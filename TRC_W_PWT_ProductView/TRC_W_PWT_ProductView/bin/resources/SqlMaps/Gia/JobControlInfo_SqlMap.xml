@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="JobControlInfo"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <statement id="Select">
+      SELECT
+        JOB_ID
+      FROM
+        TT_CC_JOB_CONTROL_INFO
+      WHERE
+        JOB_ID = #jobId#
+        AND STATUS = '0'
+    </statement>
+  </statements>
+</sqlMap>

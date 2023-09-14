@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<sqlMapConfig xmlns="http://ibatis.apache.org/dataMapper"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <settings>
+    <setting useStatementNamespaces="true"/>
+  </settings>
+
+  <!-- プロバイダ -->
+  <providers resource="./resources/dao/Providers.config"/>
+  <!-- データベース接続情報 -->
+  <database>
+    <provider name="Oracle"/>
+    <dataSource name="DUMMY" connectionString="DUMMY" />
+  </database>
+
+  <!-- SQLマップ -->
+  <sqlMaps>
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Pic.Atu_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Pic.MsStation_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Pic.TractorParts_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Pic.TractorProcess_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Pic.CommonProcess_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Pic.ProcessSearch_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Pic.GenericTable_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Pic.ProcessFiltering_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Pic.LineProcess_SqlMap.xml, TRC_W_PWT_ProductView" />
+	  <!--AiImageCheck sfadd-->	  
+	<sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Pic.AiImageCheck_SqlMap.xml, TRC_W_PWT_ProductView" />
+  </sqlMaps>
+</sqlMapConfig>

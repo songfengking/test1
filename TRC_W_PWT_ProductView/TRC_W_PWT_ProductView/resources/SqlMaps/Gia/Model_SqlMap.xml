@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="Model"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <statement id="SelectModelCdListByName">
+      SELECT
+          PRODUCT_MODEL_CD modelCd
+      FROM
+          VM_CC_PRODUCT_MODEL
+      WHERE
+          TRIM(PRODUCT_MODEL_NM) LIKE TRIM(#modelNm#) || '%'
+    </statement>
+    
+    <statement id="SelectModelList">
+      SELECT
+        PROD.PRODUCT_MODEL_NM     modelNm,
+        PROD.ASSEMBLY_PATTERN_CD   assemblyPatternCd,
+        PROD.ASSEMBLY_PATTERN_SUB_CD  assemblySubPatternCd
+      FROM 
+        VM_CC_PRODUCT_MODEL  PROD
+      WHERE
+        PROD.PRODUCT_MODEL_CD = #modelCd#
+    </statement>
+  </statements>
+</sqlMap>

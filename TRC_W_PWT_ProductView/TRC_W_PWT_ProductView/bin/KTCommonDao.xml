@@ -1,0 +1,756 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>KTCommonDao</name>
+    </assembly>
+    <members>
+        <member name="T:KTFramework.Common.Dao.CalendarUtils">
+            <summary>
+            <h3>
+            工場カレンダーユーティリティ
+            </h3>
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.CalendarUtils.HOLIDAY_SIGN_HOLIDAY">
+            <summary>休日区分:休日</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.CalendarUtils.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CalendarUtils.GetFiscalYear(System.DateTime)">
+            <summary>
+            決算期を取得します。
+            </summary>
+            <param name="date">決算期を取得する日付</param>
+            <returns>決算期</returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CalendarUtils.GetFiscalYear(System.String,KTFramework.Common.DateUtils.FormatType)">
+            <summary>
+            決算期を取得します。
+            </summary>
+            <param name="dateStr">決算期を取得する日付</param>
+            <param name="formatType">日付の書式タイプ</param>
+            <returns>決算期</returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CalendarUtils.GetFiscalYear(System.String,System.String)">
+            <summary>
+            決算期を取得します。
+            </summary>
+            <param name="dateStr">決算期を取得する日付</param>
+            <param name="format">日付の書式</param>
+            <returns>決算期</returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CalendarUtils.GetFiscalHalf(System.String)">
+            <summary>
+            決算期(4桁)から上期/下期取得する
+            </summary>
+            <param name="fiscalYear">決算期</param>
+            <returns>上期/下期</returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CalendarUtils.GetWorkdaySign(System.String)">
+            <summary>
+            休日区分から稼働日区分取得する
+            </summary>
+            <param name="holidaySign">稼働日区分</param>
+            <returns>稼働日区分</returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CalendarUtils.GetWorkdaySign(System.DateTime)">
+            <summary>
+            稼働日区分を取得する
+            </summary>
+            <param name="date"></param>
+            <returns>稼働日区分</returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CalendarUtils.GetFirstWorkDayOfMonth(System.String)">
+            <summary>
+            指定月の先頭稼働日を取得する
+            </summary>
+            <param name="yyyyMM"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CalendarUtils.GetFirstWorkDayOfMonth(System.DateTime)">
+            <summary>
+            指定月の先頭稼働日を取得する
+            </summary>
+            <param name="date"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CalendarUtils.GetLastWorkDayOfMonth(System.String)">
+            <summary>
+            指定月の最終稼働日を取得する
+            </summary>
+            <param name="yyyyMM"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CalendarUtils.GetLastWorkDayOfMonth(System.DateTime)">
+            <summary>
+            指定月の最終稼働日を取得する
+            </summary>
+            <param name="date"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CalendarUtils.GetLastDayOfMonth(System.String)">
+            <summary>
+            指定月の最終日を取得する
+            </summary>
+            <param name="yyyyMM"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CalendarUtils.GetLastDayOfMonth(System.DateTime)">
+            <summary>
+            指定月の最終日を取得する
+            </summary>
+            <param name="date"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CalendarUtils.GetWorkDays(System.String)">
+            <summary>
+            指定月の稼働日一覧を取得する
+            </summary>
+            <param name="yyyyMM"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CalendarUtils.GetWorkDays(System.DateTime)">
+            <summary>
+            指定月の稼働日一覧を取得する
+            </summary>
+            <param name="date"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CalendarUtils.GetOffsetWorkday(System.DateTime,System.Int32)">
+            <summary>
+            指定日から経過日数分先の稼働日を取得する
+            </summary>
+            <param name="date">指定日</param>
+            <param name="dayOffset">経過日数(マイナス値は過去)</param>
+            <returns>経過日数分先の稼働日</returns>
+        </member>
+        <member name="T:KTFramework.Common.Dao.CalendarUtils.FiscalHalf">
+            <summary>上期/下期</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.CalendarUtils.FiscalHalf.Undefined">
+            <summary>0:不明</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.CalendarUtils.FiscalHalf.First">
+            <summary>1:上期</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.CalendarUtils.FiscalHalf.Second">
+            <summary>2:下期</summary>
+        </member>
+        <member name="T:KTFramework.Common.Dao.CalendarUtils.WorkdaySign">
+            <summary>稼働日区分</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.CalendarUtils.WorkdaySign.Holiday">
+            <summary>0:非稼働日</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.CalendarUtils.WorkdaySign.Workday">
+            <summary>1:稼働日</summary>
+        </member>
+        <member name="T:KTFramework.Common.Dao.CommonDao">
+            <summary>
+            <h3>
+            筑波工場向け汎用データベース接続クラス
+            </h3>
+            下記の筑波工場データベースにアクセスする際に使用します。
+            <ul>
+            <li>PIC 作業指示DB</li>
+            <li>GIA 業務DB</li>
+            <li>CRE コモンレールDB（作業指示DBに統合予定）</li>
+            <li>IMG イメージ作業指示DB（作業指示DBに統合予定）</li>
+            <li>PRL 組付履歴DB（作業指示DBに統合予定）</li>
+            <li>MIG 基幹DB（業務DBに統合予定）</li>
+            </ul>
+            </summary>
+            <remarks>
+            <h3>
+            [使用方法]
+            </h3>
+            筑波工場データベースに接続する際には本クラスをインスタンス化する必要があります。
+            通常はCommonApplicationからロードしますが、個別にロードすることもできます。
+            <br />
+            個別にロードする場合はKTFramework.Dao.DaoFactoryの説明を参照してください。
+            </remarks>
+        </member>
+        <member name="F:KTFramework.Common.Dao.CommonDao.SQLMAP_CONFIG_PATH_FORMAT">
+            <summary>DB接続設定ファイルパス {0}:Assembly名 {1}:TargetDB名</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.CommonDao.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.CommonDao._targetDbs">
+            <summary>接続対象DBリスト</summary>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CommonDao.Initialize">
+            <summary>
+            Dao初期化エントリポイント。
+            KTDataAccessFactoryアセンブリの初期化(接続モードの指定)とKTCommonDaoアセンブリが利用するiBatisのSqlMapConfigをロードします。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CommonDao.Initialize(System.String,System.String)">
+            <summary>
+            Dao初期化エントリポイント。
+            KTDataAccessFactoryアセンブリの初期化(接続モードの指定)とKTCommonDaoアセンブリが利用するiBatisのSqlMapConfigをロードします。
+            </summary>
+            <param name="dbModeStr">DB接続モード(Develop/Test/Release)</param>
+            <param name="targetDbsStr">接続先DBリスト(PIC/GIA/CRE/IMG/PRL/MIG) 複数指定はカンマ区切り</param>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CommonDao.Initialize(System.String)">
+            <summary>
+            Dao初期化エントリポイント。
+            KTDataAccessFactoryアセンブリの初期化(接続モードの指定)とKTCommonDaoアセンブリが利用するiBatisのSqlMapConfigをロードします。
+            </summary>
+            <param name="dbModeStr">DB接続モード(Develop/Test/Release)</param>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CommonDao.InitializeCommonDao">
+            <summary>
+            CommonDao初期化エントリポイント。
+            KTDataAccessFactoryアセンブリの初期化(接続モードの指定)とKTCommonDaoアセンブリが利用するiBatisのSqlMapConfigをロードします。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CommonDao.InitializeCommonDao(System.String)">
+            <summary>
+            CommonDao初期化エントリポイント。
+            KTDataAccessFactoryアセンブリの初期化(接続モードの指定)とKTCommonDaoアセンブリが利用するiBatisのSqlMapConfigをロードします。
+            </summary>
+            <param name="dbModeStr">DB接続モード(Develop/Test/Release)</param>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CommonDao.InitializeAllDao(System.String)">
+            <summary>
+            DB接続情報初期化(すべて)
+            </summary>
+            <param name="dbModeStr">DB接続モード(DEVELOP/TEST/RELEASE)</param>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CommonDao.InitializeDao(System.String,KTFramework.Common.Dao.CommonDao.TargetDbName)">
+            <summary>
+            DB接続情報初期化
+            </summary>
+            <param name="dbModeStr"></param>
+            <param name="targetDb"></param>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CommonDao.Connect(System.String)">
+            <summary>
+            SQLマップをロードし、DBに接続する
+            </summary>
+            <param name="assemblyName">Assembly名</param>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CommonDao.ConnectCommonDao">
+            <summary>
+            KTCommonDaoで利用するSqlMapのロード
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CommonDao.Connect``1(``0,System.String,System.String)">
+            <summary>
+            接続
+            </summary>
+            <typeparam name="T">DaoFactory</typeparam>
+            <param name="dao">DaoFactory</param>
+            <param name="assemblyName">アセンブリ名</param>
+            <param name="sqlMapConfigPath">SqlMapConfigパス</param>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CommonDao.Terminate">
+            <summary>
+            KTCommonDao終了エントリポイント。
+            KTCommonDaoアセンブリが利用するiBatisのSqlMapConfigをアンロードします。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CommonDao.IsExistTargetDb(KTFramework.Common.Dao.CommonDao.TargetDbName)">
+            <summary>
+            対象DBが設定済みかチェック(二重記載チェック)
+            </summary>
+            <param name="checkTargetDb">対象DB</param>
+            <returns>チェック結果 true:設定済み false:未設定</returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.CommonDao.GetTargetDbs(System.String)">
+            <summary>
+            カンマ区切りテキストから接続先DBを取得してメンバ変数(_targetDbs)にセットする
+            </summary>
+            <param name="targetDbsStr">DB接続モード(DEVELOP/TEST/RELEASE)</param>
+        </member>
+        <member name="P:KTFramework.Common.Dao.CommonDao.TargetDbs">
+            <summary>接続対象DBリスト</summary>
+        </member>
+        <member name="T:KTFramework.Common.Dao.CommonDao.TargetDbName">
+            <summary>
+            標準対象DB
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.CommonDao.TargetDbName.PIC">
+            <summary>作業指示DB</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.CommonDao.TargetDbName.GIA">
+            <summary>業務DB</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.CommonDao.TargetDbName.CRE">
+            <summary>コモンレールDB</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.CommonDao.TargetDbName.IMG">
+            <summary>イメージDB</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.CommonDao.TargetDbName.PRL">
+            <summary>組付履歴DB</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.CommonDao.TargetDbName.MIG">
+            <summary>基幹DB</summary>
+        </member>
+        <member name="T:KTFramework.Common.Dao.DaoBase">
+            <summary>
+            <h3>
+            DAO基底クラス
+            </h3>
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Dao.DaoBase.GetFullStatementId(System.String,System.String)">
+            <summary>
+            SqlMapで定義したクエリを呼び出す完全ステートメントIDの文字列を返します。<br />
+            ([アセンブリ名].[namespace].[statement id])<br />
+            [アセンブリ名] = System.Reflection.Assembly.GetEntryAssembly()<br />
+            </summary>
+            <param name="sqlMapNamespace">SqlMapで定義したネームスペース</param>
+            <param name="statementId">SqlMapで定義したステートメントID</param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.DaoBase.GetFullStatementIdForLibrary(System.String,System.String)">
+            <summary>
+            [注意:任意で作成したDLL専用]<br />
+            SqlMapで定義したクエリを呼び出す完全ステートメントIDの文字列を返します。<br />
+            ([アセンブリ名].[namespace].[statement id])<br />
+            [アセンブリ名] = System.Reflection.Assembly.GetCallingAssembly()<br />
+            </summary>
+            <param name="sqlMapNamespace">SqlMapで定義したネームスペース</param>
+            <param name="statementId">SqlMapで定義したステートメントID</param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.DaoBase.GetFullStatementIdForCommonDao(System.String,System.String)">
+            <summary>
+            [注意:CommonDao専用]<br />
+            SqlMapで定義したクエリを呼び出す完全ステートメントIDの文字列を返します。<br />
+            ([アセンブリ名].[namespace].[statement id])<br />
+            [アセンブリ名] = System.Reflection.Assembly.GetExecutingAssembly()<br />
+            </summary>
+            <param name="sqlMapNamespace">SqlMapで定義したネームスペース</param>
+            <param name="statementId">SqlMapで定義したステートメントID</param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.DaoBase.GetFullStatementId(System.String,System.String,System.String)">
+            <summary>
+            SqlMapで定義したクエリを呼び出す完全ステートメントIDの文字列を返します。
+            ([アセンブリ名].[namespace].[statement id])
+            </summary>
+            <param name="assemblyName">アセンブリ名</param>
+            <param name="sqlMapNamespace">SqlMapで定義したネームスペース</param>
+            <param name="statementId">SqlMapで定義したステートメントID</param>
+            <returns>ステートメントID</returns>
+        </member>
+        <member name="T:KTFramework.Common.Dao.Dao.Gia.JobControlInfoDao">
+            <summary>
+            <h3>
+            ジョブ制御情報(TT_CC_JOB_CONTROL_INFO)DAOクラス
+            </h3>
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dao.Gia.JobControlInfoDao.SQLMAP_NAMESPACE">
+            <summary>SQLマップネームスペース</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dao.Gia.JobControlInfoDao.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="M:KTFramework.Common.Dao.Dao.Gia.JobControlInfoDao.SelectList(KTFramework.Dao.DbInstance.Code,KTFramework.Common.Dao.Dto.Gia.JobControlInfoDto)">
+            <summary>
+            要求中のジョブ制御情報一覧を取得します。
+            </summary>
+            <param name="dbInstance"></param>
+            <param name="param"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.Dao.Gia.JobControlInfoDao.UpdateResults(KTFramework.Dao.DbInstance.Code,KTFramework.Common.Dao.Dto.Gia.JobControlInfoDto)">
+            <summary>
+            結果情報を登録します
+            </summary>
+            <param name="dbInstance"></param>
+            <param name="param"></param>
+        </member>
+        <member name="T:KTFramework.Common.Dao.Dao.Pic.PkgComE7Dao">
+            <summary>
+            <h3>
+            機番7桁パッケージ(PKG_COM_E7@PICH)DAOクラス
+            </h3>
+            機番7桁パッケージの実態はCREHにありますが、PICH経由で参照しています。
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dao.Pic.PkgComE7Dao.SQLMAP_NAMESPACE">
+            <summary>SQLマップネームスペース</summary>
+        </member>
+        <member name="M:KTFramework.Common.Dao.Dao.Pic.PkgComE7Dao.GetPlantCd(System.String,System.String)">
+            <summary>
+            エンジン機番7桁化
+            </summary>
+            <param name="engineModelCd"></param>
+            <param name="engineSerialNumber"></param>
+            <returns></returns>
+        </member>
+        <member name="T:KTFramework.Common.Dao.Dto.Gia.JobControlInfoDto">
+            <summary>
+            <h3>
+            ジョブ制御情報用DTOクラス
+            </h3>
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dto.Gia.JobControlInfoDto.jobId">
+            <summary>ジョブID</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dto.Gia.JobControlInfoDto.ymd">
+            <summary>年月日</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dto.Gia.JobControlInfoDto.seqNum">
+            <summary>連番</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dto.Gia.JobControlInfoDto.status">
+            <summary>ステータス</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dto.Gia.JobControlInfoDto.resultCd">
+            <summary>結果コード</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dto.Gia.JobControlInfoDto.reportToNm">
+            <summary>実行結果通知ユーザ名</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dto.Gia.JobControlInfoDto.reportToAddrs">
+            <summary>実行結果通知アドレス</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dto.Gia.JobControlInfoDto.parameter">
+            <summary>引数</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dto.Gia.JobControlInfoDto.createDt">
+            <summary>作成日時</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dto.Gia.JobControlInfoDto.createBy">
+            <summary>作成者</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dto.Gia.JobControlInfoDto.createPg">
+            <summary>作成プログラム</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dto.Gia.JobControlInfoDto.updateDt">
+            <summary>更新日時</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dto.Gia.JobControlInfoDto.updateBy">
+            <summary>更新者</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dto.Gia.JobControlInfoDto.updatePg">
+            <summary>更新プログラム</summary>
+        </member>
+        <member name="T:KTFramework.Common.Dao.JobControlData">
+            <summary>
+            <h3>
+            ジョブ制御情報
+            </h3>
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.JobControlData.jobId">
+            <summary>ジョブID</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.JobControlData.requestedBy">
+            <summary>要求ユーザID</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.JobControlData.execPg">
+            <summary>実行プログラム名</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.JobControlData.reportToAddrs">
+            <summary>実行結果通知アドレス/ユーザ名</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.JobControlData.detailInfoList">
+            <summary>ジョブ制御情報明細</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.JobControlData.mailResultCd">
+            <summary>実行結果メール用:結果コード</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.JobControlData.mailResultMessage">
+            <summary>実行結果メール用:結果メッセージ</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.JobControlData.mailStartDt">
+            <summary>実行結果メール用:実行開始日時</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.JobControlData.mailFinishDt">
+            <summary>実行結果メール用:実行終了日時</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.JobControlData.mailAdditionalMessage">
+            <summary>実行結果メール用:追加メッセージ</summary>
+        </member>
+        <member name="T:KTFramework.Common.Dao.JobControlDataDetail">
+            <summary>
+            <h3>
+            ジョブ制御情報明細
+            </h3>
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.JobControlDataDetail.ymd">
+            <summary>年月日</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.JobControlDataDetail.seqNum">
+            <summary>連番</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.JobControlDataDetail.resultCd">
+            <summary>結果コード</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.JobControlDataDetail.completeDt">
+            <summary>完了日時</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.JobControlDataDetail.args">
+            <summary>引数</summary>
+        </member>
+        <member name="T:KTFramework.Common.Dao.Dto.Gia.JuliDto">
+            <summary>
+            <h3>
+            ジュリアンデート(JULI@MIGH)用DTOクラス
+            </h3>
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dto.Gia.JuliDto.rowNum">
+            <summary>行番号</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dto.Gia.JuliDto.date">
+            <summary>日付</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dto.Gia.JuliDto.weekdayNum">
+            <summary>曜日(0:日 1:月 … 6:土)</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dto.Gia.JuliDto.holidaySgn">
+            <summary>休日区分(1:休日 1以外:稼働日)</summary>
+        </member>
+        <member name="T:KTFramework.Common.Dao.Dao.Gia.JuliDao">
+            <summary>
+            <h3>
+            ジュリアンデート(JULI@MIGH)DAOクラス
+            </h3>
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dao.Gia.JuliDao.SQLMAP_NAMESPACE">
+            <summary>SQLマップネームスペース</summary>
+        </member>
+        <member name="M:KTFramework.Common.Dao.Dao.Gia.JuliDao.Select(System.DateTime)">
+            <summary>
+            日付情報を取得する
+            </summary>
+            <param name="date"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.Dao.Gia.JuliDao.SelectFirstWorkday(System.DateTime)">
+            <summary>
+            先頭稼働日を取得する
+            </summary>
+            <param name="date"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.Dao.Gia.JuliDao.SelectLastWorkday(System.DateTime)">
+            <summary>
+            最終稼働日を取得する
+            </summary>
+            <param name="date"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.Dao.Gia.JuliDao.SelectOffsetWorkday(System.DateTime,System.Int32)">
+            <summary>
+            指定日から経過日数分先の稼働日を取得する
+            </summary>
+            <param name="date">指定日</param>
+            <param name="dayOffset">経過日数(マイナス値は過去)</param>
+            <returns>経過日数分先の稼働日</returns>
+        </member>
+        <member name="T:KTFramework.Common.Dao.Dao.Gia.AccessCounterDao">
+            <summary>
+            <h3>
+            アクセスカウンタ(TT_CR_ACCESS_COUNTER@GIAH)DAOクラス
+            </h3>
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dao.Gia.AccessCounterDao.SQLMAP_NAMESPACE">
+            <summary>SQLマップネームスペース</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dao.Gia.AccessCounterDao.FUNCTION_ID_LIMIT_LENGTH">
+            <summary>機能IDフィールド文字制限</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dao.Gia.AccessCounterDao.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="M:KTFramework.Common.Dao.Dao.Gia.AccessCounterDao.CountUp(System.String,System.String,System.String,System.String)">
+            <summary>
+            アクセスカウンタを更新します。
+            トランザクション実行中は呼出できません。
+            </summary>
+            <param name="applicationId">アプリケーションID</param>
+            <param name="functionId">機能ID</param>
+            <param name="userId">ユーザID</param>
+            <param name="terminalIp">端末IP</param>
+        </member>
+        <member name="M:KTFramework.Common.Dao.Dao.Gia.AccessCounterDao.CountUp(System.String,System.String,System.String,System.String,System.Boolean)">
+            <summary>
+            アクセスカウンタを更新します。
+            呼出元トランザクション内で実行する場合には、transactionをTrueで呼び出してください。
+            </summary>
+            <param name="applicationId">アプリケーションID</param>
+            <param name="functionId">機能ID</param>
+            <param name="userId">ユーザID</param>
+            <param name="terminalIp">端末IP</param>
+            <param name="transaction">呼出元トランザクションで実行する場合にはTrue</param>
+        </member>
+        <member name="T:KTFramework.Common.Dao.Dao.Gia.FiscalYearDao">
+            <summary>
+            <h3>
+            決算期パッケージ(PKG_ACCOUNTING_PERIOD@GIAH)DAOクラス
+            </h3>
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dao.Gia.FiscalYearDao.SQLMAP_NAMESPACE">
+            <summary>SQLマップネームスペース</summary>
+        </member>
+        <member name="M:KTFramework.Common.Dao.Dao.Gia.FiscalYearDao.GetFiscalYear(System.String,System.String)">
+            <summary>
+            決算期を取得します。
+            </summary>
+            <param name="targetString">決算期を取得する日付</param>
+            <param name="format">日付のフォーマット</param>
+            <returns>決算期</returns>
+        </member>
+        <member name="T:KTFramework.Common.Dao.Dao.Gia.ApplicationDao">
+            <summary>
+            <h3>
+            アプリケーション情報(TM_CR_APPLICATION@GIAH)DAOクラス
+            </h3>
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dao.Gia.ApplicationDao.SQLMAP_NAMESPACE">
+            <summary>SQLマップネームスペース</summary>
+        </member>
+        <member name="M:KTFramework.Common.Dao.Dao.Gia.ApplicationDao.SelectApplicationData(System.Data.DataTable@,System.String)">
+            <summary>
+            アプリケーション情報を取得します
+            </summary>
+            <param name="applicationTable">アプリケーション情報を格納するDataTable</param>
+            <param name="applicationId">アプリケーションID</param>
+            <returns>取得件数(最大n件)</returns>
+        </member>
+        <member name="T:KTFramework.Common.Dao.Dao.Gia.TerminalInformationDao">
+            <summary>
+            <h3>
+            アプリケーション利用端末情報(VI_CR_TERMINAL_INFORMATION@GIAH)DAOクラス
+            </h3>
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dao.Gia.TerminalInformationDao.SQLMAP_NAMESPACE">
+            <summary>SQLマップネームスペース</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dao.Gia.TerminalInformationDao.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="M:KTFramework.Common.Dao.Dao.Gia.TerminalInformationDao.SelectData(System.Data.DataTable@,System.String)">
+            <summary>
+            端末情報を取得します
+            </summary>
+            <param name="terminalTable">端末情報を格納するDataTable</param>
+            <param name="terminalIp">端末IP</param>
+            <returns>取得件数(最大1件)</returns>
+        </member>
+        <member name="T:KTFramework.Common.Dao.Dao.Gia.UserInformationDao">
+            <summary>
+            <h3>
+            アプリケーション利用ユーザ情報(VI_CR_USER_INFORMATION@GIAH)DAOクラス
+            </h3>
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dao.Gia.UserInformationDao.SQLMAP_NAMESPACE">
+            <summary>SQLマップネームスペース</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dao.Gia.UserInformationDao.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="M:KTFramework.Common.Dao.Dao.Gia.UserInformationDao.SelectData(System.Data.DataTable@,System.String,System.String)">
+            <summary>
+            アプリケーション利用ユーザ情報を取得します
+            </summary>
+            <param name="userTable">ユーザ情報を格納するDataTable</param>
+            <param name="userId">ユーザID</param>
+            <param name="password">パスワード</param>
+            <returns>取得件数(最大1件)</returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.Dao.Gia.UserInformationDao.SelectData(System.Data.DataTable@,System.String,System.String,System.String,System.Nullable{System.Int32},System.String)">
+            <summary>
+            アプリケーション利用ユーザ情報を取得します(認証済みの場合)
+            </summary>
+            <param name="userTable">ユーザ情報を格納するDataTable</param>
+            <param name="sectionCd">課コード</param>
+            <param name="lineCd">ラインコード</param>
+            <param name="userId">ユーザID</param>
+            <param name="belongTyp">所属区分 0:クボタ所属 1:協力会社所属</param>
+            <param name="tradePartnerCd">取引先コード</param>
+            <returns>取得件数(最大1件)</returns>
+        </member>
+        <member name="T:KTFramework.Common.Dao.Dao.Gia.WebServicePermissionDao">
+            <summary>
+            <h3>
+            WEBサービス権限情報(TM_CR_WEBSERVICE_PERMISSION@GIAH)DAOクラス。
+            </h3>
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dao.Gia.WebServicePermissionDao.SQLMAP_NAMESPACE">
+            <summary>SQLマップネームスペース</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.Dao.Gia.WebServicePermissionDao.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="M:KTFramework.Common.Dao.Dao.Gia.WebServicePermissionDao.CheckMethodPermission(System.String,System.String,System.String,System.String)">
+            <summary>
+            アプリケーションに対するメソッド実行権限の有無を取得します
+            </summary>
+            <param name="serviceClass">サービスクラスコード</param>
+            <param name="businessClassName">ビジネスクラス名</param>
+            <param name="methodName">メソッド名</param>
+            <param name="applicationId">アプリケーションID</param>
+            <returns>メソッド実行権限有無 true:あり false:なし</returns>
+        </member>
+        <member name="T:KTFramework.Common.Dao.JobControlInfoUtils">
+            <summary>
+            <h3>
+            ジョブ制御情報ユーティリティ
+            </h3>
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.JobControlInfoUtils.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.JobControlInfoUtils._dbInstance">
+            <summary>DBインスタンス</summary>
+        </member>
+        <member name="M:KTFramework.Common.Dao.JobControlInfoUtils.#ctor(KTFramework.Dao.DbInstance.Code)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="dbInstance">DBインスタンス</param>
+        </member>
+        <member name="M:KTFramework.Common.Dao.JobControlInfoUtils.GetRequestList(System.String)">
+            <summary>
+            要求中のジョブ制御情報一覧を取得します。
+            </summary>
+            <param name="jobId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.Dao.JobControlInfoUtils.UpdateResults(System.String,System.String,System.String,KTFramework.Common.Dao.JobControlDataDetail)">
+            <summary>
+            結果情報を登録します
+            </summary>
+            <param name="jobId"></param>
+            <param name="requestedBy"></param>
+            <param name="execPg"></param>
+            <param name="detailInfo"></param>
+        </member>
+        <member name="T:KTFramework.Common.Dao.JobControlInfoUtils.StatusCode">
+            <summary>状態コード</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.JobControlInfoUtils.StatusCode.Requested">
+            <summary>要求中</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.JobControlInfoUtils.StatusCode.InProcess">
+            <summary>実行中</summary>
+        </member>
+        <member name="F:KTFramework.Common.Dao.JobControlInfoUtils.StatusCode.Completed">
+            <summary>完了済</summary>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,1874 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:ns2="http://webMethodIf.svccom.tsukuba.kubota.co.jp" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns6="http://c2010.dto.products.tsukuba.kubota.co.jp/xsd" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:ns3="http://c3010.dto.lobdata.tsukuba.kubota.co.jp/xsd" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:ns0="http://c1010.dto.jp1ajs.tsukuba.kubota.co.jp/xsd" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:ns5="http://c9010.dto.users.tsukuba.kubota.co.jp/xsd" xmlns:ns4="http://c0010.dto.common.tsukuba.kubota.co.jp/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1="http://c9910.dto.users.tsukuba.kubota.co.jp/xsd" targetNamespace="http://webMethodIf.svccom.tsukuba.kubota.co.jp" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <xs:schema xmlns:ax23="http://c1010.dto.jp1ajs.tsukuba.kubota.co.jp/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://c1010.dto.jp1ajs.tsukuba.kubota.co.jp/xsd">
+      <xs:complexType name="C1010RequestDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="authAppNm" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="callerAppNm" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="jobNetNm" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="mailAddress" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="parameterList" nillable="true" type="ax23:C1010BatchParameterDto" />
+          <xs:element minOccurs="0" name="password" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultCd" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultMessage" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="taskId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="terminalIp" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="userId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="userNm" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="C1010BatchParameterDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="key" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="value" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+    <xs:schema xmlns:ax21="http://c9910.dto.users.tsukuba.kubota.co.jp/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://c9910.dto.users.tsukuba.kubota.co.jp/xsd">
+      <xs:complexType name="C9910SelectDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="apId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="authKey" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="authType" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="checkPassword" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ipAddress" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="newPassword" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="oldPassword" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="password" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="redirectUrl" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultMessage" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="urlNo" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="userId" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="C9910WSTerminalInfoDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="apAuth" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="apAuthList" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="apDispName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="apId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="apName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ipAddress" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="lineCd" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="lineName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="registNo" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultMessage" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="sectionCd" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="sectionName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="terminalId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="terminalName" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="C9910WSUserInfoDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="apAuth" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="apAuthList" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="apDisplayName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="apId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="apInfo" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="apName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="apRemarks" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="authDate" type="xs:long" />
+          <xs:element minOccurs="0" name="authResultCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="authResultMessage" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="authType" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="birthDay" type="xs:long" />
+          <xs:element minOccurs="0" name="buCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="bumonCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="bumonName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="companyCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="companyName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="companyName2" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="companyNameKana" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="companyNameKana2" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="expiredDays" nillable="true" type="xs:int" />
+          <xs:element minOccurs="0" name="expiredSign" nillable="true" type="xs:int" />
+          <xs:element minOccurs="0" name="icrFlag" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="idYukoEndDate" type="xs:long" />
+          <xs:element minOccurs="0" name="idYukoStartDate" type="xs:long" />
+          <xs:element minOccurs="0" name="ipAddress" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ipAddress1" nillable="true" type="xs:int" />
+          <xs:element minOccurs="0" name="ipAddress2" nillable="true" type="xs:int" />
+          <xs:element minOccurs="0" name="ipAddress3" nillable="true" type="xs:int" />
+          <xs:element minOccurs="0" name="ipAddress4" nillable="true" type="xs:int" />
+          <xs:element minOccurs="0" name="jiginouKubun" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="kikiKubunName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="kumiaiKubun" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="lineCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="lineName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="lineRyakugo" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="loginDate" type="xs:long" />
+          <xs:element minOccurs="0" name="mailAddress" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="nyuusyaDate" type="xs:long" />
+          <xs:element minOccurs="0" name="redirectUrl" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultMessage" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="sagyochoName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="seibetsu" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="syainID" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="syainKubun" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="syainNameKana" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="syainNameKanji" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="syokuchoName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="syozokuKubun" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="taisyaDate" type="xs:long" />
+          <xs:element minOccurs="0" name="tekiyoFromDate" type="xs:long" />
+          <xs:element minOccurs="0" name="tekiyoToDate" type="xs:long" />
+          <xs:element minOccurs="0" name="termKaCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="termKaName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="termLineCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="termLineName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="termLineShortName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="terminalCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="terminalName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="tyokukanKubun" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="userEditFlag" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="userId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="userName" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+    <xs:schema xmlns:ns="http://webMethodIf.svccom.tsukuba.kubota.co.jp" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://webMethodIf.svccom.tsukuba.kubota.co.jp">
+      <xs:complexType name="Exception">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Exception" nillable="true" type="xs:anyType" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="Exception">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="Exception" nillable="true" type="ns:Exception" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sGetRedirectUrl">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="selectDto" nillable="true" type="ns1:C9910SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sGetRedirectUrlResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C0010sSendMail">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="requestDto" nillable="true" type="ns4:C0010RequestDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C0010sSendMailResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns4:C0010RequestDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C0010sGetMailInfo">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="selectDto" nillable="true" type="ns4:C0010SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C0010sGetMailInfoResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns4:C0010SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C0010sGetMailInfoTest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="appId" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="funcId" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="mailMode" nillable="true" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C0010sGetMailInfoTestResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns4:C0010SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C1010sRequestBatchExec">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="requestDto" nillable="true" type="ns0:C1010RequestDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C1010sRequestBatchExecResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns0:C1010RequestDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C1010sRequestBatchExecWithMigAuth">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="requestDto" nillable="true" type="ns0:C1010RequestDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C1010sRequestBatchExecWithMigAuthResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns0:C1010RequestDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C3010sDeleteLobData">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="deleteDto" nillable="true" type="ns3:C3010DeleteDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C3010sDeleteLobDataResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns3:C3010DeleteDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C3010sRegistLobData">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="registDto" nillable="true" type="ns3:C3010RegistDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C3010sRegistLobDataResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns3:C3010RegistDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C3010sGetLobData">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="selectDto" nillable="true" type="ns3:C3010SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C3010sGetLobDataResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns3:C3010SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C2010sRegistLabelData">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="registDto" nillable="true" type="ns6:C2010RegistDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C2010sRegistLabelDataResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns6:C2010RegistDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C2010sRegistStatus">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="registDto" nillable="true" type="ns6:C2010RegistDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C2010sRegistStatusResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns6:C2010RegistDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C2010sGetLabelList">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="selectDto" nillable="true" type="ns6:C2010SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C2010sGetLabelListResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns6:C2010SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9010sGetEntryExitApplyInfo">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="selectDto" nillable="true" type="ns5:C9010SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9010sGetEntryExitApplyInfoResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns5:C9010SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestActiveDirectoryAuth">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="selectDto" nillable="true" type="ns1:C9910SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestActiveDirectoryAuthResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns1:C9910SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestActiveDirectoryAuthTest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="apId" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="userId" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="ipAddress" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="urlNo" nillable="true" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestActiveDirectoryAuthTestResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns1:C9910SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestCardLoginAuth">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="selectDto" nillable="true" type="ns1:C9910SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestCardLoginAuthResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns1:C9910SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestLoginAuth">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="selectDto" nillable="true" type="ns1:C9910SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestLoginAuthResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns1:C9910SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestLoginAuthTest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="apId" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="userId" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="password" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="ipAddress" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="urlNo" nillable="true" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestLoginAuthTestResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns1:C9910SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestPasswordChange">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="selectDto" nillable="true" type="ns1:C9910SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestPasswordChangeResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns1:C9910SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestPasswordChangeTest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="userId" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="newPassword" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="oldPassword" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="checkPassword" nillable="true" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestPasswordChangeTestResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns1:C9910SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestTerminalAuth">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="selectDto" nillable="true" type="ns1:C9910SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestTerminalAuthResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns1:C9910SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestTerminalAuthTest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="apId" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="ipAddress" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="urlNo" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="authType" nillable="true" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestTerminalAuthTestResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns1:C9910SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestTerminalInfo">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="selectDto" nillable="true" type="ns1:C9910SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestTerminalInfoResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns1:C9910WSTerminalInfoDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestTerminalInfoTest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="authKey" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="ipAddress" nillable="true" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestTerminalInfoTestResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns1:C9910WSTerminalInfoDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestUserInfo">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="selectDto" nillable="true" type="ns1:C9910SelectDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestUserInfoResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns1:C9910WSUserInfoDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestUserInfoTest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="authKey" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="ipAddress" nillable="true" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="C9910sRequestUserInfoTestResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns1:C9910WSUserInfoDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:schema>
+    <xs:schema xmlns:ax24="http://c3010.dto.lobdata.tsukuba.kubota.co.jp/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://c3010.dto.lobdata.tsukuba.kubota.co.jp/xsd">
+      <xs:complexType name="C3010DeleteDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="fileNm" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultCd" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultMessage" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="tableNm" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="C3010RegistDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="extension" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="fileNm" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="lobData" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultCd" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultMessage" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="tableNm" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="C3010SelectDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="fileNm" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="lobData" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultCd" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultMessage" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="tableNm" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+    <xs:schema xmlns:ax22="http://c0010.dto.common.tsukuba.kubota.co.jp/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://c0010.dto.common.tsukuba.kubota.co.jp/xsd">
+      <xs:complexType name="C0010RequestDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="attachmentFileList" nillable="true" type="ax22:C0010FileDto" />
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="bccAddrList" nillable="true" type="ax22:C0010AddrDto" />
+          <xs:element minOccurs="0" name="body" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="ccAddrList" nillable="true" type="ax22:C0010AddrDto" />
+          <xs:element minOccurs="0" name="fromAddr" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="fromNm" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultCd" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultMessage" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="subject" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="toAddrList" nillable="true" type="ax22:C0010AddrDto" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="C0010FileDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="fileBody" nillable="true" type="xs:base64Binary" />
+          <xs:element minOccurs="0" name="name" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="C0010AddrDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="address" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="name" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="C0010SelectDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="appId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="funcId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="isRtn" nillable="true" type="xs:boolean" />
+          <xs:element minOccurs="0" name="mailInfo" nillable="true" type="ax22:C0010MailInfoDto" />
+          <xs:element minOccurs="0" name="mailMode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultCd" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultMessage" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="C0010MailInfoDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="destinationList" nillable="true" type="ax22:C0010DestinationDto" />
+          <xs:element minOccurs="0" name="fromAddr" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="fromNm" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="mailHost" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="C0010DestinationDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="bccAddrList" nillable="true" type="ax22:C0010GroupDto" />
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="ccAddrList" nillable="true" type="ax22:C0010GroupDto" />
+          <xs:element minOccurs="0" name="mailMode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="sendFlag" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="subject" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="toAddrList" nillable="true" type="ax22:C0010GroupDto" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="C0010GroupDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="address" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="group" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="name" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+    <xs:schema xmlns:ax26="http://c9010.dto.users.tsukuba.kubota.co.jp/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://c9010.dto.users.tsukuba.kubota.co.jp/xsd">
+      <xs:complexType name="C9010SelectDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="entryExitApplyInfo" nillable="true" type="ax26:C9010EntryExitApplyInfoDto" />
+          <xs:element minOccurs="0" name="resultCd" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultMessage" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultQty" type="xs:int" />
+          <xs:element minOccurs="0" name="targetYMD" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="userId" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="C9010EntryExitApplyInfoDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="remarks" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="schedule" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="targetYMD" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="terminalLogoffTime" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="terminalLogonTime" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="userId" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+    <xs:schema xmlns:ax25="http://c2010.dto.products.tsukuba.kubota.co.jp/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://c2010.dto.products.tsukuba.kubota.co.jp/xsd">
+      <xs:complexType name="C2010RegistDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="createBy" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="createDt" nillable="true" type="xs:dateTime" />
+          <xs:element minOccurs="0" name="createPg" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="labelList" nillable="true" type="ax25:C2010LabelDto" />
+          <xs:element minOccurs="0" name="resultCd" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultMessage" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultQty" nillable="true" type="xs:int" />
+          <xs:element minOccurs="0" name="terminalNm" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="C2010LabelDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="field01" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="field02" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="field03" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="field04" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="field05" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="field06" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="field07" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="field08" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="field09" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="field10" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="field11" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="field12" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="field13" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="field14" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="field15" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="field16" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="field17" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="field18" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="field19" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="field20" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="id" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="labelNm" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="labelQty" nillable="true" type="xs:int" />
+          <xs:element minOccurs="0" name="outputStatus" nillable="true" type="xs:int" />
+          <xs:element minOccurs="0" name="outputTyp" nillable="true" type="xs:int" />
+          <xs:element minOccurs="0" name="outputYMD" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="priority" nillable="true" type="xs:int" />
+          <xs:element minOccurs="0" name="remarks" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="terminalIp" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="C2010SelectDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="labelList" nillable="true" type="ax25:C2010LabelDto" />
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="labelNmList" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="outputStatusList" nillable="true" type="xs:int" />
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="outputTypList" nillable="true" type="xs:int" />
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="outputYMDList" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultCd" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultMessage" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultQty" type="xs:int" />
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="terminalIpList" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+  </wsdl:types>
+  <wsdl:message name="C9910sRequestLoginAuthTestRequest">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestLoginAuthTest" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestLoginAuthTestResponse">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestLoginAuthTestResponse" />
+  </wsdl:message>
+  <wsdl:message name="Exception">
+    <wsdl:part name="parameters" element="ns2:Exception" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestUserInfoRequest">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestUserInfo" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestUserInfoResponse">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestUserInfoResponse" />
+  </wsdl:message>
+  <wsdl:message name="C2010sRegistStatusRequest">
+    <wsdl:part name="parameters" element="ns2:C2010sRegistStatus" />
+  </wsdl:message>
+  <wsdl:message name="C2010sRegistStatusResponse">
+    <wsdl:part name="parameters" element="ns2:C2010sRegistStatusResponse" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestPasswordChangeRequest">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestPasswordChange" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestPasswordChangeResponse">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestPasswordChangeResponse" />
+  </wsdl:message>
+  <wsdl:message name="C1010sRequestBatchExecRequest">
+    <wsdl:part name="parameters" element="ns2:C1010sRequestBatchExec" />
+  </wsdl:message>
+  <wsdl:message name="C1010sRequestBatchExecResponse">
+    <wsdl:part name="parameters" element="ns2:C1010sRequestBatchExecResponse" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestTerminalInfoTestRequest">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestTerminalInfoTest" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestTerminalInfoTestResponse">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestTerminalInfoTestResponse" />
+  </wsdl:message>
+  <wsdl:message name="C9910sGetRedirectUrlRequest">
+    <wsdl:part name="parameters" element="ns2:C9910sGetRedirectUrl" />
+  </wsdl:message>
+  <wsdl:message name="C9910sGetRedirectUrlResponse">
+    <wsdl:part name="parameters" element="ns2:C9910sGetRedirectUrlResponse" />
+  </wsdl:message>
+  <wsdl:message name="C0010sSendMailRequest">
+    <wsdl:part name="parameters" element="ns2:C0010sSendMail" />
+  </wsdl:message>
+  <wsdl:message name="C0010sSendMailResponse">
+    <wsdl:part name="parameters" element="ns2:C0010sSendMailResponse" />
+  </wsdl:message>
+  <wsdl:message name="C9010sGetEntryExitApplyInfoRequest">
+    <wsdl:part name="parameters" element="ns2:C9010sGetEntryExitApplyInfo" />
+  </wsdl:message>
+  <wsdl:message name="C9010sGetEntryExitApplyInfoResponse">
+    <wsdl:part name="parameters" element="ns2:C9010sGetEntryExitApplyInfoResponse" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestCardLoginAuthRequest">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestCardLoginAuth" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestCardLoginAuthResponse">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestCardLoginAuthResponse" />
+  </wsdl:message>
+  <wsdl:message name="C3010sRegistLobDataRequest">
+    <wsdl:part name="parameters" element="ns2:C3010sRegistLobData" />
+  </wsdl:message>
+  <wsdl:message name="C3010sRegistLobDataResponse">
+    <wsdl:part name="parameters" element="ns2:C3010sRegistLobDataResponse" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestActiveDirectoryAuthTestRequest">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestActiveDirectoryAuthTest" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestActiveDirectoryAuthTestResponse">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestActiveDirectoryAuthTestResponse" />
+  </wsdl:message>
+  <wsdl:message name="C0010sGetMailInfoTestRequest">
+    <wsdl:part name="parameters" element="ns2:C0010sGetMailInfoTest" />
+  </wsdl:message>
+  <wsdl:message name="C0010sGetMailInfoTestResponse">
+    <wsdl:part name="parameters" element="ns2:C0010sGetMailInfoTestResponse" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestActiveDirectoryAuthRequest">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestActiveDirectoryAuth" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestActiveDirectoryAuthResponse">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestActiveDirectoryAuthResponse" />
+  </wsdl:message>
+  <wsdl:message name="C3010sGetLobDataRequest">
+    <wsdl:part name="parameters" element="ns2:C3010sGetLobData" />
+  </wsdl:message>
+  <wsdl:message name="C3010sGetLobDataResponse">
+    <wsdl:part name="parameters" element="ns2:C3010sGetLobDataResponse" />
+  </wsdl:message>
+  <wsdl:message name="C2010sRegistLabelDataRequest">
+    <wsdl:part name="parameters" element="ns2:C2010sRegistLabelData" />
+  </wsdl:message>
+  <wsdl:message name="C2010sRegistLabelDataResponse">
+    <wsdl:part name="parameters" element="ns2:C2010sRegistLabelDataResponse" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestPasswordChangeTestRequest">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestPasswordChangeTest" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestPasswordChangeTestResponse">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestPasswordChangeTestResponse" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestLoginAuthRequest">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestLoginAuth" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestLoginAuthResponse">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestLoginAuthResponse" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestTerminalAuthRequest">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestTerminalAuth" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestTerminalAuthResponse">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestTerminalAuthResponse" />
+  </wsdl:message>
+  <wsdl:message name="C3010sDeleteLobDataRequest">
+    <wsdl:part name="parameters" element="ns2:C3010sDeleteLobData" />
+  </wsdl:message>
+  <wsdl:message name="C3010sDeleteLobDataResponse">
+    <wsdl:part name="parameters" element="ns2:C3010sDeleteLobDataResponse" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestTerminalInfoRequest">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestTerminalInfo" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestTerminalInfoResponse">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestTerminalInfoResponse" />
+  </wsdl:message>
+  <wsdl:message name="C1010sRequestBatchExecWithMigAuthRequest">
+    <wsdl:part name="parameters" element="ns2:C1010sRequestBatchExecWithMigAuth" />
+  </wsdl:message>
+  <wsdl:message name="C1010sRequestBatchExecWithMigAuthResponse">
+    <wsdl:part name="parameters" element="ns2:C1010sRequestBatchExecWithMigAuthResponse" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestUserInfoTestRequest">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestUserInfoTest" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestUserInfoTestResponse">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestUserInfoTestResponse" />
+  </wsdl:message>
+  <wsdl:message name="C2010sGetLabelListRequest">
+    <wsdl:part name="parameters" element="ns2:C2010sGetLabelList" />
+  </wsdl:message>
+  <wsdl:message name="C2010sGetLabelListResponse">
+    <wsdl:part name="parameters" element="ns2:C2010sGetLabelListResponse" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestTerminalAuthTestRequest">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestTerminalAuthTest" />
+  </wsdl:message>
+  <wsdl:message name="C9910sRequestTerminalAuthTestResponse">
+    <wsdl:part name="parameters" element="ns2:C9910sRequestTerminalAuthTestResponse" />
+  </wsdl:message>
+  <wsdl:message name="C0010sGetMailInfoRequest">
+    <wsdl:part name="parameters" element="ns2:C0010sGetMailInfo" />
+  </wsdl:message>
+  <wsdl:message name="C0010sGetMailInfoResponse">
+    <wsdl:part name="parameters" element="ns2:C0010sGetMailInfoResponse" />
+  </wsdl:message>
+  <wsdl:portType name="CorePortType">
+    <wsdl:operation name="C9910sRequestLoginAuthTest">
+      <wsdl:input wsaw:Action="urn:C9910sRequestLoginAuthTest" message="ns2:C9910sRequestLoginAuthTestRequest" />
+      <wsdl:output wsaw:Action="urn:C9910sRequestLoginAuthTestResponse" message="ns2:C9910sRequestLoginAuthTestResponse" />
+      <wsdl:fault wsaw:Action="urn:C9910sRequestLoginAuthTestException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestUserInfo">
+      <wsdl:input wsaw:Action="urn:C9910sRequestUserInfo" message="ns2:C9910sRequestUserInfoRequest" />
+      <wsdl:output wsaw:Action="urn:C9910sRequestUserInfoResponse" message="ns2:C9910sRequestUserInfoResponse" />
+      <wsdl:fault wsaw:Action="urn:C9910sRequestUserInfoException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C2010sRegistStatus">
+      <wsdl:input wsaw:Action="urn:C2010sRegistStatus" message="ns2:C2010sRegistStatusRequest" />
+      <wsdl:output wsaw:Action="urn:C2010sRegistStatusResponse" message="ns2:C2010sRegistStatusResponse" />
+      <wsdl:fault wsaw:Action="urn:C2010sRegistStatusException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestPasswordChange">
+      <wsdl:input wsaw:Action="urn:C9910sRequestPasswordChange" message="ns2:C9910sRequestPasswordChangeRequest" />
+      <wsdl:output wsaw:Action="urn:C9910sRequestPasswordChangeResponse" message="ns2:C9910sRequestPasswordChangeResponse" />
+      <wsdl:fault wsaw:Action="urn:C9910sRequestPasswordChangeException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C1010sRequestBatchExec">
+      <wsdl:input wsaw:Action="urn:C1010sRequestBatchExec" message="ns2:C1010sRequestBatchExecRequest" />
+      <wsdl:output wsaw:Action="urn:C1010sRequestBatchExecResponse" message="ns2:C1010sRequestBatchExecResponse" />
+      <wsdl:fault wsaw:Action="urn:C1010sRequestBatchExecException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestTerminalInfoTest">
+      <wsdl:input wsaw:Action="urn:C9910sRequestTerminalInfoTest" message="ns2:C9910sRequestTerminalInfoTestRequest" />
+      <wsdl:output wsaw:Action="urn:C9910sRequestTerminalInfoTestResponse" message="ns2:C9910sRequestTerminalInfoTestResponse" />
+      <wsdl:fault wsaw:Action="urn:C9910sRequestTerminalInfoTestException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C9910sGetRedirectUrl">
+      <wsdl:input wsaw:Action="urn:C9910sGetRedirectUrl" message="ns2:C9910sGetRedirectUrlRequest" />
+      <wsdl:output wsaw:Action="urn:C9910sGetRedirectUrlResponse" message="ns2:C9910sGetRedirectUrlResponse" />
+      <wsdl:fault wsaw:Action="urn:C9910sGetRedirectUrlException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C0010sSendMail">
+      <wsdl:input wsaw:Action="urn:C0010sSendMail" message="ns2:C0010sSendMailRequest" />
+      <wsdl:output wsaw:Action="urn:C0010sSendMailResponse" message="ns2:C0010sSendMailResponse" />
+      <wsdl:fault wsaw:Action="urn:C0010sSendMailException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C9010sGetEntryExitApplyInfo">
+      <wsdl:input wsaw:Action="urn:C9010sGetEntryExitApplyInfo" message="ns2:C9010sGetEntryExitApplyInfoRequest" />
+      <wsdl:output wsaw:Action="urn:C9010sGetEntryExitApplyInfoResponse" message="ns2:C9010sGetEntryExitApplyInfoResponse" />
+      <wsdl:fault wsaw:Action="urn:C9010sGetEntryExitApplyInfoException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestCardLoginAuth">
+      <wsdl:input wsaw:Action="urn:C9910sRequestCardLoginAuth" message="ns2:C9910sRequestCardLoginAuthRequest" />
+      <wsdl:output wsaw:Action="urn:C9910sRequestCardLoginAuthResponse" message="ns2:C9910sRequestCardLoginAuthResponse" />
+      <wsdl:fault wsaw:Action="urn:C9910sRequestCardLoginAuthException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C3010sRegistLobData">
+      <wsdl:input wsaw:Action="urn:C3010sRegistLobData" message="ns2:C3010sRegistLobDataRequest" />
+      <wsdl:output wsaw:Action="urn:C3010sRegistLobDataResponse" message="ns2:C3010sRegistLobDataResponse" />
+      <wsdl:fault wsaw:Action="urn:C3010sRegistLobDataException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestActiveDirectoryAuthTest">
+      <wsdl:input wsaw:Action="urn:C9910sRequestActiveDirectoryAuthTest" message="ns2:C9910sRequestActiveDirectoryAuthTestRequest" />
+      <wsdl:output wsaw:Action="urn:C9910sRequestActiveDirectoryAuthTestResponse" message="ns2:C9910sRequestActiveDirectoryAuthTestResponse" />
+      <wsdl:fault wsaw:Action="urn:C9910sRequestActiveDirectoryAuthTestException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C0010sGetMailInfoTest">
+      <wsdl:input wsaw:Action="urn:C0010sGetMailInfoTest" message="ns2:C0010sGetMailInfoTestRequest" />
+      <wsdl:output wsaw:Action="urn:C0010sGetMailInfoTestResponse" message="ns2:C0010sGetMailInfoTestResponse" />
+      <wsdl:fault wsaw:Action="urn:C0010sGetMailInfoTestException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestActiveDirectoryAuth">
+      <wsdl:input wsaw:Action="urn:C9910sRequestActiveDirectoryAuth" message="ns2:C9910sRequestActiveDirectoryAuthRequest" />
+      <wsdl:output wsaw:Action="urn:C9910sRequestActiveDirectoryAuthResponse" message="ns2:C9910sRequestActiveDirectoryAuthResponse" />
+      <wsdl:fault wsaw:Action="urn:C9910sRequestActiveDirectoryAuthException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C3010sGetLobData">
+      <wsdl:input wsaw:Action="urn:C3010sGetLobData" message="ns2:C3010sGetLobDataRequest" />
+      <wsdl:output wsaw:Action="urn:C3010sGetLobDataResponse" message="ns2:C3010sGetLobDataResponse" />
+      <wsdl:fault wsaw:Action="urn:C3010sGetLobDataException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C2010sRegistLabelData">
+      <wsdl:input wsaw:Action="urn:C2010sRegistLabelData" message="ns2:C2010sRegistLabelDataRequest" />
+      <wsdl:output wsaw:Action="urn:C2010sRegistLabelDataResponse" message="ns2:C2010sRegistLabelDataResponse" />
+      <wsdl:fault wsaw:Action="urn:C2010sRegistLabelDataException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestPasswordChangeTest">
+      <wsdl:input wsaw:Action="urn:C9910sRequestPasswordChangeTest" message="ns2:C9910sRequestPasswordChangeTestRequest" />
+      <wsdl:output wsaw:Action="urn:C9910sRequestPasswordChangeTestResponse" message="ns2:C9910sRequestPasswordChangeTestResponse" />
+      <wsdl:fault wsaw:Action="urn:C9910sRequestPasswordChangeTestException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestLoginAuth">
+      <wsdl:input wsaw:Action="urn:C9910sRequestLoginAuth" message="ns2:C9910sRequestLoginAuthRequest" />
+      <wsdl:output wsaw:Action="urn:C9910sRequestLoginAuthResponse" message="ns2:C9910sRequestLoginAuthResponse" />
+      <wsdl:fault wsaw:Action="urn:C9910sRequestLoginAuthException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestTerminalAuth">
+      <wsdl:input wsaw:Action="urn:C9910sRequestTerminalAuth" message="ns2:C9910sRequestTerminalAuthRequest" />
+      <wsdl:output wsaw:Action="urn:C9910sRequestTerminalAuthResponse" message="ns2:C9910sRequestTerminalAuthResponse" />
+      <wsdl:fault wsaw:Action="urn:C9910sRequestTerminalAuthException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C3010sDeleteLobData">
+      <wsdl:input wsaw:Action="urn:C3010sDeleteLobData" message="ns2:C3010sDeleteLobDataRequest" />
+      <wsdl:output wsaw:Action="urn:C3010sDeleteLobDataResponse" message="ns2:C3010sDeleteLobDataResponse" />
+      <wsdl:fault wsaw:Action="urn:C3010sDeleteLobDataException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestTerminalInfo">
+      <wsdl:input wsaw:Action="urn:C9910sRequestTerminalInfo" message="ns2:C9910sRequestTerminalInfoRequest" />
+      <wsdl:output wsaw:Action="urn:C9910sRequestTerminalInfoResponse" message="ns2:C9910sRequestTerminalInfoResponse" />
+      <wsdl:fault wsaw:Action="urn:C9910sRequestTerminalInfoException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C1010sRequestBatchExecWithMigAuth">
+      <wsdl:input wsaw:Action="urn:C1010sRequestBatchExecWithMigAuth" message="ns2:C1010sRequestBatchExecWithMigAuthRequest" />
+      <wsdl:output wsaw:Action="urn:C1010sRequestBatchExecWithMigAuthResponse" message="ns2:C1010sRequestBatchExecWithMigAuthResponse" />
+      <wsdl:fault wsaw:Action="urn:C1010sRequestBatchExecWithMigAuthException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestUserInfoTest">
+      <wsdl:input wsaw:Action="urn:C9910sRequestUserInfoTest" message="ns2:C9910sRequestUserInfoTestRequest" />
+      <wsdl:output wsaw:Action="urn:C9910sRequestUserInfoTestResponse" message="ns2:C9910sRequestUserInfoTestResponse" />
+      <wsdl:fault wsaw:Action="urn:C9910sRequestUserInfoTestException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C2010sGetLabelList">
+      <wsdl:input wsaw:Action="urn:C2010sGetLabelList" message="ns2:C2010sGetLabelListRequest" />
+      <wsdl:output wsaw:Action="urn:C2010sGetLabelListResponse" message="ns2:C2010sGetLabelListResponse" />
+      <wsdl:fault wsaw:Action="urn:C2010sGetLabelListException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestTerminalAuthTest">
+      <wsdl:input wsaw:Action="urn:C9910sRequestTerminalAuthTest" message="ns2:C9910sRequestTerminalAuthTestRequest" />
+      <wsdl:output wsaw:Action="urn:C9910sRequestTerminalAuthTestResponse" message="ns2:C9910sRequestTerminalAuthTestResponse" />
+      <wsdl:fault wsaw:Action="urn:C9910sRequestTerminalAuthTestException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="C0010sGetMailInfo">
+      <wsdl:input wsaw:Action="urn:C0010sGetMailInfo" message="ns2:C0010sGetMailInfoRequest" />
+      <wsdl:output wsaw:Action="urn:C0010sGetMailInfoResponse" message="ns2:C0010sGetMailInfoResponse" />
+      <wsdl:fault wsaw:Action="urn:C0010sGetMailInfoException" name="Exception" message="ns2:Exception" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="CoreSOAP11Binding" type="ns2:CorePortType">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="C9910sRequestLoginAuthTest">
+      <soap:operation soapAction="urn:C9910sRequestLoginAuthTest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestUserInfo">
+      <soap:operation soapAction="urn:C9910sRequestUserInfo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C2010sRegistStatus">
+      <soap:operation soapAction="urn:C2010sRegistStatus" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestPasswordChange">
+      <soap:operation soapAction="urn:C9910sRequestPasswordChange" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C1010sRequestBatchExec">
+      <soap:operation soapAction="urn:C1010sRequestBatchExec" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestTerminalInfoTest">
+      <soap:operation soapAction="urn:C9910sRequestTerminalInfoTest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sGetRedirectUrl">
+      <soap:operation soapAction="urn:C9910sGetRedirectUrl" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C0010sSendMail">
+      <soap:operation soapAction="urn:C0010sSendMail" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9010sGetEntryExitApplyInfo">
+      <soap:operation soapAction="urn:C9010sGetEntryExitApplyInfo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestCardLoginAuth">
+      <soap:operation soapAction="urn:C9910sRequestCardLoginAuth" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C3010sRegistLobData">
+      <soap:operation soapAction="urn:C3010sRegistLobData" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestActiveDirectoryAuthTest">
+      <soap:operation soapAction="urn:C9910sRequestActiveDirectoryAuthTest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C0010sGetMailInfoTest">
+      <soap:operation soapAction="urn:C0010sGetMailInfoTest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestActiveDirectoryAuth">
+      <soap:operation soapAction="urn:C9910sRequestActiveDirectoryAuth" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C3010sGetLobData">
+      <soap:operation soapAction="urn:C3010sGetLobData" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C2010sRegistLabelData">
+      <soap:operation soapAction="urn:C2010sRegistLabelData" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestPasswordChangeTest">
+      <soap:operation soapAction="urn:C9910sRequestPasswordChangeTest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestLoginAuth">
+      <soap:operation soapAction="urn:C9910sRequestLoginAuth" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestTerminalAuth">
+      <soap:operation soapAction="urn:C9910sRequestTerminalAuth" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C3010sDeleteLobData">
+      <soap:operation soapAction="urn:C3010sDeleteLobData" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestTerminalInfo">
+      <soap:operation soapAction="urn:C9910sRequestTerminalInfo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C1010sRequestBatchExecWithMigAuth">
+      <soap:operation soapAction="urn:C1010sRequestBatchExecWithMigAuth" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestUserInfoTest">
+      <soap:operation soapAction="urn:C9910sRequestUserInfoTest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C2010sGetLabelList">
+      <soap:operation soapAction="urn:C2010sGetLabelList" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestTerminalAuthTest">
+      <soap:operation soapAction="urn:C9910sRequestTerminalAuthTest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C0010sGetMailInfo">
+      <soap:operation soapAction="urn:C0010sGetMailInfo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="CoreSOAP12Binding" type="ns2:CorePortType">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="C9910sRequestLoginAuthTest">
+      <soap12:operation soapAction="urn:C9910sRequestLoginAuthTest" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestUserInfo">
+      <soap12:operation soapAction="urn:C9910sRequestUserInfo" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C2010sRegistStatus">
+      <soap12:operation soapAction="urn:C2010sRegistStatus" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestPasswordChange">
+      <soap12:operation soapAction="urn:C9910sRequestPasswordChange" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C1010sRequestBatchExec">
+      <soap12:operation soapAction="urn:C1010sRequestBatchExec" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestTerminalInfoTest">
+      <soap12:operation soapAction="urn:C9910sRequestTerminalInfoTest" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sGetRedirectUrl">
+      <soap12:operation soapAction="urn:C9910sGetRedirectUrl" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C0010sSendMail">
+      <soap12:operation soapAction="urn:C0010sSendMail" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9010sGetEntryExitApplyInfo">
+      <soap12:operation soapAction="urn:C9010sGetEntryExitApplyInfo" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestCardLoginAuth">
+      <soap12:operation soapAction="urn:C9910sRequestCardLoginAuth" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C3010sRegistLobData">
+      <soap12:operation soapAction="urn:C3010sRegistLobData" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestActiveDirectoryAuthTest">
+      <soap12:operation soapAction="urn:C9910sRequestActiveDirectoryAuthTest" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C0010sGetMailInfoTest">
+      <soap12:operation soapAction="urn:C0010sGetMailInfoTest" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestActiveDirectoryAuth">
+      <soap12:operation soapAction="urn:C9910sRequestActiveDirectoryAuth" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C3010sGetLobData">
+      <soap12:operation soapAction="urn:C3010sGetLobData" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C2010sRegistLabelData">
+      <soap12:operation soapAction="urn:C2010sRegistLabelData" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestPasswordChangeTest">
+      <soap12:operation soapAction="urn:C9910sRequestPasswordChangeTest" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestLoginAuth">
+      <soap12:operation soapAction="urn:C9910sRequestLoginAuth" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestTerminalAuth">
+      <soap12:operation soapAction="urn:C9910sRequestTerminalAuth" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C3010sDeleteLobData">
+      <soap12:operation soapAction="urn:C3010sDeleteLobData" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestTerminalInfo">
+      <soap12:operation soapAction="urn:C9910sRequestTerminalInfo" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C1010sRequestBatchExecWithMigAuth">
+      <soap12:operation soapAction="urn:C1010sRequestBatchExecWithMigAuth" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestUserInfoTest">
+      <soap12:operation soapAction="urn:C9910sRequestUserInfoTest" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C2010sGetLabelList">
+      <soap12:operation soapAction="urn:C2010sGetLabelList" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestTerminalAuthTest">
+      <soap12:operation soapAction="urn:C9910sRequestTerminalAuthTest" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="C0010sGetMailInfo">
+      <soap12:operation soapAction="urn:C0010sGetMailInfo" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="CoreHttpBinding" type="ns2:CorePortType">
+    <http:binding verb="POST" />
+    <wsdl:operation name="C9910sRequestLoginAuthTest">
+      <http:operation location="Core/C9910sRequestLoginAuthTest" />
+      <wsdl:input>
+        <mime:content part="C9910sRequestLoginAuthTest" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C9910sRequestLoginAuthTest" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestUserInfo">
+      <http:operation location="Core/C9910sRequestUserInfo" />
+      <wsdl:input>
+        <mime:content part="C9910sRequestUserInfo" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C9910sRequestUserInfo" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C2010sRegistStatus">
+      <http:operation location="Core/C2010sRegistStatus" />
+      <wsdl:input>
+        <mime:content part="C2010sRegistStatus" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C2010sRegistStatus" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestPasswordChange">
+      <http:operation location="Core/C9910sRequestPasswordChange" />
+      <wsdl:input>
+        <mime:content part="C9910sRequestPasswordChange" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C9910sRequestPasswordChange" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C1010sRequestBatchExec">
+      <http:operation location="Core/C1010sRequestBatchExec" />
+      <wsdl:input>
+        <mime:content part="C1010sRequestBatchExec" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C1010sRequestBatchExec" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestTerminalInfoTest">
+      <http:operation location="Core/C9910sRequestTerminalInfoTest" />
+      <wsdl:input>
+        <mime:content part="C9910sRequestTerminalInfoTest" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C9910sRequestTerminalInfoTest" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sGetRedirectUrl">
+      <http:operation location="Core/C9910sGetRedirectUrl" />
+      <wsdl:input>
+        <mime:content part="C9910sGetRedirectUrl" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C9910sGetRedirectUrl" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C0010sSendMail">
+      <http:operation location="Core/C0010sSendMail" />
+      <wsdl:input>
+        <mime:content part="C0010sSendMail" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C0010sSendMail" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C9010sGetEntryExitApplyInfo">
+      <http:operation location="Core/C9010sGetEntryExitApplyInfo" />
+      <wsdl:input>
+        <mime:content part="C9010sGetEntryExitApplyInfo" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C9010sGetEntryExitApplyInfo" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestCardLoginAuth">
+      <http:operation location="Core/C9910sRequestCardLoginAuth" />
+      <wsdl:input>
+        <mime:content part="C9910sRequestCardLoginAuth" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C9910sRequestCardLoginAuth" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C3010sRegistLobData">
+      <http:operation location="Core/C3010sRegistLobData" />
+      <wsdl:input>
+        <mime:content part="C3010sRegistLobData" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C3010sRegistLobData" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestActiveDirectoryAuthTest">
+      <http:operation location="Core/C9910sRequestActiveDirectoryAuthTest" />
+      <wsdl:input>
+        <mime:content part="C9910sRequestActiveDirectoryAuthTest" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C9910sRequestActiveDirectoryAuthTest" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C0010sGetMailInfoTest">
+      <http:operation location="Core/C0010sGetMailInfoTest" />
+      <wsdl:input>
+        <mime:content part="C0010sGetMailInfoTest" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C0010sGetMailInfoTest" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestActiveDirectoryAuth">
+      <http:operation location="Core/C9910sRequestActiveDirectoryAuth" />
+      <wsdl:input>
+        <mime:content part="C9910sRequestActiveDirectoryAuth" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C9910sRequestActiveDirectoryAuth" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C3010sGetLobData">
+      <http:operation location="Core/C3010sGetLobData" />
+      <wsdl:input>
+        <mime:content part="C3010sGetLobData" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C3010sGetLobData" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C2010sRegistLabelData">
+      <http:operation location="Core/C2010sRegistLabelData" />
+      <wsdl:input>
+        <mime:content part="C2010sRegistLabelData" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C2010sRegistLabelData" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestPasswordChangeTest">
+      <http:operation location="Core/C9910sRequestPasswordChangeTest" />
+      <wsdl:input>
+        <mime:content part="C9910sRequestPasswordChangeTest" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C9910sRequestPasswordChangeTest" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestLoginAuth">
+      <http:operation location="Core/C9910sRequestLoginAuth" />
+      <wsdl:input>
+        <mime:content part="C9910sRequestLoginAuth" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C9910sRequestLoginAuth" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestTerminalAuth">
+      <http:operation location="Core/C9910sRequestTerminalAuth" />
+      <wsdl:input>
+        <mime:content part="C9910sRequestTerminalAuth" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C9910sRequestTerminalAuth" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C3010sDeleteLobData">
+      <http:operation location="Core/C3010sDeleteLobData" />
+      <wsdl:input>
+        <mime:content part="C3010sDeleteLobData" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C3010sDeleteLobData" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestTerminalInfo">
+      <http:operation location="Core/C9910sRequestTerminalInfo" />
+      <wsdl:input>
+        <mime:content part="C9910sRequestTerminalInfo" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C9910sRequestTerminalInfo" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C1010sRequestBatchExecWithMigAuth">
+      <http:operation location="Core/C1010sRequestBatchExecWithMigAuth" />
+      <wsdl:input>
+        <mime:content part="C1010sRequestBatchExecWithMigAuth" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C1010sRequestBatchExecWithMigAuth" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestUserInfoTest">
+      <http:operation location="Core/C9910sRequestUserInfoTest" />
+      <wsdl:input>
+        <mime:content part="C9910sRequestUserInfoTest" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C9910sRequestUserInfoTest" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C2010sGetLabelList">
+      <http:operation location="Core/C2010sGetLabelList" />
+      <wsdl:input>
+        <mime:content part="C2010sGetLabelList" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C2010sGetLabelList" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C9910sRequestTerminalAuthTest">
+      <http:operation location="Core/C9910sRequestTerminalAuthTest" />
+      <wsdl:input>
+        <mime:content part="C9910sRequestTerminalAuthTest" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C9910sRequestTerminalAuthTest" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="C0010sGetMailInfo">
+      <http:operation location="Core/C0010sGetMailInfo" />
+      <wsdl:input>
+        <mime:content part="C0010sGetMailInfo" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="C0010sGetMailInfo" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Core">
+    <wsdl:port name="CoreSOAP11port_http" binding="ns2:CoreSOAP11Binding">
+      <soap:address location="http://192.168.57.123:18081/CORE_S_C_WebService/services/Core" />
+    </wsdl:port>
+    <wsdl:port name="CoreSOAP12port_http" binding="ns2:CoreSOAP12Binding">
+      <soap12:address location="http://192.168.57.123:18081/CORE_S_C_WebService/services/Core" />
+    </wsdl:port>
+    <wsdl:port name="CoreHttpport" binding="ns2:CoreHttpBinding">
+      <http:address location="http://192.168.57.123:18081/CORE_S_C_WebService/services/Core" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

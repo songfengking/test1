@@ -1,0 +1,2560 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>KTCommonApp</name>
+    </assembly>
+    <members>
+        <member name="T:KTFramework.Common.App.Batch.BusinessLogicBase">
+            <summary>
+            <h3>
+            バッチアプリケーション共通基底クラス
+            </h3>
+            </summary>
+            <see cref="T:KTFramework.Common.App.CommonApplication">詳細についてはCommonApplicationの説明を参照してください。</see>
+            <remarks>
+            <para>
+            <h3>
+            [使用方法]
+            </h3>
+            本クラスを継承した<i>BusinessLogic</i>クラスを作成し、エントリポイントでインスタンスを作成してください。
+            その際にコマンドライン引数を引き渡す必要があります。
+            </para>
+            <para>
+            <h3>
+            [エントリポイントのコードサンプル]
+            </h3>
+            <code>
+            class Program {
+                static int Main( string[] args ) {
+                    BusinessLogic bl = new BusinessLogic( args );
+                    return bl.ResultCode;
+                }
+            }
+            </code>
+            </para>
+            <see cref="T:KTFramework.Common.App.CommonApplication">CommonApplicationの説明も参照してください。</see>
+            </remarks>
+        </member>
+        <member name="T:KTFramework.Common.App.CommonApplication">
+            <summary>
+            <h3>
+            アプリケーション共通処理
+            </h3>
+            BusinessLogicBaseやMainFormBaseを使用して実行したアプリケーションは、
+            本クラスの初期処理、主処理、終了処理を実行します。
+            <br />
+            本クラスでは下記処理の手続きを定型化します。
+            <ul>
+            <li>コマンドライン引数の解析</li>
+            <li>共通設定ファイル(ApplicationConfig.xml)のロード</li>
+            <li>ロガーの初期化</li>
+            <li>FTP接続設定ロード</li>
+            <li>メール設定ロード</li>
+            <li>DB接続設定ロード</li>
+            <li>DB接続および切断</li>
+            <li>共通ログの出力</li>
+            <li>二重起動のチェック</li>
+            <li>起動抑止時間帯のチェック</li>
+            <li>例外発生メールの送信</li>
+            <li>アプリケーション終了メールの送信</li>
+            </ul>
+            </summary>
+            <remarks>
+            <para>
+            <h3>
+            [使用方法]
+            </h3>
+            本クラスを定型処理を利用するに当たり、下記のルール遵守や設定ファイルなどの事前準備が必要です。
+            <br />
+            <h3>
+            [コマンドライン引数について]
+            </h3>
+            引き渡した引数はCommonApplicationで解析され、Dictionary型のプロパティ<i>Args</i>にセットされます。
+            ただし、解析される引数は<i>/[argName] [argValue]</i>の形式で記述されている必要があります。
+            <br />
+            この場合、argValueの記載は必須ではありませんが、省略された場合はDictionaryのvalueに<i>"NOP"</i>がセットされます。
+            また、コマンドライン引数は下記の標準引数が用意されています。
+            <ul>
+            <li>/conf      :設定ファイル</li>
+            <li>/target    :接続対象DB[PIC|GIA|CRE|IMG|PRL|MIG] ※複数指定はカンマ区切り</li>
+            <li>/mode      :DB接続モード[RELEASE|TEST|DEVELOP]</li>
+            <li>/execUserId:ユーザ実行ユーザID ※ユーザ実行時は必ず指定</li>
+            <li>/execUserNm:ユーザ実行ユーザ名</li>
+            <li>/reportAddr:ユーザ実行結果報告メール送信先メールアドレス ※実行結果送信時は必ず指定、複数指定はカンマ区切り</li>
+            <li>/reportUser:ユーザ実行結果報告メール送信先ユーザ名 ※複数指定はカンマ区切り</li>
+            <li>/jobCtrlKey:JOB制御情報取得キー</li>
+            </ul>
+            <br />
+            ※/confで設定ファイルを直接指定した場合はapp.configの設定値を無視します
+            ※/target及び/modeで接続先DBを直接指定した場合はapp.configの設定値を無視します
+            ※/reportAddr及び/reportUserを指定した場合はapp.configのメール設定をすべて無視し、指定ユーザのみに実行結果メールを送信します
+            <h3>
+            [ApplicationConfig.xmlについて]
+            </h3>
+            アプリケーションが使用する汎用情報を定義し、いくつかの設定値は必ず記述する必要があります。
+            設定ファイルのパスは./resources/ApplicationConfig.xmlをデフォルトとし、コマンドライン引数で変更することができます。
+            <br />
+            ノードはConfigタグ、categoryタグ、sectionタグ、keyタグで構成されます。
+            <ul>
+            <li>
+            <h4>Configタグ</h4>
+            必ずルートタグとして記述し、name属性にアセンブリ名を設定してください。
+            </li>
+            <li>
+            <h4>categoryタグ</h4>
+            name属性にカテゴリ名を設定します。
+            同一nameのタグは解析時に集約されます。
+            </li>
+            <li>
+            <h4>sectionタグ</h4>
+            name属性にセクション名を設定します。
+            同一nameのタグは解析時に集約されます。
+            </li>
+            <li>
+            <h4>keyタグ</h4>
+            name属性にキー名、value属性に値を設定します。
+            同一nameのvalue値は配列に格納されます。
+            </li>
+            </ul>
+            </para>
+            <para>
+            <h3>
+            [設定ファイルサンプル]
+            </h3>
+            <code><![CDATA[
+            <!-- アプリケーション設定情報 -->
+            <!-- Configタグ：アセンブリ名を指定してください -->
+            <Config name="KTBatchSample">
+              <!-- 共通情報 -->
+              <!--   KTFrameworkを利用するための必須情報です -->
+              <!--   Commonカテゴリにアプリケーション個別のキーは追加しないでください -->
+              <category name="Common">
+                <!-- アプリケーション情報 -->
+                <section name="Application">
+                  <!-- クラスコード C/B/P/H/K/S/D/G-->
+                  <key name="class" value="C" />
+                  <!-- プロジェクトコード -->
+                  <key name="project" value="COMMON" />
+                  <!-- アプリケーション種別 S/N/W/L/B/C-->
+                  <key name="type" value="B" />
+                  <!-- アプリケーションID -->
+                  <key name="id" value="KTBatchSample" />
+                  <!-- アプリケーション名 -->
+                  <key name="name" value="KTBatchサンプル" />
+                  <!-- アプリケーション表示名 -->
+                  <key name="display" value="KTBatchサンプル" />
+                </section>
+              </category>
+            
+              <!--個別設定情報-->
+              <category name="Settings">
+                <section name="TestSettings">
+                  <key name="testKey" value="AAA" />
+                  <key name="sameKey" value="111" />
+                  <key name="sameKey" value="222" />
+                </section>
+              </category>
+            </Config> 
+            ]]>
+            </code>
+            </para>
+            <para>
+            <h3>
+            [設定データ取得方法]
+            </h3>
+            <code>
+            string value = AppConfig.Config[カテゴリ名][セクション名][キー名];
+            string[] values = AppConfig.Config[カテゴリ名][セクション名][キー名];
+            </code>
+            </para>
+            <para>
+            <h3>
+            [設定データ更新方法]
+            </h3>
+            <code>
+            AppConfig.Config[カテゴリ名][セクション名][キー名] = value;
+            </code>
+            ただし、更新対象キーが同名で複数ある場合は例外がスローされます。
+            </para>
+            </remarks>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication.PARAMETER_KEY_CONF">
+            <summary>コマンドライン引数</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication.CONFIG_FILE_PATH">
+            <summary>XML設定ファイルパス</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication.CATEGORY_COMMON">
+            <summary>XML設定ファイル:CATEGORY:COMMON</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication.RESULT_CODE_NEUTRAL">
+            <summary>結果コード(初期値)</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication.RESULT_CODE_SUCCESS">
+            <summary>結果コード(正常)</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication.RESULT_CODE_INFO">
+            <summary>結果コード(報告)</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication.RESULT_CODE_WARNING">
+            <summary>結果コード(警告)</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication.RESULT_CODE_ERROR">
+            <summary>結果コード(エラー)</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication.RESULT_CODE_SYSERROR">
+            <summary>結果コード(例外)</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._assembly">
+            <summary>アセンブリ</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._assemblyName">
+            <summary>アセンブリ名</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._ipAddr">
+            <summary>端末IPアドレス(IPv4)</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._basePath">
+            <summary>ベースパス</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._orgArgs">
+            <summary>引数</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._args">
+            <summary>引数</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._configFilePath">
+            <summary>設定ファイルパス</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._config">
+            <summary>設定ファイル</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._plantCode">
+            <summary>拠点コード(工場コード)</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._plantName">
+            <summary>拠点名(工場名)</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._classCode">
+            <summary>クラスコード</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._projectCode">
+            <summary>プロジェクトコード</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._appType">
+            <summary>アプリケーション種別</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._appId">
+            <summary>アプリケーションID</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._appName">
+            <summary>アプリケーション名</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._appDisplayName">
+            <summary>アプリケーション表示名</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._targetDbStr">
+            <summary>接続対象DB文字列[PIC|GIA|CRE|IMG|PRL|MIG]</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._dbModeStr">
+            <summary>DB接続モード文字列[RELEASE|TEST|DEVELOP]</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._startDt">
+            <summary>実行開始日時</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._finishDt">
+            <summary>実行終了日時</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._resultCode">
+            <summary>結果コード</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._resultMessage">
+            <summary>結果メッセージ</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._jobCtrlKey">
+            <summary>JOB制御情報キー</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._jobCtrlInfoUtils">
+            <summary>JOB制御情報ユーティリティ</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._jobCtrlDataList">
+            <summary>JOB制御情報リスト</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._mailBody">
+            <summary>メール本文</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._mailHandler">
+            <summary>メールハンドラ</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication.DEFAULT_EXEC_USER_ID">
+            <summary>デフォルト実行ユーザID</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication.DEFAULT_EXEC_USER_NM">
+            <summary>デフォルト実行ユーザ名</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._execUserId">
+            <summary>実行ユーザID</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._execUserNm">
+            <summary>実行ユーザ名</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._isReportResult">
+            <summary>ユーザ実行結果通知モード</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._resultReportAddrList">
+            <summary>実行結果通知ユーザメールアドレス</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._ftpHandler">
+            <summary>FTPハンドラ</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.CommonApplication._skipExecuteProcess">
+            <summary>実行処理スキップフラグ</summary>
+        </member>
+        <member name="M:KTFramework.Common.App.CommonApplication.Initialize(System.Reflection.Assembly,System.String[])">
+            <summary>
+            初期化
+            </summary>
+            <param name="assembly">アセンブリ</param>
+            <param name="args">コマンドライン引数</param>
+        </member>
+        <member name="M:KTFramework.Common.App.CommonApplication.Initialize">
+            <summary>
+            初期化
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.CommonApplication.FinishProcess">
+            <summary>
+            終了処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.CommonApplication.AnalysisArgsOption">
+            <summary>
+            引数オプション解析処理
+            オプション引数の取得とオプション除去した引数を再作成
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.CommonApplication.LoadConfig">
+            <summary>
+            設定ファイルをロードします
+            </summary>
+            <returns>true:成功 false:失敗</returns>
+        </member>
+        <member name="M:KTFramework.Common.App.CommonApplication.UpdateJobControlInfo">
+            <summary>
+            JOB実行制御情報更新(実行結果登録)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.CommonApplication.SendResultMail">
+            <summary>
+            処理結果メール送信
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.CommonApplication.GetResultReportMailNote(System.Int32)">
+            <summary>
+            実行結果報告メール用メッセージの取得
+            </summary>
+            <param name="resultCode">結果コード</param>
+            <returns>実行結果報告メール用メッセージ</returns>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.AssemblyName">
+            <summary>アセンブリ名</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.IpAddr">
+            <summary>端末IPアドレス(IPv4)</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.BasePath">
+            <summary>ベースパス</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.Args">
+            <summary>引数</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.ConfigPath">
+            <summary>設定ファイルパス</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.AppConfig">
+            <summary>設定ファイル</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.PlantCode">
+            <summary>拠点コード(工場コード)</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.PlantName">
+            <summary>拠点名(工場名)</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.ClassCode">
+            <summary>クラスコード</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.ProjectCode">
+            <summary>プロジェクトコード</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.AppType">
+            <summary>アプリケーション種別</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.AppId">
+            <summary>アプリケーションID</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.AppName">
+            <summary>アプリケーション名</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.AppDisplayName">
+            <summary>アプリケーション表示名</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.AppVersion">
+            <summary>アプリケーションバージョン</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.Excecutable">
+            <summary>実行ファイル情報</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.ApplicationIcon">
+            <summary>アプリケーションアイコン</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.TargetDbStr">
+            <summary>接続対象DB文字列[PIC|GIA|CRE|IMG|PRL|MIG]</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.DbModeStr">
+            <summary>DB接続モード文字列[RELEASE|TEST|DEVELOP]</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.StartDt">
+            <summary>実行開始日時</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.FinishDt">
+            <summary>実行終了日時</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.ResultCode">
+            <summary>結果コード</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.ResultMessage">
+            <summary>結果メッセージ</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.JobCtrlDataList">
+            <summary>JOB制御情報リスト</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.MailBody">
+            <summary>メール本文</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.MailHandler">
+            <summary>メールハンドラ</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.ExecUserId">
+            <summary>実行ユーザID</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.ExecUserNm">
+            <summary>実行ユーザ名</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.IsReportResult">
+            <summary>ユーザ実行結果通知モード</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.CommonApplication.FtpHandler">
+            <summary>FTPハンドラ</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.Batch.BusinessLogicBase.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="M:KTFramework.Common.App.Batch.BusinessLogicBase.#ctor(System.String[])">
+            <summary>
+            バッチアプリケーションのインスタンスを作成して実行します
+            </summary>
+            <param name="args">コマンドライン引数</param>
+        </member>
+        <member name="M:KTFramework.Common.App.Batch.BusinessLogicBase.Initialize(System.String[])">
+            <summary>
+            初期化処理
+            </summary>
+            <param name="args">コマンドライン引数</param>
+        </member>
+        <member name="M:KTFramework.Common.App.Batch.BusinessLogicBase.Prepare">
+            <summary>
+            実行準備
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.Batch.BusinessLogicBase.CheckArgs(System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            コマンドライン引数初期化
+            </summary>
+            <param name="args">コマンドライン引数</param>
+        </member>
+        <member name="M:KTFramework.Common.App.Batch.BusinessLogicBase.ReadConfig(KTFramework.Common.ConfigXml)">
+            <summary>
+            設定ファイル初期化
+            </summary>
+            <param name="appConfig">アプリケーションコンフィグ</param>
+        </member>
+        <member name="M:KTFramework.Common.App.Batch.BusinessLogicBase.Execute">
+            <summary>
+            プロセス実行
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.Batch.BusinessLogicBase.Invoke">
+            <summary>
+            (個別実装)メイン処理
+            </summary>
+            <returns>結果メッセージ</returns>
+        </member>
+        <member name="T:KTFramework.Common.App.ErrorDataExistsException">
+            <summary>
+            <h3>
+            エラーデータ存在例外
+            </h3>
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.ErrorDataExistsException.#ctor">
+            <summary>
+            エラーデータ存在例外
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.ErrorDataExistsException.#ctor(System.String)">
+            <summary>
+            エラーデータ存在例外
+            </summary>
+            <param name="message">例外メッセージ</param>
+        </member>
+        <member name="T:KTFramework.Common.App.FormApp.CommonControlBase">
+            <summary>
+            <h3>
+            共通コントロール基底クラス
+            </h3>
+            <see cref="T:KTFramework.Common.App.FormApp.FormAppBase">FormAppBaseの説明も参照してください。</see>
+            </summary>
+            <remarks>
+            <para>
+            <h3>
+            [使用方法]
+            </h3>
+            共通フォームのメインパネルに配置するコントロールの基本メソッドを提供します。
+            任意のコントロールオブジェクトを作成する際に、
+            本クラスを継承することで共通フォームに配置された各オブジェクトにアクセスすることができるようになります。
+            必要なメソッドを適宜オーバーライドして使用してください。
+            </para>
+            </remarks>
+        </member>
+        <member name="T:KTFramework.Common.App.FormApp.UserControlBase">
+            <summary>
+            汎用コントロール基底クラス
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserControlBase.#ctor">
+            <summary>
+            コンストラクタ
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserControlBase.RaiseEvent(KTFramework.Common.App.FormApp.UserControlBase.UserEventHandler)">
+            <summary>
+            汎用ユーザイベント(パラメータなし)
+            </summary>
+            <param name="function"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserControlBase.RaiseEventNoLog(KTFramework.Common.App.FormApp.UserControlBase.UserEventHandler)">
+            <summary>
+            汎用ユーザイベント(パラメータなし+ログ出力なし)
+            </summary>
+            <param name="function"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserControlBase.RaiseEvent(KTFramework.Common.App.FormApp.UserControlBase.UserWithParamEventHandler,System.Object)">
+            <summary>
+            汎用ユーザイベント(パラメータあり)
+            </summary>
+            <param name="function"></param>
+            <param name="param"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserControlBase.RaiseEvent(System.EventHandler,System.Object,System.EventArgs)">
+            <summary>
+            コントロールイベント(汎用)
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserControlBase.RaiseEvent(System.Windows.Forms.LinkLabelLinkClickedEventHandler,System.Object,System.Windows.Forms.LinkLabelLinkClickedEventArgs)">
+            <summary>
+            コントロールイベント(リンクラベル)
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserControlBase.RaiseEvent(System.Windows.Forms.MouseEventHandler,System.Object,System.Windows.Forms.MouseEventArgs)">
+            <summary>
+            マウスイベント
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserControlBase.RaiseEvent(System.Windows.Forms.DragEventHandler,System.Object,System.Windows.Forms.DragEventArgs)">
+            <summary>
+            マウスイベント(ドラッグアンドドロップ)
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserControlBase.RaiseEvent(System.Windows.Forms.KeyEventHandler,System.Object,System.Windows.Forms.KeyEventArgs)">
+            <summary>
+            キーイベント
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserControlBase.RaiseEvent(System.Windows.Forms.KeyPressEventHandler,System.Object,System.Windows.Forms.KeyPressEventArgs)">
+            <summary>
+            キープレスイベント
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserControlBase.RaiseEvent(KTFramework.Common.App.FormApp.UserControlBase.FormEventHandler)">
+            <summary>
+            フォームイベント(パラメータなし)
+            </summary>
+            <param name="function"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserControlBase.RaiseEvent(KTFramework.Common.App.FormApp.UserControlBase.FormWithParamEventHandler,System.Object)">
+            <summary>
+            フォームイベント(パラメータあり)
+            </summary>
+            <param name="function"></param>
+            <param name="param"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserControlBase.RaiseEvent(System.Windows.Forms.FormClosingEventHandler,System.Object,System.Windows.Forms.FormClosingEventArgs)">
+            <summary>
+            フォームイベント(クローズ中)
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserControlBase.RaiseEvent(System.Windows.Forms.FormClosedEventHandler,System.Object,System.Windows.Forms.FormClosedEventArgs)">
+            <summary>
+            フォームイベント(クローズ後)
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserControlBase.RaiseEvent(System.Timers.ElapsedEventHandler,System.Object,System.Timers.ElapsedEventArgs)">
+            <summary>
+            タイマイベント(経過)
+            </summary>
+            <param name="function"></param>
+            <param name="source"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserControlBase.RaiseEvent(System.Windows.Forms.DataGridViewCellEventHandler,System.Object,System.Windows.Forms.DataGridViewCellEventArgs)">
+            <summary>
+            GridViewコントロールイベント(セル)
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserControlBase.RaiseEvent(System.Windows.Forms.DataGridViewCellCancelEventHandler,System.Object,System.Windows.Forms.DataGridViewCellCancelEventArgs)">
+            <summary>
+            GridViewコントロールイベント(キャンセル)
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserControlBase.RaiseEvent(System.Windows.Forms.DataGridViewDataErrorEventHandler,System.Object,System.Windows.Forms.DataGridViewDataErrorEventArgs)">
+            <summary>
+            GridViewコントロールイベント(エラー)
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserControlBase.RaiseEvent(System.ComponentModel.CancelEventHandler,System.Object,System.ComponentModel.CancelEventArgs)">
+            <summary>
+            コンテキストメニューイベント(キャンセル)
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.UserControlBase.components">
+            <summary> 
+            必要なデザイナー変数です。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserControlBase.Dispose(System.Boolean)">
+            <summary> 
+            使用中のリソースをすべてクリーンアップします。
+            </summary>
+            <param name="disposing">マネージ リソースが破棄される場合 true、破棄されない場合は false です。</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserControlBase.InitializeComponent">
+            <summary> 
+            デザイナー サポートに必要なメソッドです。このメソッドの内容を 
+            コード エディターで変更しないでください。
+            </summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.UserControlBase.MainForm">
+            <summary>共通メインフォーム</summary>
+        </member>
+        <member name="T:KTFramework.Common.App.FormApp.UserControlBase.UserEventHandler">
+            <summary>汎用ユーザイベントハンドラ(パラメータなし)</summary>
+        </member>
+        <member name="T:KTFramework.Common.App.FormApp.UserControlBase.UserWithParamEventHandler">
+            <summary>汎用ユーザイベントハンドラ(パラメータなし)</summary>
+        </member>
+        <member name="T:KTFramework.Common.App.FormApp.UserControlBase.FormEventHandler">
+            <summary>フォームイベントハンドラ(パラメータなし)</summary>
+        </member>
+        <member name="T:KTFramework.Common.App.FormApp.UserControlBase.FormWithParamEventHandler">
+            <summary>フォームイベントハンドラ(パラメータあり)</summary>
+            <param name="param">パラメータ</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.#ctor">
+            <summary>
+            コンストラクタ
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.ReloadConfig">
+            <summary>
+            設定ファイル再読み込み
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.Tick1Sec">
+            <summary>
+            [タイマー]1秒タイマー計時時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.TasktrayIconClick(System.Object,System.Windows.Forms.MouseEventArgs)">
+            <summary>
+            [タスクトレイアイコン]クリック時処理
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.BaloonTipClick(System.Object,System.EventArgs)">
+            <summary>
+            [バルーンメッセージ]クリック時処理
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormLoad(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]ロード時処理
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormShown(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]表示後処理
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormResize(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]リサイズ処理
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormResizeBegin(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]リサイズ処理(開始)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormResizeEnd(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]リサイズ処理(終了)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormReturned(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]復帰処理(既定サイズに戻った)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormMaximized(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]最大化処理
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormMinimized(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]最小化処理
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormAppeared">
+            <summary>
+            [フォーム]表示時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormDisappeared">
+            <summary>
+            [フォーム]非表示時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormClosing(System.Object,System.Windows.Forms.FormClosingEventArgs)">
+            <summary>
+            [フォーム]クローズ前処理
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormClosed(System.Object,System.Windows.Forms.FormClosedEventArgs)">
+            <summary>
+            [フォーム]クローズ後処理
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormActivated(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]アクティブ時処理
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormKeyDown(System.Object,System.Windows.Forms.KeyEventArgs)">
+            <summary>
+            [フォーム]キー処理(ダウン)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormKeyPress(System.Object,System.Windows.Forms.KeyPressEventArgs)">
+            <summary>
+            [フォーム]キー処理(プレス)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormKeyUp(System.Object,System.Windows.Forms.KeyEventArgs)">
+            <summary>
+            [フォーム]キー処理(アップ)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormMouseDown(System.Object,System.Windows.Forms.MouseEventArgs)">
+            <summary>
+            [フォーム]マウスボタン処理(ダウン)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormMouseUp(System.Object,System.Windows.Forms.MouseEventArgs)">
+            <summary>
+            [フォーム]マウスボタン処理(アップ)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormMouseEnter(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]マウスポインタ処理(フォーム内に侵入)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormMouseMove(System.Object,System.Windows.Forms.MouseEventArgs)">
+            <summary>
+            [フォーム]マウスポインタ処理(フォーム内を移動)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormMouseHover(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]マウスポインタ処理(フォーム内に存在)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormMouseLeave(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]マウスポインタ処理(フォーム外に移動)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormDragEnter(System.Object,System.Windows.Forms.DragEventArgs)">
+            <summary>
+            [フォーム]ドラッグアンドドロップ処理(フォーム内に侵入)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormDragOver(System.Object,System.Windows.Forms.DragEventArgs)">
+            <summary>
+            [フォーム]ドラッグアンドドロップ処理(フォーム内に存在)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormDragDrop(System.Object,System.Windows.Forms.DragEventArgs)">
+            <summary>
+            [フォーム]ドラッグアンドドロップ処理(フォーム内にドロップ)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.FormDragLeave(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]ドラッグアンドドロップ処理(フォーム外に移動)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.ClearFunctionKey">
+            <summary>
+            ファンクションキークリア処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.InitializeFunctionKey">
+            <summary>
+            ファンクションキー初期化処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.SetFunctionKeyStatus(System.Windows.Forms.Keys,System.Boolean)">
+            <summary>
+            ファンクションキーの押下可否を設定します
+            </summary>
+            <param name="key">ファンクションキー</param>
+            <param name="enabled">押下可否</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.SetFunctionKeyStatus(System.Windows.Forms.Keys,System.Boolean,System.String)">
+            <summary>
+            ファンクションキーの押下可否及びラベルを設定します
+            </summary>
+            <param name="key">ファンクションキー</param>
+            <param name="enabled">押下可否</param>
+            <param name="label">キーラベル</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.SetFunctionKeyStatusForCtrl(System.Windows.Forms.Keys,System.Boolean)">
+            <summary>
+            ファンクションキーの押下可否を設定します(Ctrlキー同時押下用)
+            </summary>
+            <param name="key">ファンクションキー</param>
+            <param name="enabled">押下可否</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.SetFunctionKeyStatusForCtrl(System.Windows.Forms.Keys,System.Boolean,System.String)">
+            <summary>
+            ファンクションキーの押下可否及びラベルを設定します(Ctrlキー同時押下用)
+            </summary>
+            <param name="key">ファンクションキー</param>
+            <param name="enabled">押下可否</param>
+            <param name="label">キーラベル</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F1KeyDown">
+            <summary>
+            F1キークリック時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F2KeyDown">
+            <summary>
+            F2キークリック時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F3KeyDown">
+            <summary>
+            F3キークリック時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F4KeyDown">
+            <summary>
+            F4キークリック時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F5KeyDown">
+            <summary>
+            F5キークリック時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F6KeyDown">
+            <summary>
+            F6キークリック時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F7KeyDown">
+            <summary>
+            F7キークリック時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F8KeyDown">
+            <summary>
+            F8キークリック時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F9KeyDown">
+            <summary>
+            F9キークリック時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F10KeyDown">
+            <summary>
+            F10キークリック時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F11KeyDown">
+            <summary>
+            F11キークリック時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F12KeyDown">
+            <summary>
+            F12キークリック時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F1KeyDownWithCtrl">
+            <summary>
+            F1キー+Ctrlキークリック時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F2KeyDownWithCtrl">
+            <summary>
+            F2キー+Ctrlキークリック時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F3KeyDownWithCtrl">
+            <summary>
+            F3キー+Ctrlキークリック時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F4KeyDownWithCtrl">
+            <summary>
+            F4キー+Ctrlキークリック時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F5KeyDownWithCtrl">
+            <summary>
+            F5キー+Ctrlキークリック時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F6KeyDownWithCtrl">
+            <summary>
+            F6キー+Ctrlキークリック時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F7KeyDownWithCtrl">
+            <summary>
+            F7キー+Ctrlキークリック時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F8KeyDownWithCtrl">
+            <summary>
+            F8キー+Ctrlキークリック時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F9KeyDownWithCtrl">
+            <summary>
+            F9キー+Ctrlキークリック時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F10KeyDownWithCtrl">
+            <summary>
+            F10キー+Ctrlキークリック時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F11KeyDownWithCtrl">
+            <summary>
+            F11キー+Ctrlキークリック時処理
+            固定処理：設定ファイル再読み込み
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.F12KeyDownWithCtrl">
+            <summary>
+            F12キー+Ctrlキークリック時処理
+            固定処理：アプリケーション終了
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.CommonControlBase.components">
+            <summary> 
+            必要なデザイナー変数です。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.Dispose(System.Boolean)">
+            <summary> 
+            使用中のリソースをすべてクリーンアップします。
+            </summary>
+            <param name="disposing">マネージ リソースが破棄される場合 true、破棄されない場合は false です。</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonControlBase.InitializeComponent">
+            <summary> 
+            デザイナー サポートに必要なメソッドです。このメソッドの内容を 
+            コード エディターで変更しないでください。
+            </summary>
+        </member>
+        <member name="T:KTFramework.Common.App.FormApp.TenkeyPadForm">
+            <summary>
+            テンキーパッド
+            </summary>
+        </member>
+        <member name="T:KTFramework.Common.App.FormApp.UserFormBase">
+            <summary>
+            汎用フォーム基底クラス
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.UserFormBase.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserFormBase.#ctor">
+            <summary>
+            コンストラクタ
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserFormBase.ShowTenkeyPad(System.String,System.Int32@)">
+            <summary>
+            テンキーパッドを表示し、入力結果を取得します
+            </summary>
+            <param name="title">フォームタイトル</param>
+            <param name="value">入力結果</param>
+            <returns>true:入力結果取得 false:入力キャンセル</returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserFormBase.RaiseEvent(KTFramework.Common.App.FormApp.UserFormBase.UserEventHandler)">
+            <summary>
+            汎用ユーザイベント(パラメータなし)
+            </summary>
+            <param name="function"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserFormBase.RaiseEventNoLog(KTFramework.Common.App.FormApp.UserFormBase.UserEventHandler)">
+            <summary>
+            汎用ユーザイベント(パラメータなし+ログ出力なし)
+            </summary>
+            <param name="function"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserFormBase.RaiseEvent(KTFramework.Common.App.FormApp.UserFormBase.UserWithParamEventHandler,System.Object)">
+            <summary>
+            汎用ユーザイベント(パラメータあり)
+            </summary>
+            <param name="function"></param>
+            <param name="param"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserFormBase.RaiseEvent(System.EventHandler,System.Object,System.EventArgs)">
+            <summary>
+            コントロールイベント(汎用)
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserFormBase.RaiseEvent(System.Windows.Forms.LinkLabelLinkClickedEventHandler,System.Object,System.Windows.Forms.LinkLabelLinkClickedEventArgs)">
+            <summary>
+            コントロールイベント(リンクラベル)
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserFormBase.RaiseEvent(System.Windows.Forms.MouseEventHandler,System.Object,System.Windows.Forms.MouseEventArgs)">
+            <summary>
+            マウスイベント
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserFormBase.RaiseEvent(System.Windows.Forms.DragEventHandler,System.Object,System.Windows.Forms.DragEventArgs)">
+            <summary>
+            マウスイベント(ドラッグアンドドロップ)
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserFormBase.RaiseEvent(System.Windows.Forms.KeyEventHandler,System.Object,System.Windows.Forms.KeyEventArgs)">
+            <summary>
+            キーイベント
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserFormBase.RaiseEvent(System.Windows.Forms.KeyPressEventHandler,System.Object,System.Windows.Forms.KeyPressEventArgs)">
+            <summary>
+            キープレスイベント
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserFormBase.RaiseEvent(KTFramework.Common.App.FormApp.UserFormBase.FormEventHandler)">
+            <summary>
+            フォームイベント(パラメータなし)
+            </summary>
+            <param name="function"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserFormBase.RaiseEvent(KTFramework.Common.App.FormApp.UserFormBase.FormWithParamEventHandler,System.Object)">
+            <summary>
+            フォームイベント(パラメータあり)
+            </summary>
+            <param name="function"></param>
+            <param name="param"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserFormBase.RaiseEvent(System.Windows.Forms.FormClosingEventHandler,System.Object,System.Windows.Forms.FormClosingEventArgs)">
+            <summary>
+            フォームイベント(クローズ中)
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserFormBase.RaiseEvent(System.Windows.Forms.FormClosedEventHandler,System.Object,System.Windows.Forms.FormClosedEventArgs)">
+            <summary>
+            フォームイベント(クローズ後)
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserFormBase.RaiseEvent(System.Timers.ElapsedEventHandler,System.Object,System.Timers.ElapsedEventArgs)">
+            <summary>
+            タイマイベント(経過)
+            </summary>
+            <param name="function"></param>
+            <param name="source"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserFormBase.RaiseEvent(System.Windows.Forms.DataGridViewCellEventHandler,System.Object,System.Windows.Forms.DataGridViewCellEventArgs)">
+            <summary>
+            GridViewコントロールイベント(セル)
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserFormBase.RaiseEvent(System.Windows.Forms.DataGridViewCellCancelEventHandler,System.Object,System.Windows.Forms.DataGridViewCellCancelEventArgs)">
+            <summary>
+            GridViewコントロールイベント(キャンセル)
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserFormBase.RaiseEvent(System.Windows.Forms.DataGridViewDataErrorEventHandler,System.Object,System.Windows.Forms.DataGridViewDataErrorEventArgs)">
+            <summary>
+            GridViewコントロールイベント(エラー)
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserFormBase.RaiseEvent(System.ComponentModel.CancelEventHandler,System.Object,System.ComponentModel.CancelEventArgs)">
+            <summary>
+            コンテキストメニューイベント(キャンセル)
+            </summary>
+            <param name="function"></param>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.UserFormBase.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserFormBase.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.UserFormBase.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="T:KTFramework.Common.App.FormApp.UserFormBase.UserEventHandler">
+            <summary>汎用ユーザイベントハンドラ(パラメータなし)</summary>
+        </member>
+        <member name="T:KTFramework.Common.App.FormApp.UserFormBase.UserWithParamEventHandler">
+            <summary>汎用ユーザイベントハンドラ(パラメータなし)</summary>
+        </member>
+        <member name="T:KTFramework.Common.App.FormApp.UserFormBase.FormEventHandler">
+            <summary>フォームイベントハンドラ(パラメータなし)</summary>
+        </member>
+        <member name="T:KTFramework.Common.App.FormApp.UserFormBase.FormWithParamEventHandler">
+            <summary>フォームイベントハンドラ(パラメータあり)</summary>
+            <param name="param">パラメータ</param>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.TenkeyPadForm.MAX_DISPLAY_LENGTH">
+            <summary>最大桁数</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.TenkeyPadForm.MIN_DISPLAY_NUMVALUE">
+            <summary>最小値</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.TenkeyPadForm.MAX_DISPLAY_NUMVALUE">
+            <summary>最大値</summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.#ctor">
+            <summary>
+            テンキーパッドを表示します
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.#ctor(System.String,System.Int32)">
+            <summary>
+            テンキーパッドを表示します
+            </summary>
+            <param name="title">フォームタイトル</param>
+            <param name="initNumValue">初期値</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.GetInputNum">
+            <summary>
+            入力値を返す
+            </summary>
+            <returns>入力値</returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.btn0_Click(System.Object,System.EventArgs)">
+            <summary>
+            テンキーボタン(0)クリック
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.btn1_Click(System.Object,System.EventArgs)">
+            <summary>
+            テンキーボタン(1)クリック
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.btn2_Click(System.Object,System.EventArgs)">
+            <summary>
+            テンキーボタン(2)クリック
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.btn3_Click(System.Object,System.EventArgs)">
+            <summary>
+            テンキーボタン(3)クリック
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.btn4_Click(System.Object,System.EventArgs)">
+            <summary>
+            テンキーボタン(4)クリック
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.btn5_Click(System.Object,System.EventArgs)">
+            <summary>
+            テンキーボタン(5)クリック
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.btn6_Click(System.Object,System.EventArgs)">
+            <summary>
+            テンキーボタン(6)クリック
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.btn7_Click(System.Object,System.EventArgs)">
+            <summary>
+            テンキーボタン(7)クリック
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.btn8_Click(System.Object,System.EventArgs)">
+            <summary>
+            テンキーボタン(8)クリック
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.btn9_Click(System.Object,System.EventArgs)">
+            <summary>
+            テンキーボタン(9)クリック
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.btnClear_Click(System.Object,System.EventArgs)">
+            <summary>
+            コマンドキーボタン(C)クリック
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.btnUp_Click(System.Object,System.EventArgs)">
+            <summary>
+            コマンドキーボタン(▲)クリック
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.btnDown_Click(System.Object,System.EventArgs)">
+            <summary>
+            コマンドキーボタン(▼)クリック
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.btnOk_Click(System.Object,System.EventArgs)">
+            <summary>
+            コマンドキーボタン(OK)クリック
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.btnCancel_Click(System.Object,System.EventArgs)">
+            <summary>
+            コマンドキーボタン(キャンセル)クリック
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.ProcessDialogKey(System.Windows.Forms.Keys)">
+            <summary>
+            キートラップ
+            </summary>
+            <param name="keyData">キーデータ</param>
+            <returns>true:トラップする false:トラップしない</returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.TenkeyPadForm_KeyDown(System.Object,System.Windows.Forms.KeyEventArgs)">
+            <summary>
+            キーボード入力
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.AddNum(System.Int32)">
+            <summary>
+            数値追加
+            </summary>
+            <param name="num">数値</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.DeleteNum">
+            <summary>
+            数値削除
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.ClearNum">
+            <summary>
+            数値クリア
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.IncrementNum">
+            <summary>
+            数値加算
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.DecrementNum">
+            <summary>
+            数値減算
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.TenkeyPadForm.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.TenkeyPadForm.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="T:KTFramework.Common.App.FormApp.FormAppBase">
+            <summary>
+            <h3>
+            フォームアプリケーション共通基底クラス
+            </h3>
+            <see cref="T:KTFramework.Common.App.CommonApplication">詳細についてはCommonApplicationの説明を参照してください。</see>
+            </summary>
+            <remarks>
+            <para>
+            <h3>
+            [使用方法]
+            </h3>
+            エントリポイントで本クラスのインスタンスを作成してください。
+            その際に、最初にロードされるフォームのタイプとコマンドライン引数を引き渡す必要があります。
+            </para>
+            <para>
+            <h3>
+            [エントリポイントのコードサンプル]
+            </h3>
+            <h4>
+            ①任意フォームを使用する場合
+            </h4>
+              MainFormBase.GetInstanceで最初にロードするフォームオブジェクトを指定してください。
+              FormModeはUserFormを指定します。
+            <code>
+            static class Program {
+                public static MainFormBase _mainForm = null;
+                [STAThread]
+                static void Main() {
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault( false );
+                    _mainForm = MainFormBase.GetInstance( typeof( Form1 ), System.Environment.GetCommandLineArgs(), FormAppBase.FormMode.UserForm );
+                    _mainForm.Execute();
+                }
+            }
+            </code>
+            <h4>
+            ②共通フォームを使用する場合
+            </h4>
+              企業ロゴ、ヘッダ、フッタ、ファンクションキーが配置された共通フォームを使用する場合は、
+              MainFormBase.GetInstanceで共通フォームのメインパネルに最初にロードするコントロールオブジェクトを指定してください。
+              FormModeはCommonFormを指定します。
+              また、共通フォームの各オブジェクトにアクセスするため、
+              メインパネルに配置するコントロールは必ずCommonControlBaseを継承して作成してください。
+            <code>
+            static class Program {
+                public static MainFormBase _mainForm = null;
+                [STAThread]
+                static void Main() {
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault( false );
+                    _mainForm = MainFormBase.GetInstance( typeof( Control1 ), System.Environment.GetCommandLineArgs(), FormAppBase.FormMode.CommonForm );
+                    _mainForm.Execute();
+                }
+            }
+            </code>
+            </para>
+            <see cref="T:KTFramework.Common.App.CommonApplication">CommonApplicationの説明も参照してください。</see>
+            <see cref="T:KTFramework.Common.App.FormApp.CommonControlBase">CommonControlBaseの説明も参照してください。</see>
+            </remarks>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FormAppBase.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FormAppBase._mode">
+            <summary>フォームモード</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FormAppBase._formType">
+            <summary>メインフォームタイプ</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FormAppBase._mainControl">
+            <summary>メインコントロール</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FormAppBase._mainForm">
+            <summary>メインフォーム</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FormAppBase._saveWindowState">
+            <summary>フォームパラメータ:初期ウィンドウ状態保存有無</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FormAppBase._savePosition">
+            <summary>フォームパラメータ:初期位置保存有無</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FormAppBase._saveSize">
+            <summary>フォームパラメータ:初期サイズ保存有無</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FormAppBase._startupWindowState">
+            <summary>フォームパラメータ:初期ウィンドウ状態</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FormAppBase._startupPositionX">
+            <summary>フォームパラメータ:初期位置(X座標)</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FormAppBase._startupPositionY">
+            <summary>フォームパラメータ:初期位置(Y座標)</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FormAppBase._startupWidth">
+            <summary>フォームパラメータ:初期サイズ(横)</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FormAppBase._startupHeight">
+            <summary>フォームパラメータ:初期サイズ(縦)</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FormAppBase._instance">
+            <summary>インスタンス</summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FormAppBase.GetInstance">
+            <summary>
+            インスタンスの取得
+            </summary>
+            <returns>インスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FormAppBase.GetInstance(System.Type,System.String[],KTFramework.Common.App.FormApp.FormAppBase.FormMode)">
+            <summary>
+            インスタンスの取得
+            </summary>
+            <param name="formType">メインフォーム</param>
+            <param name="args">コマンドライン引数</param>
+            <param name="mode">フォームモード</param>
+            <returns>インスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FormAppBase.#ctor(System.Type,System.String[])">
+            <summary>
+            アプリケーションのインスタンスを作成して実行します
+            </summary>
+            <param name="formType">メインフォーム</param>
+            <param name="args">コマンドライン引数</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FormAppBase.Initialize(System.Type,System.String[])">
+            <summary>
+            初期化処理(任意フォーム用)
+            </summary>
+            <param name="formType">フォームタイプ</param>
+            <param name="args">コマンドライン引数</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FormAppBase.Initialize(System.String[])">
+            <summary>
+            初期化処理(共通部分)
+            </summary>
+            <param name="args">コマンドライン引数</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FormAppBase.Execute">
+            <summary>
+            プロセス実行
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FormAppBase.FormInitialize">
+            <summary>
+            フォーム初期化処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FormAppBase.ReloadConfig">
+            <summary>
+            設定ファイルの再読み込みを行います
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FormAppBase.GetFormParams">
+            <summary>
+            フォームパラメータ取得
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FormAppBase.SaveFormParams">
+            <summary>
+            フォームパラメータ保存
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FormAppBase.SaveFormParamsOnExit">
+            <summary>
+            フォームパラメータ保存
+            </summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FormAppBase.Mode">
+            <summary>フォームモード</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FormAppBase.MainControl">
+            <summary>メインコントロール</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FormAppBase.MainForm">
+            <summary>メインフォーム</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FormAppBase.CommonMainForm">
+            <summary>メインフォーム(共通フォームモード専用)</summary>
+            <remarks>共通フォームモードで起動していない場合は例外がスローされます</remarks>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FormAppBase.Args">
+            <summary>引数</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FormAppBase.AppConfig">
+            <summary>設定ファイル</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FormAppBase.SaveWindowState">
+            <summary>フォームパラメータ:初期ウィンドウ状態保存有無</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FormAppBase.SavePosition">
+            <summary>フォームパラメータ:初期位置保存有無</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FormAppBase.SaveSize">
+            <summary>フォームパラメータ:初期サイズ保存有無</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FormAppBase.StartupWindowState">
+            <summary>フォームパラメータ:初期ウィンドウ状態</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FormAppBase.StartupPositionX">
+            <summary>フォームパラメータ:初期位置(X座標)</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FormAppBase.StartupPositionY">
+            <summary>フォームパラメータ:初期位置(Y座標)</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FormAppBase.StartupWidth">
+            <summary>フォームパラメータ:初期サイズ(横)</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FormAppBase.StartupHeight">
+            <summary>フォームパラメータ:初期サイズ(縦)</summary>
+        </member>
+        <member name="T:KTFramework.Common.App.FormApp.FormAppBase.FormMode">
+            <summary>フォームモード</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FormAppBase.FormMode.UserForm">
+            <summary>任意フォームを使用</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FormAppBase.FormMode.CommonForm">
+            <summary>共通フォームを使用</summary>
+        </member>
+        <member name="T:KTFramework.Common.App.FormApp.FormAppUtils">
+            <summary>
+            フォームアプリケーション用共通メソッドクラス
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FormAppUtils.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FormAppUtils.WriteFunctionCallLog(System.String)">
+            <summary>
+            イベントメソッドコール用ログ出力
+            </summary>
+            <param name="methodName"></param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FormAppUtils.WriteFunctionCallErrorLog(System.String,KTFramework.Common.App.IllegalEventFunctionCallException)">
+            <summary>
+            イベントメソッド未定義用ログ出力
+            </summary>
+            <param name="methodName"></param>
+            <param name="ex"></param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FormAppUtils.WriteFunctionCallErrorLog(System.String,System.Exception)">
+            <summary>
+            イベントメソッド処理例外用ログ出力
+            </summary>
+            <param name="methodName"></param>
+            <param name="ex"></param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FormAppUtils.GetErrorMessage(System.Exception)">
+            <summary>
+            エラーメッセージを作成します
+            </summary>
+            <param name="ex"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FormAppUtils.GetFormIcon(System.String)">
+            <summary>
+            フォームアイコンを返します
+            デフォルトのフォームアイコン名はform.icoです。
+            アイコンファイルを埋め込みリソースとして登録してください。
+            </summary>
+            <param name="assemblyName">アセンブリ名</param>
+            <returns>フォームアイコンデータ</returns>
+        </member>
+        <member name="T:KTFramework.Common.App.FormApp.CommonFormBase">
+            <summary>
+            共通フォーム基底クラス
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.CommonFormBase.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.CommonFormBase._appBase">
+            <summary>フォームアプリケーション</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.CommonFormBase._mainControl">
+            <summary>メインコントロール</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.CommonFormBase._functionKeyCtrl">
+            <summary>ファンクションキーコントロール</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.CommonFormBase._clockTimer">
+            <summary>時計用タイマー</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.CommonFormBase._tasktrayIcon">
+            <summary>タスクトレイアイコン</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.CommonFormBase._currentKeyCode">
+            <summary>現在押下中のキーコード</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.CommonFormBase._isRepeat">
+            <summary>現在押下中のキーコードマップ</summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.GetKeyRepeat(System.Int32)">
+            <summary>
+            現在押下中のキーコードを取得します
+            </summary>
+            <param name="keyValue"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.SetKeyRepeat(System.Int32,System.Boolean)">
+            <summary>
+            現在押下中のキーコードを設定します
+            </summary>
+            <param name="keyValue"></param>
+            <param name="isRepeat"></param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.#ctor(KTFramework.Common.App.FormApp.FormAppBase,KTFramework.Common.App.FormApp.CommonControlBase)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="appBase">フォームアプリケーション</param>
+            <param name="mainControl">メインコントロール</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.SetApplicationName(System.String,System.String)">
+            <summary>
+            アプリケーション名をセットします
+            </summary>
+            <param name="projectCode">プロジェクトコード</param>
+            <param name="appName">アプリケーション名</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.ClearLabel1">
+            <summary>
+            ラベル1をクリアします
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.SetLabel1(System.String,System.String)">
+            <summary>
+            ラベル1をセットします
+            </summary>
+            <param name="title">ラベルタイトル</param>
+            <param name="content">ラベル内容</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.ClearLabel2">
+            <summary>
+            ラベル2をクリアします
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.SetLabel2(System.String,System.String)">
+            <summary>
+            ラベル2をセットします
+            </summary>
+            <param name="title">ラベルタイトル</param>
+            <param name="content">ラベル内容</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.ClearLabel3">
+            <summary>
+            ラベル3をクリアします
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.SetLabel3(System.String,System.String)">
+            <summary>
+            ラベル3をセットします
+            </summary>
+            <param name="title">ラベルタイトル</param>
+            <param name="content">ラベル内容</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.picLogo_Click(System.Object,System.EventArgs)">
+            <summary>
+            ロゴクリック(バージョン表示)
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.ClearMessage">
+            <summary>
+            メッセージをクリアします
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.SetInfoMessage(System.String)">
+            <summary>
+            情報メッセージをセットします
+            </summary>
+            <param name="message">メッセージ</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.SetSuccessMessage(System.String)">
+            <summary>
+            正常メッセージをセットします
+            </summary>
+            <param name="message">メッセージ</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.SetWarnMessage(System.String)">
+            <summary>
+            警告メッセージをセットします
+            </summary>
+            <param name="message">メッセージ</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.SetErrorMessage(System.String)">
+            <summary>
+            エラーメッセージをセットします
+            </summary>
+            <param name="message">メッセージ</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.SetMessageColor(System.Drawing.Color,System.Drawing.Color)">
+            <summary>
+            メッセージの色をセットします
+            </summary>
+            <param name="foreColor">フォント色</param>
+            <param name="backColor">背景色</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.SetMessage(System.String)">
+            <summary>
+            メッセージをセットします
+            </summary>
+            <param name="message">メッセージ</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.AddClockTimer">
+            <summary>
+            時計用タイマを追加します
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.Timer1Sec_Tick(System.Object,System.Timers.ElapsedEventArgs)">
+            <summary>
+            1秒タイマー計時イベント
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.Tick1Sec">
+            <summary>
+            1秒タイマー計時時処理
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.SetClockTime(System.String)">
+            <summary>
+            日時ラベルに日時をセットします
+            </summary>
+            <param name="time">日時文字列</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.ShowNotifyIcon">
+            <summary>
+            タスクトレイアイコンを表示します
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.ShowNotifyIcon(System.Windows.Forms.ContextMenuStrip,System.String)">
+            <summary>
+            タスクトレイアイコンを表示します
+            </summary>
+            <param name="contextMenuStrip">右クリック時メニュー</param>
+            <param name="balloonTipTitle">バルーン表示タイトル</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.ShowBaloon(System.String)">
+            <summary>
+            タスクトレイアイコンにバルーンメッセージを10秒間表示する
+            (非表示時のみ)
+            </summary>
+            <param name="message">メッセージ</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.ShowBaloon(System.String,System.Int32)">
+            <summary>
+            タスクトレイアイコンにバルーンメッセージを表示する
+            (非表示時のみ)
+            </summary>
+            <param name="message">メッセージ</param>
+            <param name="milisec">表示時間(ミリ秒)</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.ToggleWindowVisibility">
+            <summary>
+            表示/非表示を切り替える
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.UpdateWindowVisibility(System.Boolean)">
+            <summary>
+            表示状態を更新する
+            </summary>
+            <param name="flag">true:表示する false:非表示にする</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.LoadConfig">
+            <summary>
+            設定ファイル再読み込み
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.TasktrayIcon_MouseClick(System.Object,System.Windows.Forms.MouseEventArgs)">
+            <summary>
+            [タスクトレイアイコン]クリック時処理
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.BaloonTip_Click(System.Object,System.EventArgs)">
+            <summary>
+            [バルーンメッセージ]クリック時処理
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.CommonFormBase_Load(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]ロード時処理
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.CommonFormBase_Shown(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]表示後処理
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.CommonFormBase_Resize(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]リサイズ処理
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.CommonFormBase_ResizeBegin(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]リサイズ処理(開始)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.CommonFormBase_ResizeEnd(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]リサイズ処理(終了)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.CommonFormBase_FormClosing(System.Object,System.Windows.Forms.FormClosingEventArgs)">
+            <summary>
+            [フォーム]クローズ前処理
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.CommonFormBase_FormClosed(System.Object,System.Windows.Forms.FormClosedEventArgs)">
+            <summary>
+            [フォーム]クローズ後処理
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.CommonFormBase_Activated(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]アクティブ時処理
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.CommonFormBase_KeyDown(System.Object,System.Windows.Forms.KeyEventArgs)">
+            <summary>
+            [フォーム]キー処理(ダウン)
+            ※キー押下中は連続で発生
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.CommonFormBase_KeyDownOnce(System.Object,System.Windows.Forms.KeyEventArgs)">
+            <summary>
+            [フォーム]キー処理(ダウン)
+            ※1回のみ発生
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.CommonFormBase_KeyPress(System.Object,System.Windows.Forms.KeyPressEventArgs)">
+            <summary>
+            [フォーム]キー処理(プレス)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.CommonFormBase_KeyUp(System.Object,System.Windows.Forms.KeyEventArgs)">
+            <summary>
+            [フォーム]キー処理(アップ)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.CommonFormBase_MouseDown(System.Object,System.Windows.Forms.MouseEventArgs)">
+            <summary>
+            [フォーム]マウスボタン処理(ダウン)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.CommonFormBase_MouseUp(System.Object,System.Windows.Forms.MouseEventArgs)">
+            <summary>
+            [フォーム]マウスボタン処理(アップ)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.CommonFormBase_MouseMove(System.Object,System.Windows.Forms.MouseEventArgs)">
+            <summary>
+            [フォーム]マウスポインタ処理(フォーム内に侵入)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.CommonFormBase_MouseEnter(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]マウスポインタ処理(フォーム内を移動)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.CommonFormBase_MouseHover(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]マウスポインタ処理(フォーム内に存在)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.CommonFormBase_MouseLeave(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]マウスポインタ処理(フォーム外に移動)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.CommonFormBase_DragEnter(System.Object,System.Windows.Forms.DragEventArgs)">
+            <summary>
+            [フォーム]ドラッグアンドドロップ処理(フォーム内に侵入)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.CommonFormBase_DragDrop(System.Object,System.Windows.Forms.DragEventArgs)">
+            <summary>
+            [フォーム]ドラッグアンドドロップ処理(フォーム内に存在)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.CommonFormBase_DragOver(System.Object,System.Windows.Forms.DragEventArgs)">
+            <summary>
+            [フォーム]ドラッグアンドドロップ処理(フォーム内にドロップ)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.CommonFormBase_DragLeave(System.Object,System.EventArgs)">
+            <summary>
+            [フォーム]ドラッグアンドドロップ処理(フォーム外に移動)
+            </summary>
+            <param name="sender">発生元オブジェクト</param>
+            <param name="e">補足情報</param>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.CommonFormBase.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.CommonFormBase.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.CommonFormBase.AppBase">
+            <summary>フォームアプリケーション</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.CommonFormBase.FunctionKeyCtrl">
+            <summary>ファンクションキーコントロール</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.CommonFormBase.TasktrayIcon">
+            <summary>タスクトレイアイコン</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.CommonFormBase.CurrentKeyCode">
+            <summary>現在押下中のキーコード</summary>
+        </member>
+        <member name="T:KTFramework.Common.App.FormApp.CommonFormBase.Tick1SecDelegate">
+            <summary>1秒タイマー計時委譲処理</summary>
+        </member>
+        <member name="T:KTFramework.Common.App.FormApp.FunctionKeyControl">
+            <summary>
+            ファンクションキーコントロール
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FunctionKeyControl.FUNCTION_KEY_NUM">
+            <summary>ファンクションキー数</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FunctionKeyControl.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FunctionKeyControl._keyInfoMap">
+            <summary>ファンクションキー情報マップ</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FunctionKeyControl._keyInfoForCtrlMap">
+            <summary>Ctrl同時押下用ファンクションキー情報マップ</summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FunctionKeyControl.#ctor(KTFramework.Common.App.FormApp.CommonControlBase)">
+            <summary>
+            コンストラクタ
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FunctionKeyControl.GetFunctionKey(System.Windows.Forms.Keys)">
+            <summary>
+            ファンクションキーボタンコントロールオブジェクトを取得します
+            </summary>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FunctionKeyControl.SetKeyInfo(System.Windows.Forms.Keys,System.Boolean)">
+            <summary>
+            ファンクションキーの押下可否を設定します
+            </summary>
+            <param name="key"></param>
+            <param name="enabled"></param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FunctionKeyControl.SetKeyInfo(System.Windows.Forms.Keys,System.Boolean,System.String)">
+            <summary>
+            ファンクションキーの押下可否及びラベルを設定します
+            </summary>
+            <param name="key"></param>
+            <param name="enabled"></param>
+            <param name="label"></param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FunctionKeyControl.SetKeyInfoForCtrl(System.Windows.Forms.Keys,System.Boolean)">
+            <summary>
+            ファンクションキーの押下可否を設定します(Ctrlキー同時押下用)
+            </summary>
+            <param name="key"></param>
+            <param name="enabled"></param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FunctionKeyControl.SetKeyInfoForCtrl(System.Windows.Forms.Keys,System.Boolean,System.String)">
+            <summary>
+            ファンクションキーの押下可否及びラベルを設定します(Ctrlキー同時押下用)
+            </summary>
+            <param name="key"></param>
+            <param name="enabled"></param>
+            <param name="label"></param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FunctionKeyControl.UpdateKeyStatus">
+            <summary>
+            ファンクションキーの押下可否及びラベルを更新します
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FunctionKeyControl.UpdateKeyStatus(System.Collections.Generic.Dictionary{System.Windows.Forms.Keys,KTFramework.Common.App.FormApp.FunctionKeyControl.FunctionKeyInfo})">
+            <summary>
+            ファンクションキーの押下可否及びラベルを更新します
+            </summary>
+            <param name="keyInfoMap"></param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FunctionKeyControl.GetStatus(System.Windows.Forms.Keys)">
+            <summary>
+            ファンクションキーの押下可否を取得します
+            </summary>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FunctionKeyControl.UpdateKeyLayout">
+            <summary>
+            ファンクションキーボタンレイアウトを更新します
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FunctionKeyControl.components">
+            <summary> 
+            必要なデザイナー変数です。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FunctionKeyControl.Dispose(System.Boolean)">
+            <summary> 
+            使用中のリソースをすべてクリーンアップします。
+            </summary>
+            <param name="disposing">マネージ リソースが破棄される場合 true、破棄されない場合は false です。</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.FunctionKeyControl.InitializeComponent">
+            <summary> 
+            デザイナー サポートに必要なメソッドです。このメソッドの内容を 
+            コード エディターで変更しないでください。
+            </summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FunctionKeyControl.F1">
+            <summary>F1キー</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FunctionKeyControl.F2">
+            <summary>F2キー</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FunctionKeyControl.F3">
+            <summary>F3キー</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FunctionKeyControl.F4">
+            <summary>F4キー</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FunctionKeyControl.F5">
+            <summary>F5キー</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FunctionKeyControl.F6">
+            <summary>F6キー</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FunctionKeyControl.F7">
+            <summary>F7キー</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FunctionKeyControl.F8">
+            <summary>F8キー</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FunctionKeyControl.F9">
+            <summary>F9キー</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FunctionKeyControl.F10">
+            <summary>F10キー</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FunctionKeyControl.F11">
+            <summary>F11キー</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.FormApp.FunctionKeyControl.F12">
+            <summary>F12キー</summary>
+        </member>
+        <member name="T:KTFramework.Common.App.FormApp.FunctionKeyControl.FunctionKeyInfo">
+            <summary>ファンクションキー情報</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FunctionKeyControl.FunctionKeyInfo.key">
+            <summary>ファンクションキー</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FunctionKeyControl.FunctionKeyInfo.enabled">
+            <summary>押下可否</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.FunctionKeyControl.FunctionKeyInfo.label">
+            <summary>ボタンラベル</summary>
+        </member>
+        <member name="T:KTFramework.Common.App.FormApp.ApplicationInfoForm">
+            <summary>
+            バージョン情報フォーム
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.ApplicationInfoForm.#ctor(KTFramework.Common.App.FormApp.FormAppBase)">
+            <summary>
+            コンストラクタ
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.ApplicationInfoForm.SetInfo">
+            <summary>
+            情報設定
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.ApplicationInfoForm.SaveInfo">
+            <summary>
+            情報保存
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.App.FormApp.ApplicationInfoForm.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.ApplicationInfoForm.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:KTFramework.Common.App.FormApp.ApplicationInfoForm.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="T:KTFramework.Common.App.IllegalArgumentException">
+            <summary>
+            <h3>
+            不正コマンドライン引数例外
+            </h3>
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.IllegalArgumentException.#ctor">
+            <summary>
+            不正コマンドライン引数例外
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.IllegalArgumentException.#ctor(System.String)">
+            <summary>
+            不正コマンドライン引数例外
+            </summary>
+            <param name="message">例外メッセージ</param>
+        </member>
+        <member name="T:KTFramework.Common.App.MultipleBootException">
+            <summary>
+            <h3>
+            二重起動例外
+            </h3>
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.MultipleBootException.#ctor">
+            <summary>
+            二重起動例外
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.MultipleBootException.#ctor(System.String)">
+            <summary>
+            二重起動例外
+            </summary>
+            <param name="message">例外メッセージ</param>
+        </member>
+        <member name="T:KTFramework.Common.App.NoProcessDataException">
+            <summary>
+            <h3>
+            処理対象データなし例外
+            </h3>
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.NoProcessDataException.#ctor">
+            <summary>
+            処理対象データなし例外
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.NoProcessDataException.#ctor(System.String)">
+            <summary>
+            処理対象データなし例外
+            </summary>
+            <param name="message">例外メッセージ</param>
+        </member>
+        <member name="T:KTFramework.Common.App.OutsideOfServiceHoursException">
+            <summary>
+            <h3>
+            起動抑止時間帯例外
+            </h3>
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.OutsideOfServiceHoursException.#ctor">
+            <summary>
+            起動抑止時間帯例外
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.OutsideOfServiceHoursException.#ctor(System.String)">
+            <summary>
+            起動抑止時間帯例外
+            </summary>
+            <param name="message">例外メッセージ</param>
+        </member>
+        <member name="T:KTFramework.Common.App.Properties.Resources">
+            <summary>
+              ローカライズされた文字列などを検索するための、厳密に型指定されたリソース クラスです。
+            </summary>
+        </member>
+        <member name="P:KTFramework.Common.App.Properties.Resources.ResourceManager">
+            <summary>
+              このクラスで使用されているキャッシュされた ResourceManager インスタンスを返します。
+            </summary>
+        </member>
+        <member name="P:KTFramework.Common.App.Properties.Resources.Culture">
+            <summary>
+              厳密に型指定されたこのリソース クラスを使用して、すべての検索リソースに対し、
+              現在のスレッドの CurrentUICulture プロパティをオーバーライドします。
+            </summary>
+        </member>
+        <member name="T:KTFramework.Common.App.IllegalEventFunctionCallException">
+            <summary>
+            <h3>
+            未定義イベントメソッドコール例外
+            </h3>
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.IllegalEventFunctionCallException.#ctor">
+            <summary>
+            未定義イベントメソッドコール例外
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.IllegalEventFunctionCallException.#ctor(System.String)">
+            <summary>
+            未定義イベントメソッドコール例外
+            </summary>
+            <param name="message">例外メッセージ</param>
+        </member>
+        <member name="T:KTFramework.Common.App.WebApp.WebAppBase">
+            <summary>
+            <h3>
+            WEBアプリケーション共通基底クラス
+            </h3>
+            <see cref="T:KTFramework.Common.App.CommonApplication">詳細についてはCommonApplicationの説明を参照してください。</see>
+            </summary>
+            <remarks>
+            <para>
+            <h3>
+            [使用方法]
+            </h3>
+            Global.aspxで本クラスのインスタンスを作成してください。
+            その際に、コマンドライン引数とGlobalのインスタンスを引き渡す必要があります。
+            </para>
+            <para>
+            <h3>
+            [エントリポイントのコードサンプル]
+            </h3>
+            <code>
+            protected void Application_Start( object sender, EventArgs e ) {
+                new PdsWebApp( System.Environment.GetCommandLineArgs(), this );
+            }
+            </code>
+            </para>
+            <see cref="T:KTFramework.Common.App.CommonApplication">CommonApplicationの説明も参照してください。</see>
+            </remarks>
+        </member>
+        <member name="F:KTFramework.Common.App.WebApp.WebAppBase.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.WebApp.WebAppBase._httpApp">
+            <summary>HTTPアプリケーション</summary>
+        </member>
+        <member name="F:KTFramework.Common.App.WebApp.WebAppBase._instance">
+            <summary>インスタンス</summary>
+        </member>
+        <member name="M:KTFramework.Common.App.WebApp.WebAppBase.GetInstance">
+            <summary>
+            インスタンスの取得
+            </summary>
+            <returns>インスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Common.App.WebApp.WebAppBase.#ctor(System.Reflection.Assembly,System.String[],System.Web.HttpApplication)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="assembly">アセンブリ</param>
+            <param name="args">コマンドライン引数</param>
+            <param name="httpApp">HTTPアプリケーション</param>
+        </member>
+        <member name="M:KTFramework.Common.App.WebApp.WebAppBase.Initialize(System.Reflection.Assembly,System.String[],System.Web.HttpApplication)">
+            <summary>
+            初期化処理(共通部分)
+            </summary>
+            <param name="assembly">アセンブリ</param>
+            <param name="args">コマンドライン引数</param>
+            <param name="httpApp">HTTPアプリケーション</param>
+        </member>
+        <member name="P:KTFramework.Common.App.WebApp.WebAppBase.Args">
+            <summary>引数</summary>
+        </member>
+        <member name="P:KTFramework.Common.App.WebApp.WebAppBase.AppConfig">
+            <summary>設定ファイル</summary>
+        </member>
+        <member name="T:KTFramework.Common.App.SettingFileLoadErrorException">
+            <summary>
+            <h3>
+            設定ファイルロードエラー例外
+            </h3>
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.SettingFileLoadErrorException.#ctor">
+            <summary>
+            設定ファイルロードエラー例外
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.App.SettingFileLoadErrorException.#ctor(System.String)">
+            <summary>
+            設定ファイルロードエラー例外
+            </summary>
+            <param name="message">例外メッセージ</param>
+        </member>
+    </members>
+</doc>

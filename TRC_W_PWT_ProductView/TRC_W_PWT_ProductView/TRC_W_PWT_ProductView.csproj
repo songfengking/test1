@@ -1,0 +1,1466 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{3B302012-BBC5-4656-AA1B-5F209E0D2123}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TRC_W_PWT_ProductView</RootNamespace>
+    <AssemblyName>TRC_W_PWT_ProductView</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <UseIISExpress>true</UseIISExpress>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication>enabled</IISExpressAnonymousAuthentication>
+    <IISExpressWindowsAuthentication>disabled</IISExpressWindowsAuthentication>
+    <IISExpressUseClassicPipelineMode />
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <TypeScriptToolsVersion>4.3</TypeScriptToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>0</WarningLevel>
+    <PublishDatabases>false</PublishDatabases>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="C1.C1Excel.4, Version=4.1.20142.323, Culture=neutral, PublicKeyToken=79882d576c6336da, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\C1.C1Excel.4.dll</HintPath>
+    </Reference>
+    <Reference Include="C1.C1Report.4, Version=4.6.20142.54733, Culture=neutral, PublicKeyToken=594a0605db190bb9, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\C1.C1Report.4.dll</HintPath>
+    </Reference>
+    <Reference Include="IBatisNet.Common, Version=1.6.2.0, Culture=neutral, PublicKeyToken=ed781d9fc396c6ca, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\IBatisNet.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="IBatisNet.DataMapper, Version=1.6.2.0, Culture=neutral, PublicKeyToken=ed781d9fc396c6ca, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\IBatisNet.DataMapper.dll</HintPath>
+    </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib">
+      <HintPath>..\lib\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
+    <Reference Include="KTC1CommonUtils">
+      <HintPath>..\lib\KTC1CommonUtils.dll</HintPath>
+    </Reference>
+    <Reference Include="KTCommon, Version=1.2.3.3, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\KTCommon.dll</HintPath>
+    </Reference>
+    <Reference Include="KTCommonApp, Version=1.1.3.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\KTCommonApp.dll</HintPath>
+    </Reference>
+    <Reference Include="KTCommonDao, Version=1.0.5.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\KTCommonDao.dll</HintPath>
+    </Reference>
+    <Reference Include="KTDataAccess, Version=1.1.2.3, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\KTDataAccess.dll</HintPath>
+    </Reference>
+    <Reference Include="KTDataAccessFactory, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\KTDataAccessFactory.dll</HintPath>
+    </Reference>
+    <Reference Include="KTExcel, Version=1.0.0.5, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\KTExcel.dll</HintPath>
+    </Reference>
+    <Reference Include="KTWebClient, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\KTWebClient.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="NPOI">
+      <HintPath>..\lib\NPOI.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OOXML">
+      <HintPath>..\lib\NPOI.OOXML.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OpenXml4Net">
+      <HintPath>..\lib\NPOI.OpenXml4Net.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OpenXmlFormats">
+      <HintPath>..\lib\NPOI.OpenXmlFormats.dll</HintPath>
+    </Reference>
+    <Reference Include="Oracle.DataAccess, Version=2.121.2.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\..\app\ho.so\product\12.1.0\client_1\ODP.NET\bin\4\Oracle.DataAccess.dll</HintPath>
+    </Reference>
+    <Reference Include="PdfSharp, Version=1.32.3057.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\PdfSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="CSS\Base.css" />
+    <Content Include="CSS\cobalt\images\ui-bg_flat_0_aaaaaa_40x100.png" />
+    <Content Include="CSS\cobalt\images\ui-bg_glass_55_b3c4d8_500x100.png" />
+    <Content Include="CSS\cobalt\images\ui-bg_glass_75_fef1bd_1x400.png" />
+    <Content Include="CSS\cobalt\images\ui-bg_glass_85_dae6f4_1x400.png" />
+    <Content Include="CSS\cobalt\images\ui-bg_glass_95_fef1ec_1x400.png" />
+    <Content Include="CSS\cobalt\images\ui-bg_inset-hard_100_fcfdfd_1x100.png" />
+    <Content Include="CSS\cobalt\images\ui-bg_inset-hard_100_ffe475_1x100.png" />
+    <Content Include="CSS\cobalt\images\ui-icons_469bdd_256x240.png" />
+    <Content Include="CSS\cobalt\images\ui-icons_6e6c56_256x240.png" />
+    <Content Include="CSS\cobalt\images\ui-icons_cd0a0a_256x240.png" />
+    <Content Include="CSS\cobalt\images\wijmo-ui-icons_000000_240x112.png" />
+    <Content Include="CSS\cobalt\images\wijmo-ui-icons_ffffff_240x112.png" />
+    <Content Include="CSS\cobalt\jquery-wijmo.css" />
+    <Content Include="CSS\jquery-ui.theme.min.css" />
+    <Content Include="CSS\TRC.css" />
+    <None Include="ENVLOGO\kubota.png" />
+    <Content Include="favicon.ico" />
+    <Content Include="Global.asax" />
+    <Content Include="Images\browser-change.jpg" />
+    <Content Include="Images\busy.gif" />
+    <Content Include="Images\category_header_bar_h30.png" />
+    <Content Include="Images\content_header_bar_h30.png" />
+    <Content Include="Images\detail_header_bar_h22.png" />
+    <Content Include="Images\DownAllow.png" />
+    <Content Include="Images\dummyload.gif" />
+    <Content Include="Images\list_content_bar_h20.png" />
+    <Content Include="Images\list_selected_bar_h20.png" />
+    <Content Include="Images\list_title_bar_h20.png" />
+    <Content Include="Images\passSymbol.png" />
+    <Content Include="Images\UpAllow.png" />
+    <Content Include="resources\ApplicationConfig.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <EmbeddedResource Include="Properties\licenses.licx" />
+    <EmbeddedResource Include="resources\dao\sqlMapConfig\SqlMapConfig_GIA.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\dao\sqlMapConfig\SqlMapConfig_PIC.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\dao\sqlMapConfig\SqlMapConfig_CRE.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Gia\ProductKind_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Pic\MsStation_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Gia\ClassGroup_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Gia\Products_SqlMap.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Cre\EngineParts_SqlMap.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Pic\TractorParts_SqlMap.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Gia\Model_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Cre\EngineProcess_SqlMap.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Pic\TractorProcess_SqlMap.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Pic\CommonProcess_SqlMap.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Gia\TractorParts_SqlMap.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Gia\Serial_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Gia\AccessCounter_SqlMap.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Gia\Kintai_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Gia\KTAuth_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Pic\Atu_SqlMap.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Gia\WmsDpf_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Pic\ProcessSearch_SqlMap.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Pic\GenericTable_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Pic\ProcessFiltering_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Pic\LineProcess_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Gia\JobControlInfo_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Gia\TmCcAuthUser_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Gia\TmGeServerPrinter_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Gia\PickingDetail_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Gia\PickingSummary_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Gia\MsSagyo_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Gia\KatashikiMaster_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Gia\ItemList_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Gia\MsZiseki_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Gia\Imadoko_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Gia\StationTsuukaJunjo_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Gia\TeRittaiLocation_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\SqlMaps\Pic\AiImageCheck_SqlMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <Content Include="Scripts\Common.js" />
+    <Content Include="Scripts\CustomControls\KTDatePicker.js" />
+    <Content Include="Scripts\CustomControls\KTExpander.js" />
+    <Content Include="Scripts\CustomControls\KTMonthPicker.js" />
+    <Content Include="Scripts\CustomControls\KTNumericTextBox.js" />
+    <Content Include="Scripts\CustomControls\KTTextBox.js" />
+    <Content Include="Scripts\CustomControls\KTTimeTextBox.js" />
+    <Content Include="Scripts\KeyControl.js" />
+    <Content Include="Scripts\LibScript\jquery-1.11.1.min.js" />
+    <Content Include="Scripts\LibScript\jquery-ui.min.js" />
+    <Content Include="Scripts\LibScript\modernizr-2.5.3.js" />
+    <Content Include="Scripts\MasterMain.js" />
+    <Content Include="Scripts\Pages\AiImageCheck\AiImageCheck.js" />
+    <Content Include="Scripts\Pages\AiImageCheck\AnlGroupList.js" />
+    <Content Include="Scripts\Pages\AiImageCheck\AnlGroupInput.js" />
+    <Content Include="Scripts\Pages\AiImageCheck\AnlGroupListInput.js" />
+    <Content Include="Scripts\Pages\AiImageCheck\AnlGroupModelInput.js" />
+    <Content Include="Scripts\Pages\AiImageCheck\AnlGroupModelList.js" />
+    <Content Include="Scripts\Pages\AiImageCheck\AnlGroupModelView.js" />
+    <Content Include="Scripts\Pages\AiImageCheck\AnlItemInput.js" />
+    <Content Include="Scripts\Pages\AiImageCheck\AnlItemView.js" />
+    <Content Include="Scripts\Pages\AiImageCheck\MainCorrectiveList.js" />
+    <Content Include="Scripts\Pages\AiImageCheck\MainCorrectiveInput.js" />
+    <Content Include="Scripts\Pages\AiImageCheck\AnlGroupView.js" />
+    <Content Include="Scripts\Pages\AiImageCheck\Ready.js" />
+    <Content Include="Scripts\Pages\AiImageCheck\SubmitControl.js" />
+    <Content Include="Scripts\Pages\ContentSolidScroll.js" />
+    <Content Include="Scripts\Pages\Kanban\KanbanPickingDetailView.js" />
+    <Content Include="Scripts\Pages\Kanban\KanbanPickingStatusView.js" />
+    <Content Include="Scripts\Pages\Kanban\KanbanPickingUserSelect.js" />
+    <Content Include="Scripts\Pages\Kanban\KanbanShortageView.js" />
+    <Content Include="Scripts\Pages\Maintenance\MasterMainte3CList.js" />
+    <Content Include="Scripts\Pages\Maintenance\MasterMainteNAListDetail.js" />
+    <Content Include="Scripts\Pages\Maintenance\MasterMainteDpfList.js" />
+    <Content Include="Scripts\Pages\Maintenance\DpfSerial.js" />
+    <Content Include="Scripts\Pages\Maintenance\MasterMainteDpfListDetail.js" />
+    <Content Include="Scripts\Pages\Maintenance\ProcessingDtEdit.js" />
+    <Content Include="Scripts\Pages\MainProcessView.js" />
+    <Content Include="Scripts\Pages\AiImageCheck\MainCorrectiveView.js" />
+    <Content Include="Scripts\Pages\Order\ProCodeIdnoDialog.js" />
+    <Content Include="Scripts\Pages\Order\SearchCallEngineSimulation.js" />
+    <Content Include="Scripts\Pages\Order\SearchEngineStock.js" />
+    <Content Include="Scripts\Pages\Order\SearchOrderInfo.js" />
+    <Content Include="Scripts\Pages\Order\SearchStationOrder.js" />
+    <Content Include="Scripts\Pages\Order\SearchProductOrder.js" />
+    <Content Include="Scripts\Pages\PartsView\ShipmentParts.js" />
+    <Content Include="Scripts\Pages\ProcessView\AiImage.js" />
+    <Content Include="Scripts\Pages\ProcessView\CheckPoint.js" />
+    <Content Include="Scripts\Pages\ProcessView\GenericDetail.js" />
+    <Content Include="Scripts\Pages\ProcessView\Optaxis.js" />
+    <Content Include="Scripts\Pages\ProcessView\PrintCheckSheet.js" />
+    <Content Include="Scripts\Pages\LoginByID.js" />
+    <Content Include="Scripts\Pages\Maintenance\MasterMainteNAList.js" />
+    <Content Include="Scripts\Pages\PartsView\Ecu.js" />
+    <Content Include="Scripts\Pages\PartsView\Injecter.js" />
+    <Content Include="Scripts\Pages\ProcessView\PCrawler.js" />
+    <Content Include="Scripts\Pages\ProcessView\CriticalInspection.js" />
+    <Content Include="Scripts\Pages\ProcessView\EngineTest03.js" />
+    <Content Include="Scripts\Pages\ProcessView\EngineTest07.js" />
+    <Content Include="Scripts\Pages\ContentScroll.js" />
+    <Content Include="Scripts\Pages\ProcessView\ELCheckSheet.js" />
+    <Content Include="Scripts\Pages\ChangePassword.js" />
+    <Content Include="Scripts\Pages\Maintenance\NACheckList.js" />
+    <Content Include="Scripts\Pages\InputModal.js" />
+    <Content Include="Scripts\Pages\ProcessFilteringView.js" />
+    <Content Include="Scripts\Pages\ProcessView\Sheel.js" />
+    <Content Include="Scripts\Pages\MainPartsView.js" />
+    <Content Include="Scripts\Pages\DetailPartsFrame.js" />
+    <Content Include="Scripts\Pages\ProcessView\TestBench.js" />
+    <Content Include="Scripts\Pages\ProcessView\Torque.js" />
+    <Content Include="Scripts\Pages\ProcessView\TractorAll.js" />
+    <Content Include="Scripts\Ready.js" />
+    <Content Include="Scripts\ControlCommon.js" />
+    <Content Include="Scripts\Pages\MainView.js" />
+    <Content Include="Scripts\Pages\DetailFrame.js" />
+    <Content Include="Scripts\Pages\ProcessView\CameraImage.js" />
+    <Content Include="Scripts\LibScript\scrollViewer.js" />
+    <Content Include="Scripts\SubmitControl.js" />
+    <Content Include="Scripts\Pages\ProcessView\CheckSheet.js" />
+    <Content Include="Scripts\Pages\PrintViewForm.js" />
+    <Content Include="Scripts\MasterSub.js" />
+    <Content Include="Scripts\Pages\BatchExecCmdInput.js" />
+    <Content Include="TemplateFiles\Report\ENGR0001.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="TemplateFiles\Report\TRCR0001.xml" />
+    <Content Include="TemplateFiles\Report\TRCR0002.xml" />
+    <Content Include="UI\Pages\AiImageCheck\AnlGroupList.aspx" />
+    <Content Include="UI\Pages\AiImageCheck\AnlGroupInput.aspx" />
+    <Content Include="UI\Pages\AiImageCheck\AnlGroupListInput.aspx" />
+    <Content Include="UI\Pages\AiImageCheck\AnlGroupModelInput.aspx" />
+    <Content Include="UI\Pages\AiImageCheck\AnlGroupModelList.aspx" />
+    <Content Include="UI\Pages\AiImageCheck\AnlGroupModelView.aspx" />
+    <Content Include="UI\Pages\AiImageCheck\AnlItemInput.aspx" />
+    <Content Include="UI\Pages\AiImageCheck\AnlItemView.aspx" />
+    <Content Include="UI\Pages\AiImageCheck\ImageInputModal.ascx" />
+    <Content Include="UI\Pages\AiImageCheck\AnlGroupView.aspx" />
+    <Content Include="UI\Pages\AiImageCheck\MainCorrectiveInput.aspx" />
+    <Content Include="UI\Pages\ApCheck.aspx" />
+    <Content Include="UI\Pages\BatchExecCmdInput.aspx" />
+    <Content Include="UI\Pages\DetailFrame.aspx" />
+    <Content Include="UI\Pages\BrowserChangeGuidance.aspx" />
+    <Content Include="UI\Pages\Error.aspx" />
+    <Content Include="UI\Pages\AiImageCheck\MainCorrectiveList.aspx" />
+    <Content Include="UI\Pages\Kanban\KanbanPickingDetailView.aspx" />
+    <Content Include="UI\Pages\Kanban\KanbanPickingStatusView.aspx" />
+    <Content Include="UI\Pages\Kanban\KanbanPickingUserSelect.aspx" />
+    <Content Include="UI\Pages\Kanban\KanbanShortageView.aspx" />
+    <Content Include="UI\Pages\Maintenance\MasterMainte3CList.aspx" />
+    <Content Include="UI\Pages\Maintenance\NACheckList.aspx" />
+    <Content Include="UI\Pages\Maintenance\ProcessingDtEdit.aspx" />
+    <Content Include="UI\Pages\Maintenance\MasterMainteDpfList.aspx" />
+    <Content Include="UI\Pages\Maintenance\DpfSerial.aspx" />
+    <Content Include="UI\Pages\Maintenance\MaintenanceDpfListDetail.aspx" />
+    <Content Include="UI\Pages\MainProcessView.aspx" />
+    <Content Include="UI\Pages\MainView.aspx" />
+    <Content Include="UI\Pages\Order\ProCodeIdnoDialog.aspx" />
+    <Content Include="UI\Pages\Order\SearchCallEngineSimulation.aspx" />
+    <Content Include="UI\Pages\Order\SearchEngineStock.aspx" />
+    <Content Include="UI\Pages\Order\SearchOrderInfo.aspx" />
+    <Content Include="UI\Pages\Order\SearchProductOrder.aspx" />
+    <Content Include="UI\Pages\Order\SearchStationOrder.aspx" />
+    <Content Include="UI\Pages\PartsSearch\AtuPartsSerial.ascx" />
+    <Content Include="UI\Pages\PartsSearch\LeakMeasureResult.ascx" />
+    <Content Include="UI\Pages\PartsSearch\TorqueTightenRecord.ascx" />
+    <Content Include="UI\Pages\PartsView\CoreParts.ascx" />
+    <Content Include="UI\Pages\PartsView\Crate.ascx" />
+    <Content Include="UI\Pages\PartsView\Ecu.ascx" />
+    <Content Include="UI\Pages\PartsView\Housing.ascx" />
+    <Content Include="UI\Pages\PartsView\Mission.ascx" />
+    <Content Include="UI\Pages\PartsView\RackPositionSensor.ascx" />
+    <Content Include="UI\Pages\PartsView\Rops.ascx" />
+    <Content Include="UI\Pages\ProcessView\AiImage.ascx" />
+    <Content Include="UI\Pages\ProcessView\ShipmentParts.ascx" />
+    <Content Include="UI\Pages\PartsView\SupplyPump.ascx" />
+    <Content Include="UI\Pages\PartsView\Injecter.ascx" />
+    <Content Include="UI\Pages\PartsView\Dpf.ascx" />
+    <Content Include="UI\Pages\PartsView\Epr.ascx" />
+    <Content Include="UI\Pages\PartsView\Mixer.ascx" />
+    <Content Include="UI\Pages\PartsView\WiFiEcu.ascx" />
+    <Content Include="UI\Pages\PartsView\Scr.ascx" />
+    <Content Include="UI\Pages\PartsView\Acu.ascx" />
+    <Content Include="UI\Pages\PartsView\Doc.ascx" />
+    <Content Include="UI\Pages\PartsView\Nameplate.ascx" />
+    <Content Include="UI\Pages\PartsView\SerialPrint.ascx" />
+    <Content Include="UI\Pages\ProcessFilteringView.aspx" />
+    <Content Include="UI\Pages\ProcessView\CheckSheet.ascx" />
+    <Content Include="UI\Pages\ProcessView\CriticalInspection.ascx" />
+    <Content Include="UI\Pages\ProcessView\CheckPoint.ascx" />
+    <Content Include="UI\Pages\ProcessView\EngineELCheckSheet.ascx" />
+    <Content Include="UI\Pages\ProcessView\EngineTest03.ascx" />
+    <Content Include="UI\Pages\ProcessView\FrictionLoss.ascx" />
+    <Content Include="UI\Pages\ProcessView\GenericDetail.ascx" />
+    <Content Include="UI\Pages\ProcessView\Harnes.ascx" />
+    <Content Include="UI\Pages\ProcessView\FuelInjection03.ascx" />
+    <Content Include="UI\Pages\ProcessView\NutRunner.ascx" />
+    <Content Include="UI\Pages\ProcessView\Optaxis.ascx" />
+    <Content Include="UI\Pages\ProcessView\TestBench.ascx" />
+    <Content Include="UI\Pages\ProcessView\Torque.ascx" />
+    <Content Include="UI\Pages\ProcessView\PCrawler.ascx" />
+    <Content Include="UI\Pages\ProcessView\FuelInjection07.ascx" />
+    <Content Include="UI\Pages\ProcessView\EngineTest07.ascx" />
+    <Content Include="UI\Pages\ProcessView\ELCheckSheet.ascx" />
+    <Content Include="UI\Pages\ProcessView\Sheel.ascx" />
+    <Content Include="UI\Pages\ProcessView\TractorAll.ascx" />
+    <Content Include="UI\Pages\AiImageCheck\MainCorrectiveView.aspx" />
+    <Content Include="UI\Pages\SessionKeep.aspx" />
+    <Content Include="UI\Pages\Top.aspx" />
+    <Content Include="UI\Pages\ProcessView\CameraImage.ascx" />
+    <Content Include="UI\Pages\PartsView\CriticalParts.ascx" />
+    <Content Include="UI\Pages\ImageView.aspx" />
+    <Content Include="UI\Pages\UserControl\InputModal.ascx" />
+    <Content Include="UI\Pages\UserControl\LoadingData.ascx" />
+    <Content Include="UI\Pages\LoginByAD.aspx" />
+    <Content Include="UI\Pages\ChangePassword.aspx" />
+    <Content Include="UI\Pages\MaintenanceMenu.aspx" />
+    <Content Include="UI\Pages\Maintenance\MasterMainteNAList.aspx" />
+    <Content Include="UI\Pages\Maintenance\MaintenanceNAListDetail.aspx" />
+    <Content Include="UI\Pages\PreViewForm.aspx" />
+    <Content Include="UI\Pages\ProcessView\PrintCheckSheet.ascx" />
+    <Content Include="UI\Pages\MainPartsView.aspx" />
+    <Content Include="UI\Pages\DetailPartsFrame.aspx" />
+    <Content Include="UI\Pages\LoginByTrc.aspx" />
+    <Content Include="UI\Pages\UserControl\MainProcessConditionPartialView.ascx" />
+    <Content Include="UI\Pages\UserControl\MainProcessOperationPartialView.ascx" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Business\AiImageCheckBusiness.cs" />
+    <Compile Include="Business\KanbanBusiness.cs" />
+    <Compile Include="Business\MainProcessViewBusiness.cs" />
+    <Compile Include="Business\MainViewBusiness.cs" />
+    <Compile Include="Business\DetailViewBusiness.cs" />
+    <Compile Include="Business\MainPartsViewBusiness.cs" />
+    <Compile Include="Business\DetailPartsViewBusiness.cs" />
+    <Compile Include="Business\OrderBusiness.cs" />
+    <Compile Include="Common\ConfigData.cs" />
+    <Compile Include="Common\CoreService.cs" />
+    <Compile Include="Common\Excel.cs" />
+    <Compile Include="Common\AppPermission.cs" />
+    <Compile Include="Common\TrcWebConsts.cs" />
+    <Compile Include="Common\WebFileUtils.cs" />
+    <Compile Include="Dao\Com\ImadokoDao.cs" />
+    <Compile Include="Dao\Com\AiImageCheckDao.cs" />
+    <Compile Include="Dao\Com\KatashikiMasterDao.cs" />
+    <Compile Include="Dao\Com\MsSagyoDao.cs" />
+    <Compile Include="Dao\Com\PickingDetailDao.cs" />
+    <Compile Include="Dao\Com\PickingSummaryDao.cs" />
+    <Compile Include="Dao\Com\StationTsuukaJunjoDao.cs" />
+    <Compile Include="Dao\Com\TeRittaiLocationDao.cs" />
+    <Compile Include="Dao\Com\TmCcAuthUserDao.cs" />
+    <Compile Include="Dao\Com\TmCcExcelTemplateDao.cs" />
+    <Compile Include="Dao\Com\JobControlInfoDao.cs" />
+    <Compile Include="Dao\Com\LineProcessDao.cs" />
+    <Compile Include="Dao\Com\GenericTableDao.cs" />
+    <Compile Include="Dao\Com\KintaiDao.cs" />
+    <Compile Include="Common\WebServices.cs" />
+    <Compile Include="Common\WebServicesUtils.cs" />
+    <Compile Include="Dao\Com\Serial7Dao.cs" />
+    <Compile Include="Dao\Com\AccessCounterDao.cs" />
+    <Compile Include="Dao\Com\KTAuthDao.cs" />
+    <Compile Include="Dao\Com\TmGeServerPrinterDao.cs" />
+    <Compile Include="Dao\Com\ItemListDao.cs" />
+    <Compile Include="Dao\Com\MsZisekiDao.cs" />
+    <Compile Include="Dao\Com\WmsDpfDao.cs" />
+    <Compile Include="Dao\Parts\EnginePartsDao.cs" />
+    <Compile Include="Dao\Parts\AtuDao.cs" />
+    <Compile Include="Dao\Process\ProcessFilteringDao.cs" />
+    <Compile Include="Dao\Process\ProcessSearchDao.cs" />
+    <Compile Include="Dao\Process\EngineProcessDao.cs" />
+    <Compile Include="Dao\Com\ModelDao.cs" />
+    <Compile Include="Dao\Process\TractorProcessDao.cs" />
+    <Compile Include="Dao\Parts\TractorPartsDao.cs" />
+    <Compile Include="Dao\Process\CommonProcessDao.cs" />
+    <Compile Include="Dao\Com\SerialParam.cs" />
+    <Compile Include="Defines\AssemblyPatternCode.cs" />
+    <Compile Include="Defines\GeneralPatternCode.cs" />
+    <Compile Include="Defines\Interface\IDetail.cs" />
+    <Compile Include="Defines\ListDefine\CallEngineWarehouse.cs" />
+    <Compile Include="Defines\ListDefine\EngineKind.cs" />
+    <Compile Include="Defines\ListDefine\PartsKind.cs" />
+    <Compile Include="Common\ControlUtils.cs" />
+    <Compile Include="Common\DataUtils.cs" />
+    <Compile Include="Dao\Products\ProductsDao.cs" />
+    <Compile Include="Dao\Com\MsStationDao.cs" />
+    <Compile Include="Dao\Com\ClassGroupDao.cs" />
+    <Compile Include="Dao\Com\ProductKindDao.cs" />
+    <Compile Include="Dao\Com\MasterList.cs" />
+    <Compile Include="Defines\ListDefine\ModelType.cs" />
+    <Compile Include="Defines\ListDefine\DateKind.cs" />
+    <Compile Include="Defines\ListDefine\ProductKind.cs" />
+    <Compile Include="Defines\ListDefine\GroupCd.cs" />
+    <Compile Include="Defines\ListDefine\ProcessKind.cs" />
+    <Compile Include="Defines\ListDefine\ResultKind.cs" />
+    <Compile Include="Defines\ListDefine\WordList.cs" />
+    <Compile Include="Defines\ListDefine\PartsSearchTarget.cs" />
+    <Compile Include="Defines\ListDefine\AtuProcessKind.cs" />
+    <Compile Include="Defines\ListDefine\PartsSearchKind.cs" />
+    <Compile Include="Defines\MsgManager.cs" />
+    <Compile Include="Defines\ProcessViewDefine\IndividualDropDownItem.cs" />
+    <Compile Include="Defines\ProcessViewDefine\SearchConditionDefine.cs" />
+    <Compile Include="Defines\ProcessViewDefine\SearchResultDefine.cs" />
+    <Compile Include="Defines\RequestParameter.cs" />
+    <Compile Include="Defines\Session.cs" />
+    <Compile Include="Common\PageUtils.cs" />
+    <Compile Include="Common\WebAppInstance.cs" />
+    <Compile Include="Defines\TypeDefine\ControlDefine.cs" />
+    <Compile Include="Defines\PageControlID.cs" />
+    <Compile Include="Defines\TypeDefine\GridViewDefine.cs" />
+    <Compile Include="Defines\PageInfo.cs" />
+    <Compile Include="Defines\ResourcePath.cs" />
+    <Compile Include="Defines\TypeDefine\LabelTemplateField.cs" />
+    <Compile Include="Defines\User.cs" />
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Reports\Dto\EngineInjection07DetailDto.cs" />
+    <Compile Include="Reports\EngineInjection07DetailReport.cs" />
+    <Compile Include="Reports\EngineInjection03DetailReport.cs" />
+    <Compile Include="Reports\Dto\EngineInjection03DetailDto.cs" />
+    <Compile Include="Reports\NGReport.cs" />
+    <Compile Include="Reports\Utils\JapaneseFontResolver .cs" />
+    <Compile Include="Session\SessionManagerInstance.cs" />
+    <Compile Include="Session\TransInfoSessionHandler.cs" />
+    <Compile Include="Session\ConditionInfoSessionHandler.cs" />
+    <Compile Include="Session\PageControlInfoSessionHandler.cs" />
+    <Compile Include="Session\ImageInfoSessionHandler.cs" />
+    <Compile Include="Session\UserInfoSessionHandler.cs" />
+    <Compile Include="UI\Base\BaseForm.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\MasterForm\MasterMain.master.cs">
+      <DependentUpon>MasterMain.master</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\MasterForm\MasterMain.master.designer.cs">
+      <DependentUpon>MasterMain.master</DependentUpon>
+    </Compile>
+    <Compile Include="UI\MasterForm\MasterSub.master.cs">
+      <DependentUpon>MasterSub.master</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\MasterForm\MasterSub.master.designer.cs">
+      <DependentUpon>MasterSub.master</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\AnlGroupList.aspx.cs">
+      <DependentUpon>AnlGroupList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\AnlGroupList.aspx.designer.cs">
+      <DependentUpon>AnlGroupList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\AnlGroupInput.aspx.cs">
+      <DependentUpon>AnlGroupInput.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\AnlGroupInput.aspx.designer.cs">
+      <DependentUpon>AnlGroupInput.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\AnlGroupListInput.aspx.cs">
+      <DependentUpon>AnlGroupListInput.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\AnlGroupListInput.aspx.designer.cs">
+      <DependentUpon>AnlGroupListInput.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\AnlGroupModelInput.aspx.cs">
+      <DependentUpon>AnlGroupModelInput.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\AnlGroupModelInput.aspx.designer.cs">
+      <DependentUpon>AnlGroupModelInput.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\AnlGroupModelList.aspx.cs">
+      <DependentUpon>AnlGroupModelList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\AnlGroupModelList.aspx.designer.cs">
+      <DependentUpon>AnlGroupModelList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\AnlGroupModelView.aspx.cs">
+      <DependentUpon>AnlGroupModelView.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\AnlGroupModelView.aspx.designer.cs">
+      <DependentUpon>AnlGroupModelView.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\AnlItemInput.aspx.cs">
+      <DependentUpon>AnlItemInput.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\AnlItemInput.aspx.designer.cs">
+      <DependentUpon>AnlItemInput.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\AnlItemView.aspx.cs">
+      <DependentUpon>AnlItemView.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\AnlItemView.aspx.designer.cs">
+      <DependentUpon>AnlItemView.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\ImageInputModal.ascx.cs">
+      <DependentUpon>ImageInputModal.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\ImageInputModal.ascx.designer.cs">
+      <DependentUpon>ImageInputModal.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\AnlGroupView.aspx.cs">
+      <DependentUpon>AnlGroupView.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\AnlGroupView.aspx.designer.cs">
+      <DependentUpon>AnlGroupView.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\MainCorrectiveInput.aspx.cs">
+      <DependentUpon>MainCorrectiveInput.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\MainCorrectiveInput.aspx.designer.cs">
+      <DependentUpon>MainCorrectiveInput.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ApCheck.aspx.cs">
+      <DependentUpon>ApCheck.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ApCheck.aspx.designer.cs">
+      <DependentUpon>ApCheck.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\BatchExecCmdInput.aspx.cs">
+      <DependentUpon>BatchExecCmdInput.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\BatchExecCmdInput.aspx.designer.cs">
+      <DependentUpon>BatchExecCmdInput.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\DetailFrame.aspx.cs">
+      <DependentUpon>DetailFrame.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\DetailFrame.aspx.designer.cs">
+      <DependentUpon>DetailFrame.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\BrowserChangeGuidance.aspx.cs">
+      <DependentUpon>BrowserChangeGuidance.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\BrowserChangeGuidance.aspx.designer.cs">
+      <DependentUpon>BrowserChangeGuidance.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\Error.aspx.cs">
+      <DependentUpon>Error.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\Error.aspx.designer.cs">
+      <DependentUpon>Error.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\MainCorrectiveList.aspx.cs">
+      <DependentUpon>MainCorrectiveList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\MainCorrectiveList.aspx.designer.cs">
+      <DependentUpon>MainCorrectiveList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\Kanban\KanbanPickingDetailView.aspx.cs">
+      <DependentUpon>KanbanPickingDetailView.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\Kanban\KanbanPickingDetailView.aspx.designer.cs">
+      <DependentUpon>KanbanPickingDetailView.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\Kanban\KanbanPickingStatusView.aspx.cs">
+      <DependentUpon>KanbanPickingStatusView.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\Kanban\KanbanPickingStatusView.aspx.designer.cs">
+      <DependentUpon>KanbanPickingStatusView.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\Kanban\KanbanPickingUserSelect.aspx.cs">
+      <DependentUpon>KanbanPickingUserSelect.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\Kanban\KanbanPickingUserSelect.aspx.designer.cs">
+      <DependentUpon>KanbanPickingUserSelect.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\Kanban\KanbanShortageView.aspx.cs">
+      <DependentUpon>KanbanShortageView.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\Kanban\KanbanShortageView.aspx.designer.cs">
+      <DependentUpon>KanbanShortageView.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\Maintenance\MasterMainte3CList.aspx.cs">
+      <DependentUpon>MasterMainte3CList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\Maintenance\MasterMainte3CList.aspx.designer.cs">
+      <DependentUpon>MasterMainte3CList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\Maintenance\NACheckList.aspx.cs">
+      <DependentUpon>NACheckList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\Maintenance\NACheckList.aspx.designer.cs">
+      <DependentUpon>NACheckList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\Maintenance\ProcessingDtEdit.aspx.cs">
+      <DependentUpon>ProcessingDtEdit.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\Maintenance\ProcessingDtEdit.aspx.designer.cs">
+      <DependentUpon>ProcessingDtEdit.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\Maintenance\MasterMainteDpfList.aspx.cs">
+      <DependentUpon>MasterMainteDpfList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\Maintenance\MasterMainteDpfList.aspx.designer.cs">
+      <DependentUpon>MasterMainteDpfList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\Maintenance\DpfSerial.aspx.cs">
+      <DependentUpon>DpfSerial.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\Maintenance\DpfSerial.aspx.designer.cs">
+      <DependentUpon>DpfSerial.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\Maintenance\MaintenanceDpfListDetail.aspx.cs">
+      <DependentUpon>MaintenanceDpfListDetail.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\Maintenance\MaintenanceDpfListDetail.aspx.designer.cs">
+      <DependentUpon>MaintenanceDpfListDetail.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\MainProcessView.aspx.cs">
+      <DependentUpon>MainProcessView.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\MainProcessView.aspx.designer.cs">
+      <DependentUpon>MainProcessView.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\MainView.aspx.cs">
+      <DependentUpon>MainView.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\MainView.aspx.designer.cs">
+      <DependentUpon>MainView.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\Order\ProCodeIdnoDialog.aspx.cs">
+      <DependentUpon>ProCodeIdnoDialog.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\Order\ProCodeIdnoDialog.aspx.designer.cs">
+      <DependentUpon>ProCodeIdnoDialog.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\Order\SearchCallEngineSimulation.aspx.cs">
+      <DependentUpon>SearchCallEngineSimulation.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\Order\SearchCallEngineSimulation.aspx.designer.cs">
+      <DependentUpon>SearchCallEngineSimulation.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\Order\SearchEngineStock.aspx.cs">
+      <DependentUpon>SearchEngineStock.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\Order\SearchEngineStock.aspx.designer.cs">
+      <DependentUpon>SearchEngineStock.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\Order\SearchOrderInfo.aspx.cs">
+      <DependentUpon>SearchOrderInfo.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\Order\SearchOrderInfo.aspx.designer.cs">
+      <DependentUpon>SearchOrderInfo.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\Order\SearchProductOrder.aspx.cs">
+      <DependentUpon>SearchProductOrder.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\Order\SearchProductOrder.aspx.designer.cs">
+      <DependentUpon>SearchProductOrder.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\Order\SearchStationOrder.aspx.cs">
+      <DependentUpon>SearchStationOrder.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\Order\SearchStationOrder.aspx.designer.cs">
+      <DependentUpon>SearchStationOrder.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PartsSearch\AtuPartsSerial.ascx.cs">
+      <DependentUpon>AtuPartsSerial.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PartsSearch\AtuPartsSerial.ascx.designer.cs">
+      <DependentUpon>AtuPartsSerial.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PartsSearch\LeakMeasureResult.ascx.cs">
+      <DependentUpon>LeakMeasureResult.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PartsSearch\LeakMeasureResult.ascx.designer.cs">
+      <DependentUpon>LeakMeasureResult.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PartsSearch\TorqueTightenRecord.ascx.cs">
+      <DependentUpon>TorqueTightenRecord.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PartsSearch\TorqueTightenRecord.ascx.designer.cs">
+      <DependentUpon>TorqueTightenRecord.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\CoreParts.ascx.cs">
+      <DependentUpon>CoreParts.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\CoreParts.ascx.designer.cs">
+      <DependentUpon>CoreParts.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Crate.ascx.cs">
+      <DependentUpon>Crate.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Crate.ascx.designer.cs">
+      <DependentUpon>Crate.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Ecu.ascx.cs">
+      <DependentUpon>Ecu.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Ecu.ascx.designer.cs">
+      <DependentUpon>Ecu.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Housing.ascx.cs">
+      <DependentUpon>Housing.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Housing.ascx.designer.cs">
+      <DependentUpon>Housing.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Mission.ascx.cs">
+      <DependentUpon>Mission.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Mission.ascx.designer.cs">
+      <DependentUpon>Mission.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\RackPositionSensor.ascx.cs">
+      <DependentUpon>RackPositionSensor.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\RackPositionSensor.ascx.designer.cs">
+      <DependentUpon>RackPositionSensor.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Rops.ascx.cs">
+      <DependentUpon>Rops.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Rops.ascx.designer.cs">
+      <DependentUpon>Rops.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\AiImage.ascx.cs">
+      <DependentUpon>AiImage.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\AiImage.ascx.designer.cs">
+      <DependentUpon>AiImage.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\ShipmentParts.ascx.cs">
+      <DependentUpon>ShipmentParts.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\ShipmentParts.ascx.designer.cs">
+      <DependentUpon>ShipmentParts.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\SupplyPump.ascx.cs">
+      <DependentUpon>SupplyPump.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\SupplyPump.ascx.designer.cs">
+      <DependentUpon>SupplyPump.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Injecter.ascx.cs">
+      <DependentUpon>Injecter.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Injecter.ascx.designer.cs">
+      <DependentUpon>Injecter.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Dpf.ascx.cs">
+      <DependentUpon>Dpf.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Dpf.ascx.designer.cs">
+      <DependentUpon>Dpf.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Epr.ascx.cs">
+      <DependentUpon>Epr.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Epr.ascx.designer.cs">
+      <DependentUpon>Epr.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Mixer.ascx.cs">
+      <DependentUpon>Mixer.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Mixer.ascx.designer.cs">
+      <DependentUpon>Mixer.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\WiFiEcu.ascx.cs">
+      <DependentUpon>WiFiEcu.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\WiFiEcu.ascx.designer.cs">
+      <DependentUpon>WiFiEcu.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Scr.ascx.cs">
+      <DependentUpon>Scr.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Scr.ascx.designer.cs">
+      <DependentUpon>Scr.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Acu.ascx.cs">
+      <DependentUpon>Acu.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Acu.ascx.designer.cs">
+      <DependentUpon>Acu.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Doc.ascx.cs">
+      <DependentUpon>Doc.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Doc.ascx.designer.cs">
+      <DependentUpon>Doc.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Nameplate.ascx.cs">
+      <DependentUpon>Nameplate.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\Nameplate.ascx.designer.cs">
+      <DependentUpon>Nameplate.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\SerialPrint.ascx.cs">
+      <DependentUpon>SerialPrint.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\SerialPrint.ascx.designer.cs">
+      <DependentUpon>SerialPrint.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessFilteringView.aspx.cs">
+      <DependentUpon>ProcessFilteringView.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessFilteringView.aspx.designer.cs">
+      <DependentUpon>ProcessFilteringView.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\CheckSheet.ascx.cs">
+      <DependentUpon>CheckSheet.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\CheckSheet.ascx.designer.cs">
+      <DependentUpon>CheckSheet.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\CriticalInspection.ascx.cs">
+      <DependentUpon>CriticalInspection.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\CriticalInspection.ascx.designer.cs">
+      <DependentUpon>CriticalInspection.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\CheckPoint.ascx.cs">
+      <DependentUpon>CheckPoint.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\CheckPoint.ascx.designer.cs">
+      <DependentUpon>CheckPoint.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\EngineELCheckSheet.ascx.cs">
+      <DependentUpon>EngineELCheckSheet.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\EngineELCheckSheet.ascx.designer.cs">
+      <DependentUpon>EngineELCheckSheet.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\EngineTest03.ascx.cs">
+      <DependentUpon>EngineTest03.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\EngineTest03.ascx.designer.cs">
+      <DependentUpon>EngineTest03.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\FrictionLoss.ascx.cs">
+      <DependentUpon>FrictionLoss.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\FrictionLoss.ascx.designer.cs">
+      <DependentUpon>FrictionLoss.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\GenericDetail.ascx.cs">
+      <DependentUpon>GenericDetail.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\GenericDetail.ascx.designer.cs">
+      <DependentUpon>GenericDetail.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\Harnes.ascx.cs">
+      <DependentUpon>Harnes.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\Harnes.ascx.designer.cs">
+      <DependentUpon>Harnes.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\FuelInjection03.ascx.cs">
+      <DependentUpon>FuelInjection03.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\FuelInjection03.ascx.designer.cs">
+      <DependentUpon>FuelInjection03.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\NutRunner.ascx.cs">
+      <DependentUpon>NutRunner.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\NutRunner.ascx.designer.cs">
+      <DependentUpon>NutRunner.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\Optaxis.ascx.cs">
+      <DependentUpon>Optaxis.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\Optaxis.ascx.designer.cs">
+      <DependentUpon>Optaxis.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\TestBench.ascx.cs">
+      <DependentUpon>TestBench.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\TestBench.ascx.designer.cs">
+      <DependentUpon>TestBench.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\Torque.ascx.cs">
+      <DependentUpon>Torque.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\PCrawler.ascx.cs">
+      <DependentUpon>PCrawler.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\PCrawler.ascx.designer.cs">
+      <DependentUpon>PCrawler.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\Torque.ascx.designer.cs">
+      <DependentUpon>Torque.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\FuelInjection07.ascx.cs">
+      <DependentUpon>FuelInjection07.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\FuelInjection07.ascx.designer.cs">
+      <DependentUpon>FuelInjection07.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\EngineTest07.ascx.cs">
+      <DependentUpon>EngineTest07.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\EngineTest07.ascx.designer.cs">
+      <DependentUpon>EngineTest07.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\ELCheckSheet.ascx.cs">
+      <DependentUpon>ELCheckSheet.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\ELCheckSheet.ascx.designer.cs">
+      <DependentUpon>ELCheckSheet.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\Sheel.ascx.cs">
+      <DependentUpon>Sheel.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\Sheel.ascx.designer.cs">
+      <DependentUpon>Sheel.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\TractorAll.ascx.cs">
+      <DependentUpon>TractorAll.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\TractorAll.ascx.designer.cs">
+      <DependentUpon>TractorAll.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\MainCorrectiveView.aspx.cs">
+      <DependentUpon>MainCorrectiveView.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\AiImageCheck\MainCorrectiveView.aspx.designer.cs">
+      <DependentUpon>MainCorrectiveView.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\SessionKeep.aspx.cs">
+      <DependentUpon>SessionKeep.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\SessionKeep.aspx.designer.cs">
+      <DependentUpon>SessionKeep.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\Top.aspx.cs">
+      <DependentUpon>Top.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\Top.aspx.designer.cs">
+      <DependentUpon>Top.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\CameraImage.ascx.cs">
+      <DependentUpon>CameraImage.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\CameraImage.ascx.designer.cs">
+      <DependentUpon>CameraImage.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\CriticalParts.ascx.cs">
+      <DependentUpon>CriticalParts.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PartsView\CriticalParts.ascx.designer.cs">
+      <DependentUpon>CriticalParts.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ImageView.aspx.cs">
+      <DependentUpon>ImageView.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ImageView.aspx.designer.cs">
+      <DependentUpon>ImageView.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\UserControl\InputModal.ascx.cs">
+      <DependentUpon>InputModal.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\UserControl\InputModal.ascx.designer.cs">
+      <DependentUpon>InputModal.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\UserControl\LoadingData.ascx.cs">
+      <DependentUpon>LoadingData.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\UserControl\LoadingData.ascx.designer.cs">
+      <DependentUpon>LoadingData.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\LoginByAD.aspx.cs">
+      <DependentUpon>LoginByAD.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\LoginByAD.aspx.designer.cs">
+      <DependentUpon>LoginByAD.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ChangePassword.aspx.cs">
+      <DependentUpon>ChangePassword.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ChangePassword.aspx.designer.cs">
+      <DependentUpon>ChangePassword.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\MaintenanceMenu.aspx.cs">
+      <DependentUpon>MaintenanceMenu.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\MaintenanceMenu.aspx.designer.cs">
+      <DependentUpon>MaintenanceMenu.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\Maintenance\MasterMainteNAList.aspx.cs">
+      <DependentUpon>MasterMainteNAList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\Maintenance\MasterMainteNAList.aspx.designer.cs">
+      <DependentUpon>MasterMainteNAList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\Maintenance\MaintenanceNAListDetail.aspx.cs">
+      <DependentUpon>MaintenanceNAListDetail.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\Maintenance\MaintenanceNAListDetail.aspx.designer.cs">
+      <DependentUpon>MaintenanceNAListDetail.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\PreViewForm.aspx.cs">
+      <DependentUpon>PreViewForm.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\PreViewForm.aspx.designer.cs">
+      <DependentUpon>PreViewForm.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\PrintCheckSheet.ascx.cs">
+      <DependentUpon>PrintCheckSheet.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\ProcessView\PrintCheckSheet.ascx.designer.cs">
+      <DependentUpon>PrintCheckSheet.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\MainPartsView.aspx.cs">
+      <DependentUpon>MainPartsView.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\MainPartsView.aspx.designer.cs">
+      <DependentUpon>MainPartsView.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\DetailPartsFrame.aspx.cs">
+      <DependentUpon>DetailPartsFrame.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\DetailPartsFrame.aspx.designer.cs">
+      <DependentUpon>DetailPartsFrame.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\LoginByTrc.aspx.cs">
+      <DependentUpon>LoginByTrc.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\LoginByTrc.aspx.designer.cs">
+      <DependentUpon>LoginByTrc.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\UserControl\MainProcessConditionPartialView.ascx.cs">
+      <DependentUpon>MainProcessConditionPartialView.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\UserControl\MainProcessConditionPartialView.ascx.designer.cs">
+      <DependentUpon>MainProcessConditionPartialView.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Pages\UserControl\MainProcessOperationPartialView.ascx.cs">
+      <DependentUpon>MainProcessOperationPartialView.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Pages\UserControl\MainProcessOperationPartialView.ascx.designer.cs">
+      <DependentUpon>MainProcessOperationPartialView.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\KTAuthLogin\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\SrvCore\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="UI\MasterForm\MasterMain.master" />
+    <Content Include="UI\MasterForm\MasterSub.master" />
+    <Content Include="resources\dao\Providers.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <None Include="Properties\PublishProfiles\IISデバッグ.pubxml" />
+    <None Include="Properties\PublishProfiles\リリース.pubxml">
+      <SubType>Designer</SubType>
+    </None>
+    <Content Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </Content>
+    <Content Include="Web References\KTAuthLogin\ktauthLogin.wsdl" />
+    <Content Include="Web References\KTAuthLogin\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </Content>
+    <Content Include="Web References\KTAuthLogin\WSChangePwdDto.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\KTAuthLogin\WSUserInfoDto.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\SrvCore\C1010RequestDto.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\SrvCore\C2010RegistDto.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\SrvCore\C2010SelectDto.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\SrvCore\C9010SelectDto.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\SrvCore\C0010RequestDto.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\SrvCore\C0010SelectDto.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\SrvCore\C3010DeleteDto.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\SrvCore\C3010RegistDto.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\SrvCore\C3010SelectDto.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\SrvCore\C9910SelectDto.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\SrvCore\C9910WSTerminalInfoDto.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\SrvCore\C9910WSUserInfoDto.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="TemplateFiles\Excel\関所テンプレート.xls" />
+    <Content Include="TemplateFiles\Manual\ユーザーズガイド：トレーサビリティ.pdf" />
+    <None Include="Web References\SrvCore\Core.wsdl" />
+    <None Include="Web References\SrvCore\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <Content Include="TemplateFiles\Report\NG報告書.xls">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TemplateFiles\Report\EngineInjection03DetailReport.pdf" />
+    <EmbeddedResource Include="Reports\Fonts\ipaexg.ttf" />
+    <Content Include="TemplateFiles\Report\EngineInjection07DetailReport.pdf" />
+    <None Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferences Include="Web References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\KTWebControl\KTWebControl.csproj">
+      <Project>{35a4776f-9e7c-4ba7-a5d4-028a2249316f}</Project>
+      <Name>KTWebControl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\KTWebInheritance\KTWebInheritance.csproj">
+      <Project>{265aaf67-cb61-4f90-aa9b-2a3a75495004}</Project>
+      <Name>KTWebInheritance</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferenceUrl Include="http://192.168.57.123:18081/CORE_S_C_WebService/services/Core%3fwsdl">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\SrvCore\</RelPath>
+      <UpdateFromURL>http://192.168.57.123:18081/CORE_S_C_WebService/services/Core%3fwsdl</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>TRC_W_PWT_ProductView_SrvCore_Core</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="http://133.253.80.5:8080/KTService2/services/ktauthLogin%3fwsdl">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\KTAuthLogin\</RelPath>
+      <UpdateFromURL>http://133.253.80.5:8080/KTService2/services/ktauthLogin%3fwsdl</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>TRC_W_PWT_ProductView_KTAuthLogin_ktauthLogin</CachedSettingsPropName>
+    </WebReferenceUrl>
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="Scripts\Pages\ProcessView\file1.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets')" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <SaveServerSettingsInUserFile>True</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

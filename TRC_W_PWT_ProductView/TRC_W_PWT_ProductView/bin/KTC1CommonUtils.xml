@@ -1,0 +1,525 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>KTC1CommonUtils</name>
+    </assembly>
+    <members>
+        <member name="T:KTFramework.C1Common.Excel.ExcelColumn">
+            <summary>
+            EXCEL列定義クラス
+            </summary>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelColumn.#ctor(System.String,KTFramework.C1Common.Excel.ExcelColumn.ColumnDataType)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="columnName">DataTableへ格納するカラム名</param>
+            <param name="type">DataTableへ格納する値の型</param>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelColumn.#ctor(System.Int32,System.String,KTFramework.C1Common.Excel.ExcelColumn.ColumnDataType)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="columnIndex">Excelのカラムインデックス</param>
+            <param name="columnName">DataTableへ格納するカラム名</param>
+            <param name="type">DataTableへ格納する値の型</param>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelColumn.#ctor(System.String,KTFramework.C1Common.Excel.ExcelColumn.ColumnDataType,System.Object)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="columnName">DataTableへ格納するカラム名</param>
+            <param name="type">DataTableへ格納する値の型</param>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelColumn.#ctor(System.Int32,System.String,KTFramework.C1Common.Excel.ExcelColumn.ColumnDataType,System.Object)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="columnIndex">Excelのカラムインデックス</param>
+            <param name="columnName">DataTableへ格納するカラム名</param>
+            <param name="type">DataTableへ格納する値の型</param>
+        </member>
+        <member name="P:KTFramework.C1Common.Excel.ExcelColumn.ColumnIndex">
+            <summary>Exelカラムインデックス</summary>
+        </member>
+        <member name="P:KTFramework.C1Common.Excel.ExcelColumn.ColumnName">
+            <summary>DataTableカラム名</summary>
+        </member>
+        <member name="P:KTFramework.C1Common.Excel.ExcelColumn.Type">
+            <summary>値型</summary>
+        </member>
+        <member name="P:KTFramework.C1Common.Excel.ExcelColumn.NullValue">
+            <summary>ロード時にセルがNULL(ブランク含む)の場合に設定する代替値</summary>
+        </member>
+        <member name="T:KTFramework.C1Common.Excel.ExcelColumn.ColumnDataType">
+            <summary>
+            Excelセルデータタイプ
+            </summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelColumn.ColumnDataType.String">
+            <summary>文字列</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelColumn.ColumnDataType.Int">
+            <summary>整数</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelColumn.ColumnDataType.Decimal">
+            <summary>小数</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelColumn.ColumnDataType.Date">
+            <summary>日付</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelColumn.ColumnDataType.Bool">
+            <summary>Boolean</summary>
+        </member>
+        <member name="T:KTFramework.C1Common.Excel.ExcelColumnCollection">
+            <summary>
+            EXCEL列定義クラスコレクション
+            </summary>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelColumnCollection.#ctor">
+            <summary>
+            コンストラクタ
+            </summary>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelColumnCollection.#ctor(KTFramework.C1Common.Excel.ExcelColumn[])">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="columns">コレクションに含めるEXCEL列定義クラス</param>
+            <remarks>
+            コレクションの名前はEXCEL列定義クラスのDataTableカラム名プロパティを割り当てます。
+            </remarks>
+        </member>
+        <member name="T:KTFramework.C1Common.Excel.ExcelError">
+            <summary>
+            Excelエラー処理
+            </summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.COLMUN_ERROR_FIELD_NAME">
+            <summary>エラー列フィールド</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.COLMUN_ERROR_FIELD_CAPTION">
+            <summary>エラー列表示名</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.ROW_ERROR_STATUS_OK">
+            <summary>行エラー状態(OK)</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.ROW_ERROR_STATUS_NG">
+            <summary>行エラー状態(NG)</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.ERROR">
+            <summary>引数エラー</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.ERROR_DIM">
+            <summary>引数エラー</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.ERROR_SHEET_CHECK">
+            <summary>Excelシートチェックエラー</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.ERROR_ROW_CREATE">
+            <summary>行作成エラー</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.ERROR_GET_CELL">
+            <summary>セル値取得エラー</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.ERROR_COLUMN_CREATE">
+            <summary>列作成エラー</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.ERROR_SET_CELL">
+            <summary>セル値設定エラー</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.ERROR_ADD_ROW">
+            <summary>行追加エラー</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.ERROR_TYPE">
+            <summary>行追加エラー</summary>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelError.#ctor">
+            <summary>
+            初期化
+            </summary>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelError.#ctor(KTFramework.C1Common.Excel.ExcelError.ErrorType)">
+            <summary>
+            初期化
+            </summary>
+            <param name="errorType">エラー種類</param>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelError.#ctor(KTFramework.C1Common.Excel.ExcelError.ErrorType,System.Int32,System.Int32)">
+            <summary>
+            初期化
+            </summary>
+            <param name="errorType">エラー種類</param>
+            <param name="colIndex">列インデックス</param>
+            <param name="rowIndex">行インデックス</param>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelError.SetError">
+            <summary>
+            エラー設定
+            </summary>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelError.SetError(KTFramework.C1Common.Excel.ExcelError.ErrorType)">
+            <summary>
+            エラー設定
+            </summary>
+            <param name="errorType">エラー種類</param>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelError.SetError(KTFramework.C1Common.Excel.ExcelError.ErrorType,System.Int32,System.Int32)">
+            <summary>
+            エラー設定
+            </summary>
+            <param name="errorType">エラー種類</param>
+            <param name="colIndex">列インデックス</param>
+            <param name="rowIndex">行インデックス</param>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelError.GetErroMessage">
+            <summary>
+            エラーメッセージ取得
+            </summary>
+            <returns>エラーメッセージ</returns>
+        </member>
+        <member name="P:KTFramework.C1Common.Excel.ExcelError._rowIndex">
+            <summary>行インデックス</summary>
+        </member>
+        <member name="P:KTFramework.C1Common.Excel.ExcelError._colIndex">
+            <summary>列インデックス</summary>
+        </member>
+        <member name="P:KTFramework.C1Common.Excel.ExcelError._errorType">
+            <summary>エラー種類</summary>
+        </member>
+        <member name="P:KTFramework.C1Common.Excel.ExcelError.IsError">
+            <summary>
+            エラーフラグ
+            </summary>
+        </member>
+        <member name="T:KTFramework.C1Common.Excel.ExcelError.ErrorType">
+            <summary>
+            例外種類
+            </summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.ErrorType.None">
+            <summary>エラー無し</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.ErrorType.Error">
+            <summary>エラー</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.ErrorType.ErrorDim">
+            <summary>引数エラー</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.ErrorType.ErrorSheetCheck">
+            <summary>Excelシートチェックエラー</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.ErrorType.ErrorRowCreate">
+            <summary>行作成エラー</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.ErrorType.ErrorGetCell">
+            <summary>セル値取得エラー</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.ErrorType.ErrorColumnCreate">
+            <summary>列作成エラー</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.ErrorType.ErrorSetCell">
+            <summary>セル値設定エラー</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.ErrorType.ErrorAddRow">
+            <summary>行追加エラー</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelError.ErrorType.ErrorType">
+            <summary>セル型エラー</summary>
+        </member>
+        <member name="T:KTFramework.C1Common.Zip.ZipFileHandler">
+            <summary>
+            ZIPファイルハンドリングクラス
+            </summary>
+            <remarks>
+            GrapeCity ComponentOne Studioを利用しています。<br />
+            本クラスの使用にはC1.C1Zip.4.dll,KTCommon.dllが必要です。<br />
+            単一ファイルの解凍/圧縮はKTCommon.FileUtils(ComponentOne不要)を使用してください。<br />
+            </remarks>
+        </member>
+        <member name="M:KTFramework.C1Common.Zip.ZipFileHandler.Decompress(System.String,System.String,System.Boolean)">
+            <summary>
+            書庫を解凍します。<br />
+            単一ファイルの解凍はKTCommon.FileUtils.Decompress()を使用してください<br />
+            </summary>
+            <param name="srcPath">書庫のパス</param>
+            <param name="destFolder">解凍ファイルの保存先フォルダ</param>
+            <param name="overWrite">上書き可否 true:上書きする false:上書きしない</param>
+        </member>
+        <member name="M:KTFramework.C1Common.Zip.ZipFileHandler.Compress(System.String[],System.String,System.Boolean)">
+            <summary>
+            圧縮書庫を作成します。<br />
+            単一ファイルの圧縮はKTCommon.FileUtils.Compress()を使用してください<br />
+            </summary>
+            <param name="filePathList">圧縮対象ファイルのパス一覧</param>
+            <param name="destPath">書庫のパス</param>
+            <param name="overWrite">上書き可否 true:上書きする false:上書きしない</param>
+        </member>
+        <member name="M:KTFramework.C1Common.Zip.ZipFileHandler.Compress(System.String[],System.String,System.String,System.Boolean)">
+            <summary>
+            圧縮書庫を作成します。<br />
+            単一ファイルの圧縮はKTCommon.FileUtils.Compress()を使用してください<br />
+            </summary>
+            <param name="filePathList">圧縮対象ファイルのパス一覧</param>
+            <param name="destPath">書庫のパス</param>
+            <param name="password">パスワード</param>
+            <param name="overWrite">上書き可否 true:上書きする false:上書きしない</param>
+        </member>
+        <member name="T:KTFramework.C1Common.Excel.ExcelConditionItem">
+            <summary>
+            EXCEL出力用検索条件用DTO
+            </summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelConditionItem._condition">
+            <summary>検索条件名</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.ExcelConditionItem._value">
+            <summary>検索条件値</summary>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelConditionItem.#ctor(System.String,System.String)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="condition"></param>
+            <param name="value"></param>
+        </member>
+        <member name="P:KTFramework.C1Common.Excel.ExcelConditionItem.Condition">
+            <summary>検索条件名</summary>
+        </member>
+        <member name="P:KTFramework.C1Common.Excel.ExcelConditionItem.Value">
+            <summary>検索条件値</summary>
+        </member>
+        <member name="T:KTFramework.C1Common.Excel.ExcelHandler">
+            <summary>
+            EXCELファイルを操作します。<br />
+            </summary>
+            <remarks>
+            GrapeCity ComponentOne Studioを利用しています。<br />
+            本クラスの使用にはC1.C1Excel.4.dll,KTCommon.dllが必要です。<br />
+            <br />
+            ■使用例
+            <code>
+            ExcelHandler excel = new ExcelHandler();
+            excel.Create();
+            </code>
+            <br />
+            作成したEXCELオブジェクトをファイル保存する場合はSave()メソッドを実行してください。
+            <code>
+            Save( @"c:\temp\sample.xlsx" );
+            </code>
+            <br />
+            作成したEXCELオブジェクトをレスポンスストリームに流す場合はDownload()メソッドを実行してください。
+            <code>
+            Download( response, @"c:\temp\sample.xlsx" );
+            </code>
+            </remarks>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelHandler.#ctor">
+            <summary>
+            コンストラクタ
+            </summary>
+            <remarks>
+            テンプレートなし
+            </remarks>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelHandler.#ctor(System.String)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <remarks>
+            テンプレートあり
+            </remarks>
+            <param name="templeteFilePath">テンプレートパス</param>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelHandler.GetAllData(System.Int32,KTFramework.C1Common.Excel.ExcelColumnCollection,System.Int32)">
+            <summary>
+            Excelデータ一括取得処理
+            </summary>
+            <param name="targetSheetIndex">読み込むExcelファイルのシートインデックス(-1指定時は全シート取得)</param>
+            <param name="excelColumns">DataTableへ取込むExcelセル情報配列</param>
+            <param name="headerRowCount">ヘッダの行数(取込み除外件数)</param>
+            <returns>Excelファイル情報を格納したDataTable</returns>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelHandler.GetAllData(System.Data.DataTable@,System.Int32,KTFramework.C1Common.Excel.ExcelColumnCollection,System.Int32)">
+            <summary>
+            Excelデータ一括取得処理(全てStringとして扱う）
+            </summary>
+            <param name="tblResult">Excelファイル情報を格納したDataTable</param>
+            <param name="targetSheetIndex">読み込むExcelファイルのシートインデックス(-1指定時は全シート取得)</param>
+            <param name="excelColumns">ヘッダ定義</param>
+            <param name="headerRowCount">ヘッダの行数(取込み除外件数)</param>
+            <returns>エラー結果</returns>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelHandler.Write(System.Data.DataTable,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            一括書き込み(ソートなし)
+            </summary>
+            <remarks>
+            DataTableをEXCELデータに書き込む
+            </remarks>
+            <param name="data">書き込むデータ</param>
+            <param name="sheetIndex">シート番号</param>
+            <param name="columnIndex">列番号</param>
+            <param name="rowIndex">行番号</param>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelHandler.Write(System.Data.DataTable,System.Int32,System.Int32,System.Int32,System.String)">
+            <summary>
+            一括書き込み(ソートあり)
+            </summary>
+            <remarks>
+            DataTableをEXCELデータに書き込む
+            </remarks>
+            <param name="data">書き込むデータ</param>
+            <param name="sheetIndex">シート番号</param>
+            <param name="startColumnIndex">出力開始列番号</param>
+            <param name="startRowIndex">出力開始行番号</param>
+            <param name="sortKey">ソートキー（"Key1，Key2, Key3"と指定）</param>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelHandler.GetCellValue(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            読み込み（セル単位）
+            </summary>
+            <remarks>
+            指定したセルから読み込みを行う
+            </remarks>
+            <param name="sheetIndex"></param>
+            <param name="rowIndex"></param>
+            <param name="colIndex"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelHandler.Save(System.String,System.Boolean)">
+            <summary>
+            保存
+            </summary>
+            <remarks>
+            指定したパスに保存する
+            </remarks>
+            <param name="filePath">保存先フルパス</param>
+            <param name="overWrite">上書き可否（true:上書き保存する、false:上書きしない）</param>
+            <returns>実行結果 true:成功 false:引数エラー</returns>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.ExcelHandler.Download(System.Web.HttpResponse,System.String)">
+            <summary>
+            ダウンロード
+            </summary>
+            <param name="response">レスポンス</param>
+            <param name="fileName">ファイル名</param>
+        </member>
+        <member name="T:KTFramework.C1Common.Excel.SimpleExcelHandler">
+            <summary>
+            タイトル・出力日時・検索条件・検索結果一覧で構成された一覧表を出力します。<br />
+            EXCEL出力に必要な項目でインスタンスを作成し、<br />
+            Create()を実行してください。<br />
+            </summary>
+            <remarks>
+            GrapeCity ComponentOne Studioを利用しています。<br />
+            本クラスの使用にはC1.C1Excel.4.dll,KTCommon.dllが必要です。<br />
+            <br />
+            ■使用例
+            <code>
+            SimpleExcelHandler excel = new SimpleExcelHandler( "サンプルリスト", targetTable, searchConditions );
+            excel.Create();
+            </code>
+            <br />
+            作成したEXCELオブジェクトをファイル保存する場合はSave()メソッドを実行してください。
+            <code>
+            Save( @"c:\temp\sample.xlsx" );
+            </code>
+            <br />
+            作成したEXCELオブジェクトをレスポンスストリームに流す場合はDownload()メソッドを実行してください。
+            <code>
+            Download( response );
+            </code>
+            </remarks>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.SimpleExcelHandler.OUTPUT_DATE">
+            <summary>出力日</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.SimpleExcelHandler.SEARCH_CONDITION">
+            <summary>検索条件</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.SimpleExcelHandler.SHEET_DEFAULT">
+            <summary>検索結果出力シート番号</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.SimpleExcelHandler.ROW_SEARCH_CONDITION_START">
+            <summary>検索条件ラベル出力開始行</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.SimpleExcelHandler.COLUMN_SEARCH_CONDITION_LABEL">
+            <summary>検索条件ラベル出力列</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.SimpleExcelHandler.COLUMN_SEARCH_CONDITION_VALUE">
+            <summary>検索条件値出力列</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.SimpleExcelHandler.COLUMN_LIST_DATA">
+            <summary>一覧出力開始列</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.SimpleExcelHandler.RESULT_LIST_FILENAME_FORMAT">
+            <summary>検索結果EXCELファイル名フォーマット {0}:リスト名 {1}:検索日時</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.SimpleExcelHandler.RESULT_LIST_TITLE_FORMAT">
+            <summary>検索結果EXCELタイトル名フォーマット {0}:リスト名</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.SimpleExcelHandler.CELL_OUTPUT_DATE_LABEL">
+            <summary>出力日ラベル</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.SimpleExcelHandler.CELL_OUTPUT_DATE_VALUE">
+            <summary>出力日</summary>
+        </member>
+        <member name="F:KTFramework.C1Common.Excel.SimpleExcelHandler.CELL_SEARCH_CONDITION_TITLE_LABEL">
+            <summary>検索条件タイトルラベル</summary>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.SimpleExcelHandler.#ctor(System.String,System.Data.DataTable,System.Collections.Generic.List{KTFramework.C1Common.Excel.ExcelConditionItem})">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="excelName">EXCEL名(拡張子なし)</param>
+            <param name="targetTable">対象検索結果一覧</param>
+            <param name="searchConditions">検索条件リスト</param>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.SimpleExcelHandler.#ctor(System.String,System.String,System.Data.DataTable,System.Collections.Generic.List{KTFramework.C1Common.Excel.ExcelConditionItem})">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="templateFilePath">テンプレートパス</param>
+            <param name="excelName">EXCEL名(拡張子なし)</param>
+            <param name="targetTable">対象検索結果一覧</param>
+            <param name="searchConditions">検索条件リスト</param>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.SimpleExcelHandler.GetFileName">
+            <summary>
+            EXCELファイル名を取得します
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.SimpleExcelHandler.GetTitle(System.String)">
+            <summary>
+            タイトル名を取得します
+            </summary>
+            <param name="excelName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.SimpleExcelHandler.Create">
+            <summary>
+            EXCELデータを作成します
+            </summary>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.SimpleExcelHandler.Create(System.Int32)">
+            <summary>
+            EXCELデータを作成します
+            </summary>
+            <param name="sheetIndex"></param>
+        </member>
+        <member name="M:KTFramework.C1Common.Excel.SimpleExcelHandler.Download(System.Web.HttpResponse)">
+            <summary>
+            ダウンロード
+            </summary>
+            <param name="response">レスポンス</param>
+        </member>
+        <member name="P:KTFramework.C1Common.Excel.SimpleExcelHandler.ExcelHandler">
+            <summary>EXCEL操作オブジェクトハンドラ</summary>
+        </member>
+        <member name="P:KTFramework.C1Common.Excel.SimpleExcelHandler.FileName">
+            <summary>ファイル名</summary>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,2954 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="EngineProcess"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン工程一覧:トルク締付検索]                                                      -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineTorqueList">
+      SELECT
+        TRQ.型式コード        productModelCd, <!--型式コード-->
+        SUBSTR(TRQ.機番,2,6)  serial6,        <!--機番-->
+        TRQ.作成日時          inspectionDt,   <!--測定日-->
+        TRQ.部品名称          partsNm,        <!--部品名-->
+        CASE                                  <!--結果-->
+          WHEN TRQ.結果 IS NULL THEN '完了'
+          WHEN TRQ.結果 = '1' THEN '完了'
+          WHEN TRQ.結果 = '2' THEN 'NG'
+          WHEN TRQ.結果 = '8' THEN 'パス'
+          WHEN TRQ.結果 = '9' THEN '中断'
+        END result,
+        TRQ.端末名            terminalNm,     <!--端末名-->
+        TRQ.作成者            userId,         <!--作業者ID-->
+        TRQ.計測通番          historyIndex    <!--来歴No-->
+      FROM
+        TBL_トルク締付履歴 TRQ
+      INNER JOIN
+      (
+        SELECT 
+          型式コード, 機番, 部品名称, MAX(計測通番) 計測通番
+        FROM 
+          TBL_トルク締付履歴
+        GROUP BY 
+          型式コード, 機番, 部品名称
+      ) TRQ_G ON TRQ.型式コード = TRQ_G.型式コード AND TRQ.機番 = TRQ_G.機番 AND TRQ.部品名称 = TRQ_G.部品名称 AND TRQ.計測通番 = TRQ_G.計測通番
+      <dynamic prepend="WHERE">
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (TRQ.型式コード, TRQ.機番) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          TRQ.型式コード like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+        <isNotEmpty property="paramProductModelCdList" prepend="AND">
+          TRQ.型式コード IN
+          <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+            #paramProductModelCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <!-- [測定日(FROM)検索] -->
+        <isNotEmpty property="paramInspectionDtFrom" prepend="AND">
+          TRQ.作成日時 <![CDATA[>=]]> #paramInspectionDtFrom#
+        </isNotEmpty>
+        <!-- [測定日(TO)検索] -->
+        <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+          TRQ.作成日時 <![CDATA[<=]]> #paramInspectionDtTo#
+        </isNotEmpty>
+      </dynamic>
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン工程一覧:ハーネス検査検索]                                                    -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineHarnessList">
+      SELECT
+        HNS.型式コード        productModelCd, <!--型式コード-->
+        SUBSTR(HNS.機番,2,6)  serial6,        <!--機番-->
+        HNS.作成日時          inspectionDt,   <!--測定日-->
+        HNS.判定              result,         <!--結果-->
+        CASE                                  <!--結果(CRS)-->
+          WHEN HNS.不良検出_CRS = '0' THEN 'OK'
+          WHEN HNS.不良検出_CRS = '1' THEN 'NG'
+        END resultCrs,
+        CASE                                  <!--結果(INJ)-->
+          WHEN HNS.不良検出_INJ = '0' THEN 'OK'
+          WHEN HNS.不良検出_INJ = '1' THEN 'NG'
+        END resultInj,
+        CASE                                  <!--結果(DPF)-->
+          WHEN HNS.不良検出_DPF = '0' THEN 'OK'
+          WHEN HNS.不良検出_DPF = '1' THEN 'NG'
+        END resultDpf,
+        CASE                                  <!--結果(G)-->
+          WHEN HNS.不良検出_G = '0' THEN 'OK'
+          WHEN HNS.不良検出_G = '1' THEN 'NG'
+        END resultG,
+        CASE                                  <!--結果(REIL)-->
+          WHEN HNS.不良検出_REIL = '0' THEN 'OK'
+          WHEN HNS.不良検出_REIL = '1' THEN 'NG'
+        END resultReil,
+        HNS.試験連番          historyIndex    <!--来歴No-->
+      FROM
+        TBL_ハーネス検査履歴 HNS
+      INNER JOIN
+      (
+        SELECT 
+          型式コード, 機番, MAX(作成日時) 作成日時
+        FROM 
+          TBL_ハーネス検査履歴
+        GROUP BY 
+          型式コード, 機番
+      ) HNS_G ON HNS.型式コード = HNS_G.型式コード AND HNS.機番 = HNS_G.機番 AND HNS.作成日時 = HNS_G.作成日時
+      WHERE
+        HNS.工場コード = '28'
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (HNS.型式コード, HNS.機番) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          HNS.型式コード like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+        <isNotEmpty property="paramProductModelCdList" prepend="AND">
+          HNS.型式コード IN
+          <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+            #paramProductModelCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <!-- [測定日(FROM)検索] -->
+        <isNotEmpty property="paramInspectionDtFrom" prepend="AND">
+          HNS.作成日時 <![CDATA[>=]]> #paramInspectionDtFrom#
+        </isNotEmpty>
+        <!-- [測定日(TO)検索] -->
+        <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+          HNS.作成日時 <![CDATA[<=]]> #paramInspectionDtTo#
+        </isNotEmpty>
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン工程一覧:運転検査(03/07)検索]                                                 -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineTestList">
+      <!--03エンジン運転検査-->
+      SELECT 
+        EMH.PRO_CODE          productModelCd, <!--型式コード-->
+        EMH.ENG_SNO           serial6,        <!--機番-->
+        TO_DATE(SUBSTR(EMH.MEASURE_DATETIME,1,8),'YYYYMMDD') inspectionDt,  <!--測定日-->
+        BENCHINO              benchiNo,       <!--ベンチNo -->
+        CASE                                  <!--結果-->
+          WHEN EMH.RESULT = 1 THEN 'OK'
+          ELSE 'NG'
+        END  result,
+        TRIM(EMH.WORKER_NAME) userNm,         <!--作業者名-->
+        CASE                                  <!--OEM区分-->
+          WHEN EMH.OEM_KBN = '0' THEN '搭載'
+          WHEN EMH.OEM_KBN = '1' THEN 'OEM'
+        END oemTyp,  
+        CASE                                  <!--排ガス規制区分-->
+          WHEN EMH.TIER_KBN = '0' THEN 'T3'
+          WHEN EMH.TIER_KBN = '1' THEN 'T4'
+        END toreTyp,
+        CASE                                  <!--エンジン区分-->
+          WHEN EMH.CRS_ENG_FLAG = '1' THEN 'コモンレール'
+          WHEN EMH.SI_KBN = '1' THEN 'SI'
+          ELSE 'メカ式'
+        END engineTyp,
+        CASE                                  <!--ECU区分-->
+          WHEN EMH.ECU_KBN = '1' THEN '三菱'
+          WHEN EMH.ECU_KBN = '2' THEN 'E-Controls'
+        END ecuTyp,
+        CASE                                  <!--燃料区分-->
+          WHEN EMH.FUEL_KBN = 0 THEN 'DI'
+          WHEN EMH.FUEL_KBN = 1 THEN 'G'
+          WHEN EMH.FUEL_KBN = 2 THEN 'L(Ground)'
+          WHEN EMH.FUEL_KBN = 3 THEN 'N'
+          WHEN EMH.FUEL_KBN = 4 THEN 'L(+V)'
+        END fuelTyp,
+        CASE                                  <!--インタークーラーフラグ-->
+          WHEN EMH.INTER_COOLER_KBN = '0' THEN '無'
+          WHEN EMH.INTER_COOLER_KBN = '1' THEN '有'
+        END interCoolerTyp,
+        CASE                                  <!--アクセル電圧区分フラグ-->
+          WHEN EMH.ACCEL_VOLTAGE_KBN = '0' THEN 'フル'
+          WHEN EMH.ACCEL_VOLTAGE_KBN = '1' THEN 'ハーフ'
+          WHEN EMH.ACCEL_VOLTAGE_KBN = '2' THEN 'クロス'
+        END accelVoltageTyp,
+      
+        CASE                                  <!--TSC1区分-->
+          WHEN EMH.TSC1_KBN = '0' THEN '無'
+          WHEN EMH.TSC1_KBN = '1' THEN '有'
+        END tsc1Typ,
+        CASE                                  <!--低回転慣らし区分-->
+          WHEN EMH.LOW_IDLE_KBN = '0' THEN '無'
+          WHEN EMH.LOW_IDLE_KBN = '1' THEN '有'
+        END lowIdleTyp,
+        CASE                                  <!--アクセル入力区分-->
+          WHEN EMH.ACCEL_INPUT_KBN = '0' THEN 'CAN'
+          WHEN EMH.ACCEL_INPUT_KBN = '1' THEN 'ハード'
+        END accelInputTyp,
+        CASE                                  <!--ENG区分-->
+         WHEN EMH.ENG_KBN = '0' THEN 'N/A'
+         WHEN EMH.ENG_KBN = '1' THEN 'ターボ'
+        END engTyp,
+        CASE                                  <!--ERG有無-->
+          WHEN EMH.EGR_KBN = '0' THEN '無'
+          WHEN EMH.EGR_KBN = '1' THEN '有'
+        END ergTyp,
+        EMH_G.HISTORY_COUNT   historyIndex    <!--来歴No-->
+      FROM 
+        D_HEADER EMH
+      INNER JOIN
+      (
+        SELECT
+          PRO_CODE, ENG_SNO, MAX(MEASURE_DATETIME) MEASURE_DATETIME, COUNT(RESULT) HISTORY_COUNT
+        FROM
+          D_HEADER
+        GROUP BY
+          PRO_CODE, ENG_SNO
+      ) EMH_G ON EMH.PRO_CODE = EMH_G.PRO_CODE AND EMH.ENG_SNO = EMH_G.ENG_SNO AND EMH.MEASURE_DATETIME = EMH_G.MEASURE_DATETIME
+      <dynamic prepend="WHERE">
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (EMH.PRO_CODE, EMH.ENG_SNO) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          EMH.PRO_CODE like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+        <isNotEmpty property="paramProductModelCdList" prepend="AND">
+          EMH.PRO_CODE IN
+          <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+            #paramProductModelCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <!-- [測定日(FROM)検索] -->
+        <isNotEmpty property="paramInspectionDtFrom" prepend="AND">
+          EMH.MEASURE_DATETIME <![CDATA[>=]]> TO_CHAR(#paramInspectionDtFrom#,'YYYYMMDD') || '      '
+        </isNotEmpty>
+        <!-- [測定日(TO)検索] -->
+        <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+          EMH.MEASURE_DATETIME <![CDATA[<=]]> TO_CHAR(#paramInspectionDtTo#,'YYYYMMDD') || '235959'
+        </isNotEmpty>
+      </dynamic>
+      UNION
+      <!--07エンジン運転検査-->
+      SELECT 
+        EMH.PRO_CODE          productModelCd, <!--型式コード-->
+        EMH.ENG_SNO           serial6,        <!--機番-->
+        TO_DATE(SUBSTR(EMH.MEASURE_DATETIME,1,8),'YYYYMMDD') inspectionDt,  <!--測定日-->
+         BENCHINO             benchiNo,       <!--ベンチNo-->
+        CASE                                  <!--結果-->
+          WHEN EMH.RESULT = 1 THEN 'OK'
+          ELSE 'NG'
+        END  result,
+        TRIM(EMH.WORKER_NAME) userNm,         <!--作業者名-->
+        CASE                                  <!--OEM区分-->
+          WHEN EMH.OEM_KBN = '0' THEN '搭載'
+          WHEN EMH.OEM_KBN = '1' THEN 'OEM'
+        END oemTyp,  
+        CASE                                  <!--排ガス規制区分-->
+          WHEN EMH.TIER_KBN = '0' THEN 'T3'
+          WHEN EMH.TIER_KBN = '1' THEN 'T4'
+        END toreTyp,
+        CASE                                  <!--エンジン区分-->
+          WHEN EMH.CRS_ENG_FLAG = '1' THEN 'コモンレール'
+          ELSE 'メカ式'
+        END engineTyp,
+        NULL ecuTyp,                          <!--ECU区分-->
+        NULL fuelTyp,                         <!--燃料区分-->
+        CASE                                  <!--インタークーラーフラグ-->
+          WHEN EMH.INTER_COOLER_KBN = '0' THEN '無'
+          WHEN EMH.INTER_COOLER_KBN = '1' THEN '有'
+        END interCoolerTyp,
+        CASE                                  <!--アクセル電圧区分フラグ-->
+          WHEN EMH.ACCEL_VOLTAGE_KBN = '0' THEN 'フル'
+          WHEN EMH.ACCEL_VOLTAGE_KBN = '1' THEN 'ハーフ'
+          WHEN EMH.ACCEL_VOLTAGE_KBN = '2' THEN 'クロス'
+        END accelVoltageTyp,
+        NULL tsc1Typ,                         <!--TSC1区分-->
+        NULL lowIdleTyp,                      <!--低回転慣らし区分-->
+        CASE                                  <!--アクセル入力区分-->
+          WHEN EMH.ACCEL_INPUT_KBN = '0' THEN 'CAN'
+          WHEN EMH.ACCEL_INPUT_KBN = '1' THEN 'ハード'
+        END accelInputTyp,
+        CASE                                  <!--ENG区分-->
+          WHEN EMH.ENG_KBN = '0' THEN 'N/A'
+          WHEN EMH.ENG_KBN = '1' THEN 'ターボ'
+        END engTyp,
+        CASE                                  <!--ERG有無-->
+          WHEN EMH.EGR_KBN = '0' THEN '無'
+          WHEN EMH.EGR_KBN = '1' THEN '有'
+        END ergTyp,
+        EMH_G.HISTORY_COUNT   historyIndex    <!--来歴No-->
+      FROM
+        D_HEADER_07 EMH
+      INNER JOIN
+      (
+        SELECT
+          PRO_CODE, ENG_SNO, MAX(MEASURE_DATETIME) MEASURE_DATETIME, COUNT(RESULT) HISTORY_COUNT
+        FROM
+          D_HEADER_07
+        GROUP BY
+          PRO_CODE, ENG_SNO
+      ) EMH_G ON EMH.PRO_CODE = EMH_G.PRO_CODE AND EMH.ENG_SNO = EMH_G.ENG_SNO AND EMH.MEASURE_DATETIME = EMH_G.MEASURE_DATETIME
+      <dynamic prepend="WHERE">
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (EMH.PRO_CODE, EMH.ENG_SNO) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          EMH.PRO_CODE like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+        <isNotEmpty property="paramProductModelCdList" prepend="AND">
+          EMH.PRO_CODE IN
+          <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+            #paramProductModelCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <!-- [測定日(FROM)検索] -->
+        <isNotEmpty property="paramInspectionDtFrom" prepend="AND">
+          EMH.MEASURE_DATETIME <![CDATA[>=]]> TO_CHAR(#paramInspectionDtFrom#,'YYYYMMDD') || '      '
+        </isNotEmpty>
+        <!-- [測定日(TO)検索] -->
+        <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+          EMH.MEASURE_DATETIME <![CDATA[<=]]> TO_CHAR(#paramInspectionDtTo#,'YYYYMMDD') || '235959'
+        </isNotEmpty>
+      </dynamic>
+    </statement>
+    
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン工程一覧:フリクションロス実測検索]                                            -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineFrictionLossList">
+      SELECT
+        FRQ.型式コード        productModelCd, <!--型式コード-->
+        FRQ.機番              serial6,        <!--機番-->
+        FRQ.計測日時          inspectionDt,   <!--測定日-->
+        FRQ.回転数            rpm,            <!--回転数-->
+        CASE                                  <!--結果-->
+          WHEN FRQ.平均判定 = '1' THEN 'OK'
+          ELSE 'NG'
+        END result,
+        FRQ_G.HISTORY_COUNT   historyIndex    <!--来歴No-->
+      FROM
+        TBL_フリクションロス実測 FRQ
+      INNER JOIN
+      (
+        SELECT
+          型式コード, 機番, 回転数, MAX(計測日時) 計測日時, COUNT(平均判定) HISTORY_COUNT
+        FROM
+          TBL_フリクションロス実測
+        GROUP BY
+          型式コード, 機番, 回転数
+      ) FRQ_G ON FRQ.型式コード = FRQ_G.型式コード AND FRQ.機番 = FRQ_G.機番 AND FRQ.計測日時 = FRQ_G.計測日時
+      <dynamic prepend="WHERE">
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (FRQ.型式コード, FRQ.機番) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          FRQ.型式コード like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+        <isNotEmpty property="paramProductModelCdList" prepend="AND">
+          FRQ.型式コード IN
+          <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+            #paramProductModelCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <!-- [測定日(FROM)検索] -->
+        <isNotEmpty property="paramInspectionDtFrom" prepend="AND">
+          FRQ.計測日時 <![CDATA[>=]]> #paramInspectionDtFrom#
+        </isNotEmpty>
+        <!-- [測定日(TO)検索] -->
+        <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+          FRQ.計測日時 <![CDATA[<=]]> #paramInspectionDtTo#
+        </isNotEmpty>
+      </dynamic>
+    </statement>
+    
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン工程一覧:シリンダヘッド部品組付履歴検索]                                      -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineCyhAssemblyList">
+      SELECT
+        CYHP.生産型式コード   productModelCd, <!--型式コード-->
+        SUBSTR(CYHP.機番,2,6) serial6,        <!--機番-->
+        CYHP.作成日時         inspectionDt,   <!--測定日-->
+        CYHP.吸気指示         intakeInst,     <!--吸気指示-->
+        CYHP.排気指示         exhaustInst,    <!--排気指示-->
+        CYHP.副燃焼室指示     chamberInst,    <!--副燃焼室指示-->
+        CYHP.判定             result,         <!--結果-->
+        CYHP_G.計測通番       historyIndex    <!--来歴No-->
+      FROM
+        TBL_シリンダヘッド部品組付履歴 CYHP
+      INNER JOIN
+      (
+        SELECT
+          生産型式コード, 機番, MAX(計測通番) 計測通番
+        FROM
+          TBL_シリンダヘッド部品組付履歴
+        GROUP BY
+          生産型式コード, 機番
+      ) CYHP_G ON CYHP.生産型式コード = CYHP_G.生産型式コード AND CYHP.機番 = CYHP_G.機番 AND CYHP.計測通番 = CYHP_G.計測通番
+      <dynamic prepend="WHERE">
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (CYHP.生産型式コード, CYHP.機番) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          CYHP.生産型式コード like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+        <isNotEmpty property="paramProductModelCdList" prepend="AND">
+          CYHP.生産型式コード IN
+          <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+            #paramProductModelCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <!-- [測定日(FROM)検索] -->
+        <isNotEmpty property="paramInspectionDtFrom" prepend="AND">
+          CYHP.作成日時 <![CDATA[>=]]> #paramInspectionDtFrom#
+        </isNotEmpty>
+        <!-- [測定日(TO)検索] -->
+        <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+          CYHP.作成日時 <![CDATA[<=]]> #paramInspectionDtTo#
+        </isNotEmpty>
+      </dynamic>
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン工程一覧:3C精密測定検索]                                                      -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngine3CInspectionList">
+      SELECT
+        DTL_G.MODEL_CD        productModelCd, <!--型式コード-->
+        DTL_G.SERIAL6         serial6,        <!--機番-->
+        PMD.INSPECTION_DATE   inspectionDt,   <!--測定日-->
+        PMD.CRITICAL_PARTS_CD partsTypeCd,    <!--部品区分コード-->
+        PMD.CRITICAL_PARTS_NM partsNm,        <!--部品名-->
+        PMD.MATERIAL_PROCESSING_DATE processYmd,  <!--加工日-->
+        PMD.MATERIAL_PROCESSING_NUM   processNum, <!--連番-->
+        PMD.RESULT            result          <!--結果-->
+      FROM
+        TT_SQ_PRECISE_MEASURE_DATA PMD
+      INNER JOIN
+      (
+        SELECT
+          MODEL_CD, SERIAL6, CRITICAL_PARTS_CD, CRITICAL_PARTS_NM, MATERIAL_PROCESSING_DATE, MATERIAL_PROCESSING_NUM
+        FROM
+          TT_SQ_3C_DETAIL
+        GROUP BY
+          MODEL_CD, SERIAL6, CRITICAL_PARTS_CD, CRITICAL_PARTS_NM, MATERIAL_PROCESSING_DATE, MATERIAL_PROCESSING_NUM
+      ) DTL_G ON 
+          DTL_G.CRITICAL_PARTS_NM = PMD.CRITICAL_PARTS_NM AND 
+          DTL_G.MATERIAL_PROCESSING_DATE = PMD.MATERIAL_PROCESSING_DATE AND
+          DTL_G.MATERIAL_PROCESSING_NUM = PMD.MATERIAL_PROCESSING_NUM AND
+          DTL_G.CRITICAL_PARTS_CD = PMD.CRITICAL_PARTS_CD
+      <dynamic prepend="WHERE">
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (DTL_G.MODEL_CD, DTL_G.SERIAL6) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          DTL_G.MODEL_CD like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+        <isNotEmpty property="paramProductModelCdList" prepend="AND">
+          DTL_G.MODEL_CD IN
+          <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+            #paramProductModelCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <!-- [部品区分検索] -->
+        <isNotEmpty property="paramPartsCd" prepend="AND">
+          PMD.CRITICAL_PARTS_CD = #paramPartsCd#
+        </isNotEmpty>
+        <!-- [測定日(FROM)検索] -->
+        <isNotEmpty property="paramInspectionDtFrom" prepend="AND">
+          PMD.INSPECTION_DATE <![CDATA[>=]]> #paramInspectionDtFrom#
+        </isNotEmpty>
+        <!-- [測定日(TO)検索] -->
+        <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+          PMD.INSPECTION_DATE <![CDATA[<=]]> #paramInspectionDtTo#
+        </isNotEmpty>
+      </dynamic>
+    </statement>
+    
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン工程一覧:燃料噴射時期検索]                                                    -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineInjectionList">
+      <!--03エンジン-->
+      SELECT
+        INJ.生産型式コード    productModelCd,  <!--型式コード-->
+        INJ.機番              serial6,         <!--機番-->
+        INJ.測定号機          measureTerminal, <!--測定号機-->
+        CASE
+          WHEN INJ.総合判定 = 0 THEN 'OK'
+          WHEN INJ.総合判定 = 1 THEN 'NG'
+          WHEN INJ.総合判定 = 2 THEN '再計測'
+        END result,                            <!--総合判定-->
+        INJ.測定日時          inspectionDt,    <!--測定日-->
+        INJ_G.HISTORY_COUNT   historyIndex     <!--来歴No-->
+      FROM
+        TBL噴射計測データ INJ
+      INNER JOIN
+      (
+        SELECT
+          生産型式コード, 機番, MAX(測定日時) 測定日時, COUNT(測定日時) HISTORY_COUNT
+        FROM
+          TBL噴射計測データ
+        GROUP BY
+          生産型式コード, 機番
+      ) INJ_G ON INJ.生産型式コード = INJ_G.生産型式コード AND INJ.機番 = INJ_G.機番 AND INJ.測定日時 = INJ_G.測定日時
+      <dynamic prepend="WHERE">
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (INJ.生産型式コード, INJ.機番) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          INJ.生産型式コード like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+        <isNotEmpty property="paramProductModelCdList" prepend="AND">
+          INJ.生産型式コード IN
+          <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+            #paramProductModelCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <!-- [測定日(FROM)検索] -->
+        <isNotEmpty property="paramInspectionDtFrom" prepend="AND">
+          INJ.測定日時 <![CDATA[>=]]> #paramInspectionDtFrom#
+        </isNotEmpty>
+        <!-- [測定日(TO)検索] -->
+        <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+          INJ.測定日時 <![CDATA[<=]]> #paramInspectionDtTo#
+        </isNotEmpty>
+      </dynamic>
+      UNION
+      <!--07エンジン-->
+      SELECT
+        INJ.生産型式コード    productModelCd,  <!--型式コード-->
+        INJ.機番              serial6,         <!--機番-->
+        NULL                  measureTerminal, <!--測定号機-->
+        NULL                  result,          <!--総合判定-->
+        INJ.測定日時          inspectionDt,    <!--測定日-->
+        INJ_G.HISTORY_COUNT   historyIndex     <!--来歴No-->
+      FROM
+        TBL_07噴射時期計測データ INJ
+      INNER JOIN
+      (
+        SELECT
+          生産型式コード, 機番, MAX(測定日時) 測定日時, COUNT(測定日時) HISTORY_COUNT
+        FROM
+          TBL_07噴射時期計測データ
+        GROUP BY
+          生産型式コード, 機番
+      ) INJ_G ON INJ.生産型式コード = INJ_G.生産型式コード AND INJ.機番 = INJ_G.機番 AND INJ.測定日時 = INJ_G.測定日時
+      <dynamic prepend="WHERE">
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (INJ.生産型式コード, INJ.機番) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          INJ.生産型式コード like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+        <isNotEmpty property="paramProductModelCdList" prepend="AND">
+          INJ.生産型式コード IN
+          <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+            #paramProductModelCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <!-- [測定日(FROM)検索] -->
+        <isNotEmpty property="paramInspectionDtFrom" prepend="AND">
+          INJ.測定日時 <![CDATA[>=]]> #paramInspectionDtFrom#
+        </isNotEmpty>
+        <!-- [測定日(TO)検索] -->
+        <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+          INJ.測定日時 <![CDATA[<=]]> #paramInspectionDtTo#
+        </isNotEmpty>
+      </dynamic>
+    </statement>
+    
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン工程詳細:トルク締付] 最新来歴情報                                             -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineTorqueLatestHistory">
+        SELECT
+            TRQ.工場コード       "plantCode",
+            TRQ.ステーションNO   "stationNo",
+            TRQ.型式コード       "productModelCd",
+            TRQ.国コード         "countryCd",
+            SUBSTR(TRQ.機番,2,6) "serial6",
+            TRQ.計測通番         "historyIndex",
+            TRQ.作成日時         "inspectionDt",
+            TRQ.部品名称         "partsNm",
+            TRQ.IDNO             "idno",
+            TRQ.端末名           "terminalNm",
+            CASE
+                WHEN TRQ.結果 IS NULL THEN '完了'
+                WHEN TRQ.結果 = '0' THEN '未実施'
+                WHEN TRQ.結果 = '1' THEN '完了'
+                WHEN TRQ.結果 = '2' THEN 'NG'
+                WHEN TRQ.結果 = '8' THEN 'パス'
+                WHEN TRQ.結果 = '9' THEN '中断'
+              END "result"
+        FROM TBL_トルク締付履歴  TRQ
+        INNER JOIN (
+                SELECT
+                    型式コード      MODEL_CD,
+                    機番            SERIAL,
+                    部品名称        PARTS_NM,
+                    MAX(計測通番)   MAX_SEQ
+                FROM TBL_トルク締付履歴
+                GROUP BY
+                    型式コード,
+                    機番,
+                    部品名称
+            ) TMP
+                ON  TRQ.型式コード = TMP.MODEL_CD
+                AND TRQ.機番       = TMP.SERIAL
+                AND TRQ.部品名称   = TMP.PARTS_NM
+                AND TRQ.計測通番   = TMP.MAX_SEQ
+        WHERE
+            TRQ.工場コード = '28'
+            <!-- [機番検索](modelCd/serialメンバを含む) -->
+        AND (TRQ.型式コード, TRQ.機番) IN ((#paramSerial.productModelCd#, #paramSerial.serial#))
+        ORDER BY
+            TRQ.部品名称
+    </statement>
+   
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン工程詳細:トルク締付]                                                          -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineTorqueDetail">
+      SELECT
+        TRQ.工場コード       plantCode,
+        TRQ.ステーションNO   stationNo,
+        TRQ.型式コード       productModelCd,
+        TRQ.国コード         countryCd,
+        SUBSTR(TRQ.機番,2,6) serial6,
+        TRQ.計測通番         historyIndex,
+        DECODE(TRQ.上限値 ,null,null,TO_CHAR(TRQ.上限値  / 100 ,'990.00')) upperLimit,
+        DECODE(TRQ.下限値 ,null,null,TO_CHAR(TRQ.下限値  / 100 ,'990.00')) lowerLimit,
+        DECODE(TRQ.計測値1,null,null,TO_CHAR(TRQ.計測値1 / 100 ,'990.00')) measureVal1,
+        DECODE(TRQ.計測値2,null,null,TO_CHAR(TRQ.計測値2 / 100 ,'990.00')) measureVal2,
+        DECODE(TRQ.計測値3,null,null,TO_CHAR(TRQ.計測値3 / 100 ,'990.00')) measureVal3,
+        DECODE(TRQ.計測値4,null,null,TO_CHAR(TRQ.計測値4 / 100 ,'990.00')) measureVal4,
+        DECODE(TRQ.計測値5,null,null,TO_CHAR(TRQ.計測値5 / 100 ,'990.00')) measureVal5,
+        DECODE(TRQ.計測値6,null,null,TO_CHAR(TRQ.計測値6 / 100 ,'990.00')) measureVal6,
+        DECODE(TRQ.計測値7,null,null,TO_CHAR(TRQ.計測値7 / 100 ,'990.00')) measureVal7,
+        DECODE(TRQ.計測値8,null,null,TO_CHAR(TRQ.計測値8 / 100 ,'990.00')) measureVal8,
+        TRQ.作成日時         inspectionDt,
+        TRQ.作成者           createUserId,
+        TRQ.作成プログラム   createUserPg,
+        TRQ.更新日時         updateDt,
+        TRQ.更新者           updateUserId,
+        TRQ.更新プログラム   updateUserPg,
+        TRQ.部品名称         partsNm,
+        TRQ.IDNO             idno,
+        TRQ.端末名           terminalNm,
+        DECODE(TRQ.計測値9, null,null,TO_CHAR(TRQ.計測値9  / 100 ,'990.00')) measureVal9,            <!--トラクタのトルク締付けが無くなったため、未使用-->
+        DECODE(TRQ.計測値10,null,null,TO_CHAR(TRQ.計測値10 / 100 ,'990.00')) measureVal10,           <!--トラクタのトルク締付けが無くなったため、未使用-->
+        TRQ.作業員番号       inspectionEmployeeCd,   <!--トラクタのトルク締付けが無くなったため、未使用-->
+        CASE                                         <!--トラクタのトルク締付けが無くなったため、未使用-->
+          WHEN TRQ.結果 IS NULL THEN '完了'
+          WHEN TRQ.結果 = '0' THEN '未実施'
+          WHEN TRQ.結果 = '1' THEN '完了'
+          WHEN TRQ.結果 = '2' THEN 'NG'
+          WHEN TRQ.結果 = '8' THEN 'パス'
+          WHEN TRQ.結果 = '9' THEN '中断'
+        END result,
+        TRQ.締付状態1        tightStatus1,           <!--トラクタのトルク締付けが無くなったため、未使用-->
+        TRQ.締付状態2        tightStatus2,           <!--トラクタのトルク締付けが無くなったため、未使用-->
+        TRQ.締付状態3        tightStatus3,           <!--トラクタのトルク締付けが無くなったため、未使用-->
+        TRQ.締付状態4        tightStatus4,           <!--トラクタのトルク締付けが無くなったため、未使用-->
+        TRQ.締付状態5        tightStatus5,           <!--トラクタのトルク締付けが無くなったため、未使用-->
+        TRQ.締付状態6        tightStatus6,           <!--トラクタのトルク締付けが無くなったため、未使用-->
+        TRQ.締付状態7        tightStatus7,           <!--トラクタのトルク締付けが無くなったため、未使用-->
+        TRQ.締付状態8        tightStatus8,           <!--トラクタのトルク締付けが無くなったため、未使用-->
+        TRQ.締付状態9        tightStatus9,           <!--トラクタのトルク締付けが無くなったため、未使用-->
+        TRQ.締付状態10       tightStatus10,          <!--トラクタのトルク締付けが無くなったため、未使用-->
+        TRQ.パス作業者1      passEmployeeCd1,        <!--トラクタのトルク締付けが無くなったため、未使用-->
+        TRQ.パス作業者2      passEmployeeCd2,        <!--トラクタのトルク締付けが無くなったため、未使用-->
+        TRQ.パス作業者3      passEmployeeCd3,        <!--トラクタのトルク締付けが無くなったため、未使用-->
+        TRQ.パス作業者4      passEmployeeCd4,        <!--トラクタのトルク締付けが無くなったため、未使用-->
+        TRQ.パス作業者5      passEmployeeCd5,        <!--トラクタのトルク締付けが無くなったため、未使用-->
+        TRQ.パス作業者6      passEmployeeCd6,        <!--トラクタのトルク締付けが無くなったため、未使用-->
+        TRQ.パス作業者7      passEmployeeCd7,        <!--トラクタのトルク締付けが無くなったため、未使用-->
+        TRQ.パス作業者8      passEmployeeCd8,        <!--トラクタのトルク締付けが無くなったため、未使用-->
+        TRQ.パス作業者9      passEmployeeCd9,        <!--トラクタのトルク締付けが無くなったため、未使用-->
+        TRQ.パス作業者10     passEmployeeCd10,       <!--トラクタのトルク締付けが無くなったため、未使用-->
+        TRQ.角度上限値          angleUpperLimit,
+        TRQ.角度下限値          angleLowerLimit,
+        TRQ.角度計測値1         angleMeasureVal1,
+        TRQ.角度計測値2         angleMeasureVal2,
+        TRQ.角度計測値3         angleMeasureVal3,
+        TRQ.角度計測値4         angleMeasureVal4,
+        TRQ.角度計測値5         angleMeasureVal5,
+        TRQ.角度計測値6         angleMeasureVal6,
+        TRQ.角度計測値7         angleMeasureVal7,
+        TRQ.角度計測値8         angleMeasureVal8,
+        TRQ.角度計測値9         angleMeasureVal9,
+        TRQ.角度計測値10        angleMeasureVal10,
+        DECODE(TRQ.二度締上限値  ,null,null,TO_CHAR(TRQ.二度締上限値  / 100 ,'990.00'))     twiceUpperLimit,
+        DECODE(TRQ.二度締下限値  ,null,null,TO_CHAR(TRQ.二度締下限値  / 100 ,'990.00'))     twiceLowerLimit,
+        DECODE(TRQ.二度締計測値1 ,null,null,TO_CHAR(TRQ.二度締計測値1 / 100 ,'990.00'))     twiceMeasureVal1,
+        DECODE(TRQ.二度締計測値2 ,null,null,TO_CHAR(TRQ.二度締計測値2 / 100 ,'990.00'))     twiceMeasureVal2,
+        DECODE(TRQ.二度締計測値3 ,null,null,TO_CHAR(TRQ.二度締計測値3 / 100 ,'990.00'))     twiceMeasureVal3,
+        DECODE(TRQ.二度締計測値4 ,null,null,TO_CHAR(TRQ.二度締計測値4 / 100 ,'990.00'))     twiceMeasureVal4,
+        DECODE(TRQ.二度締計測値5 ,null,null,TO_CHAR(TRQ.二度締計測値5 / 100 ,'990.00'))     twiceMeasureVal5,
+        DECODE(TRQ.二度締計測値6 ,null,null,TO_CHAR(TRQ.二度締計測値6 / 100 ,'990.00'))     twiceMeasureVal6,
+        DECODE(TRQ.二度締計測値7 ,null,null,TO_CHAR(TRQ.二度締計測値7 / 100 ,'990.00'))     twiceMeasureVal7,
+        DECODE(TRQ.二度締計測値8 ,null,null,TO_CHAR(TRQ.二度締計測値8 / 100 ,'990.00'))     twiceMeasureVal8,
+        DECODE(TRQ.二度締計測値9 ,null,null,TO_CHAR(TRQ.二度締計測値9 / 100 ,'990.00'))     twiceMeasureVal9,
+        DECODE(TRQ.二度締計測値10,null,null,TO_CHAR(TRQ.二度締計測値10/ 100 ,'990.00'))     twiceMeasureVal10,
+        TRQ.二度締角度上限値    twiceAngleUpperLimit,
+        TRQ.二度締角度下限値    twiceAngleLowerLimit,
+        TRQ.二度締角度計測値1   twiceAngleMeasureVal1,
+        TRQ.二度締角度計測値2   twiceAngleMeasureVal2,
+        TRQ.二度締角度計測値3   twiceAngleMeasureVal3,
+        TRQ.二度締角度計測値4   twiceAngleMeasureVal4,
+        TRQ.二度締角度計測値5   twiceAngleMeasureVal5,
+        TRQ.二度締角度計測値6   twiceAngleMeasureVal6,
+        TRQ.二度締角度計測値7   twiceAngleMeasureVal7,
+        TRQ.二度締角度計測値8   twiceAngleMeasureVal8,
+        TRQ.二度締角度計測値9   twiceAngleMeasureVal9,
+        TRQ.二度締角度計測値10  twiceAngleMeasureVal10,
+        TRQ.二度締締付状態1     twiceTightStatus1,
+        TRQ.二度締締付状態2     twiceTightStatus2,
+        TRQ.二度締締付状態3     twiceTightStatus3,
+        TRQ.二度締締付状態4     twiceTightStatus4,
+        TRQ.二度締締付状態5     twiceTightStatus5,
+        TRQ.二度締締付状態6     twiceTightStatus6,
+        TRQ.二度締締付状態7     twiceTightStatus7,
+        TRQ.二度締締付状態8     twiceTightStatus8,
+        TRQ.二度締締付状態9     twiceTightStatus9,
+        TRQ.二度締締付状態10    twiceTightStatus10
+    FROM
+        TBL_トルク締付履歴 TRQ
+    WHERE
+        TRQ.工場コード = '28' AND
+        <!-- [機番検索](modelCd/serialメンバを含む) -->
+        (TRQ.型式コード, TRQ.機番) IN ((#paramSerial.productModelCd#, #paramSerial.serial#))
+        <isNotEmpty property="partsNm" prepend="AND ">
+        TRQ.部品名称 = #partsNm#
+        </isNotEmpty>
+    ORDER BY
+        TRQ.部品名称,
+        TRQ.計測通番 DESC
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン工程詳細:ハーネス検査]                                                        -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineHarnessDetail">
+    SELECT
+        HNS.工場コード           plantCode,
+        HNS.ステーション         stationNo,
+        HNS.型式コード           productModelCd,
+        HNS.型式名               productModelNm,
+        HNS.国コード             countryCd,
+        SUBSTR(HNS.機番,2,6)     serial6,
+        HNS.判定                 result,
+        HNS.試験連番             historyIndex,
+        CASE                                  <!--結果(CRS)-->
+          WHEN HNS.不良検出_CRS = '0' THEN 'OK'
+          WHEN HNS.不良検出_CRS = '1' THEN 'NG'
+        END resultCrs,
+        CASE                                  <!--結果(INJ)-->
+          WHEN HNS.不良検出_INJ = '0' THEN 'OK'
+          WHEN HNS.不良検出_INJ = '1' THEN 'NG'
+        END resultInj,
+        CASE                                  <!--結果(DPF)-->
+          WHEN HNS.不良検出_DPF = '0' THEN 'OK'
+          WHEN HNS.不良検出_DPF = '1' THEN 'NG'
+        END resultDpf,
+        CASE                                  <!--結果(G)-->
+          WHEN HNS.不良検出_G = '0' THEN 'OK'
+          WHEN HNS.不良検出_G = '1' THEN 'NG'
+        END resultG,
+        CASE                                  <!--結果(REIL)-->
+          WHEN HNS.不良検出_REIL = '0' THEN 'OK'
+          WHEN HNS.不良検出_REIL = '1' THEN 'NG'
+        END resultReil,
+        HNS.エラーコード1        errorCd1,
+        HNS.エラーコード2        errorCd2,
+        HNS.エラーコード3        errorCd3,
+        HNS.エラーコード4        errorCd4,
+        HNS.エラーコード5        errorCd5,
+        HNS.エラーコード6        errorCd6,
+        HNS.エラーコード7        errorCd7,
+        HNS.エラーコード8        errorCd8,
+        HNS.エラーコード9        errorCd9,
+        HNS.エラーコード10       errorCd10,
+        HNS.エラーコード11       errorCd11,
+        HNS.エラーコード12       errorCd12,
+        HNS.エラーコード13       errorCd13,
+        HNS.エラーコード14       errorCd14,
+        HNS.エラーコード15       errorCd15,
+        HNS.エラーコード16       errorCd16,
+        HNS.エラーコード17       errorCd17,
+        HNS.エラーコード18       errorCd18,
+        HNS.エラーコード19       errorCd19,
+        HNS.エラーコード20       errorCd20,
+        HNS.作成日時             inspectionDt,
+        HNS.作成者               createUserId,
+        HNS.作成プログラム       createUserPg,
+        HNS.更新日時             updateDt,
+        HNS.更新者               updateUserId,
+        HNS.更新プログラム       updateUserPg
+    FROM
+        TBL_ハーネス検査履歴 HNS
+    WHERE
+        HNS.工場コード = '28' AND
+        <!-- [機番検索](modelCd/serialメンバを含む) -->
+        (HNS.型式コード, HNS.機番) IN ((#paramSerial.productModelCd#, #paramSerial.serial#))
+    ORDER BY
+        HNS.作成日時 DESC
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン工程詳細:エンジン運転検査(03)ヘッダ]                                          -->
+    <!-- ************************************************************************************** -->
+    <!--ヘッダ情報-->
+    <statement id="SelectEngineTest03Header">
+      SELECT
+        EMH.ID_NO                idno,              <!--IdNo-->
+        EMH.MEASURE_DATETIME     inspectionYmdHms,  <!--測定年月日(測定開始日時)-->
+        CASE ( LENGTH(TRIM(EMH.MEASURE_DATETIME)) )
+          WHEN 14 THEN TO_DATE(EMH.MEASURE_DATETIME,'YYYYMMDDHH24MISS')
+          ELSE TO_DATE(SUBSTR(EMH.MEASURE_DATETIME,1,8),'YYYYMMDD')
+        END                      inspectionDt,      <!--測定日時(測定開始日時)-->
+        EMH.PRO_CODE             productModelCd,    <!--生産型式コード-->
+        EMH.PRO_NAME             productModelNm,    <!--エンジン型式名-->
+        EMH.ENG_PRT              enginePrt,         <!--エンジン刻印名-->
+        EMH.ENG_SNO              serial6,           <!--エンジン機番-->
+        EMH.COUNTRY              countryCd,         <!--国コード-->
+        EMH.SETUBINO             setubiNo,          <!--設備No-->
+        EMH.BENCHINO             benchiNo,          <!--ベンチNo＜1:第一 2:第二＞-->
+        TRIM(EMH.WORKER_NAME)    userNm,            <!--作業者名-->
+        CASE                                        <!--判定（総合）＜1:OK 2:NG＞-->
+          WHEN EMH.RESULT = 1 THEN 'OK'
+          ELSE 'NG'
+        END result,
+        EMH.FIT_NAME1            fitName1,          <!--ﾌｧﾐﾘｰﾈｰﾑ：適合規制名（１）-->
+        EMH.FIT_NAME2            fitName2,          <!--ﾌｧﾐﾘｰﾈｰﾑ：適合規制名（２）-->
+        EMH.FIT_NAME3            fitName3,          <!--ﾌｧﾐﾘｰﾈｰﾑ：適合規制名（３）-->
+        EMH.FMR_NAME1            fmrName1,          <!--ﾌｧﾐﾘｰﾈｰﾑ：ﾌｧﾐﾘｰﾈｰﾑ（１）-->
+        EMH.FMR_NAME2            fmrName2,          <!--ﾌｧﾐﾘｰﾈｰﾑ：ﾌｧﾐﾘｰﾈｰﾑ（２）-->
+        EMH.FMR_NAME3            fmrName3,          <!--ﾌｧﾐﾘｰﾈｰﾑ：ﾌｧﾐﾘｰﾈｰﾑ（３）-->
+        EMH.THROTTLE             throttle,          <!--スロットル位置-->
+        EMH.CYLINDER             cylinder,          <!--気筒数-->
+        CASE                                        <!--エンジン区分-->
+         WHEN EMH.ENG_KBN = '0' THEN 'N/A'
+         WHEN EMH.ENG_KBN = '1' THEN 'ターボ'
+        END engTyp,
+        EMH.ENG_L                engineL,           <!--エンジン排気量（ﾘｯﾄﾙ）-->
+        EMH.SLOPE1               slope1,            <!--低格出力：傾き-->
+        EMH.CROSSPOINT1          clossPoint1,       <!--低格出力：切辺-->
+        EMH.SLOPE2               slope2,            <!--最大トルク：傾き-->
+        EMH.CROSSPOINT2          clossPoint2,       <!--最大トルク：切辺-->
+        CASE                                        <!--ERG有無-->
+          WHEN EMH.EGR_KBN = '0' THEN '無'
+          WHEN EMH.EGR_KBN = '1' THEN '有'
+        END ergTyp,
+        CASE
+          WHEN LENGTH(TRIM(EMH.ENG_CARRYDATE)) = 14 THEN TO_DATE(EMH.ENG_CARRYDATE,'YYYYMMDDHH24MISS')
+          WHEN LENGTH(TRIM(EMH.ENG_CARRYDATE)) IS NULL THEN TO_DATE(NULL)
+          ELSE TO_DATE(SUBSTR(EMH.ENG_CARRYDATE,1,8),'YYYYMMDD')
+        END                      engineCarryDt,     <!--エンジン搬入日時-->
+        SUBSTR(EMH.ENG_STARTTIME,1,2) || ':'||SUBSTR(EMH.ENG_STARTTIME,3,2) 
+          || ':'||SUBSTR(EMH.ENG_STARTTIME,5,2)     engineStartTime,     <!--エンジン始動時間-->
+        SUBSTR(EMH.MEASURE_STARTTIME,1,2) || ':'||SUBSTR(EMH.MEASURE_STARTTIME,3,2) 
+          || ':'||SUBSTR(EMH.MEASURE_STARTTIME,5,2) measureStartTime,    <!--調整作業開始-->
+        SUBSTR(EMH.MEASURE_ENDTIME,1,2) || ':'||SUBSTR(EMH.MEASURE_ENDTIME,3,2) 
+          || ':'||SUBSTR(EMH.MEASURE_ENDTIME,5,2) measureEndTime,        <!--調整作業終了-->
+        EMH.CHECK_FLAG           checkFlag,         <!--ホスト報告済フラグ＜1:済＞-->
+        EMH.TEIKAKU_RTFLJT_VAL   teikakuRtfLjtVal,  <!--定格点Ｑフラグ-->
+        EMH.TORQUE_RTFLJT_VAL    torqueRtfLjtVal,   <!--トルク点Ｑフラグ-->
+        EMH.PALETNO              paletNo,           <!--パレットNo-->
+        EMH.CREATION_DATETIME    createDt,          <!--作成日時-->
+        EMH.CREATION_BY_USER     createUserId,      <!--作成者-->
+        EMH.CREATION_BY_PGM      createUserPg,      <!--作成プログラム-->
+        EMH.LAST_UPDATE_DATETIME updateDt,          <!--最終更新日時-->
+        EMH.LAST_UPDATED_BY_USER updateUserId,      <!--最終更新者-->
+        EMH.LAST_UPDATED_BY_PGM  updateUserPg,      <!--最終更新プログラム-->
+        CASE                                        <!--排ガス規制区分：0：Ｔ３/1：Ｔ４-->
+          WHEN EMH.TIER_KBN = '0' THEN 'T3'
+          WHEN EMH.TIER_KBN = '1' THEN 'T4'
+        END tireTyp,
+        CASE                                        <!--搭載-ＯＥＭ区分：0：搭載/1：ＯＥＭ-->
+          WHEN EMH.OEM_KBN = '0' THEN '搭載'
+          WHEN EMH.OEM_KBN = '1' THEN 'OEM'
+        END oemTyp,  
+        CASE                                        <!--エンジン区分-->
+          WHEN EMH.CRS_ENG_FLAG = '1' THEN 'コモンレール' <!--CRSエンジンフラグ-->
+          WHEN EMH.SI_KBN = '1' THEN 'SI'                 <!--SIエンジン区分 0:DIエンジン/1:SIエンジン-->
+          ELSE 'メカ式'
+        END engineTyp,
+        CASE                                        <!--ECU種別 1:三菱/2:E-Controls-->
+          WHEN EMH.ECU_KBN = '1' THEN '三菱'
+          WHEN EMH.ECU_KBN = '2' THEN 'E-Controls'
+        END ecuTyp,
+        CASE                                        <!--燃料区分 0:DI/1:G/2:L/3:N/4:GL-->
+          WHEN EMH.FUEL_KBN = 0 THEN 'DI'
+          WHEN EMH.FUEL_KBN = 1 THEN 'G'
+          WHEN EMH.FUEL_KBN = 2 THEN 'L(Ground)'
+          WHEN EMH.FUEL_KBN = 3 THEN 'N'
+          WHEN EMH.FUEL_KBN = 4 THEN 'L(+V)'
+        END fuelTyp,
+        EMH.TEMP_CONDITION       tempCondition,     <!--運転条件温度-->
+        EMH.ACCEL_VOLTAGE1       accelVoltage1,     <!--APS1/FPP1-->
+        EMH.ACCEL_VOLTAGE2       accelVoltage2,     <!--APS2/FPP2-->
+        EMH.ANALOG_VOLTAGE1      analogVoltage1,    <!--アナログ入力1-->
+        EMH.ANALOG_VOLTAGE2      analogVoltage2,    <!--アナログ入力2-->
+        EMH.ANALOG_VOLTAGE3      analogVoltage3,    <!--アナログ入力3-->
+        CASE                                        <!--0:無/1:有-->
+          WHEN EMH.HARNESS_RELAY_FLAG = '0' THEN '無'
+          WHEN EMH.HARNESS_RELAY_FLAG = '1' THEN '有'
+          ELSE NULL
+        END harnesRelayFlag,
+        CASE                                        <!--1:Eco Mode/2:Standard Mode/3:Power Mode/空白:設定無-->
+          WHEN EMH.ENGINE_MODE = '1' THEN 'Eco'
+          WHEN EMH.ENGINE_MODE = '2' THEN 'Standard'
+          WHEN EMH.ENGINE_MODE = '3' THEN 'Power'
+          ELSE NULL
+        END engineMode,
+        CASE                                        <!--インタークーラー区分 0:無/1:有-->
+          WHEN EMH.INTER_COOLER_KBN = '0' THEN '無'
+          WHEN EMH.INTER_COOLER_KBN = '1' THEN '有'
+        END interCoolerTyp,
+        CASE                                        <!--アクセル電圧区分 0:フル/1:ハーフ/2:クロス-->
+          WHEN EMH.ACCEL_VOLTAGE_KBN = '0' THEN 'フル'
+          WHEN EMH.ACCEL_VOLTAGE_KBN = '1' THEN 'ハーフ'
+          WHEN EMH.ACCEL_VOLTAGE_KBN = '2' THEN 'クロス'
+        END accelVoltageTyp,
+        EMH.SA_SELECT            saSelect,          <!--SA SELECT指示値（0～4)-->
+        CASE                                        <!--TSC1区分 0:無/1:有-->
+          WHEN EMH.TSC1_KBN = '0' THEN '無'
+          WHEN EMH.TSC1_KBN = '1' THEN '有'
+        END tsc1Typ,
+        CASE                                        <!--低回転慣らし区分 0:無/1:有-->
+          WHEN EMH.LOW_IDLE_KBN = '0' THEN '無'
+          WHEN EMH.LOW_IDLE_KBN = '1' THEN '有'
+        END lowIdleTyp,
+        CASE                                        <!--アクセル入力区分 0:CAN/1:ﾊｰﾄﾞ-->
+          WHEN EMH.ACCEL_INPUT_KBN = '0' THEN 'CAN'
+          WHEN EMH.ACCEL_INPUT_KBN = '1' THEN 'ハード'
+        END accelInputTyp,
+        CASE                                        <!--フル電子ガバナ区分-->
+          WHEN EMH.GOVERNOR_KBN = '0' THEN '無'     
+          WHEN EMH.GOVERNOR_KBN = '1' THEN 'フル電子'
+        END governorTyp,
+        EMH.TEIKAKU2_RTFLJT_VAL teikaku2RtfLjtVal,  <!--第2定格点Qﾗﾝｸ-->
+        EMH.RACK_OFFSET_VAL rackOffsetVal,          <!--ラック位置オフセット-->
+        CASE                                        <!--CAN通信速度-->
+          WHEN EMH.CAN_SPEED_KBN = '0' THEN '250kbps'
+          WHEN EMH.CAN_SPEED_KBN = '1' THEN '500kbps'
+        END canSpeedTyp,
+        EMH.TCO1_SA_SELECT tco1SaSelect,
+        CASE EMH.TCO1_SEND
+          WHEN '0' THEN '無'
+          WHEN '1' THEN '有'
+        END tco1Send
+      FROM
+        D_HEADER EMH
+      WHERE
+        <!-- [機番検索](modelCd/serial6メンバを含む) -->
+        (EMH.PRO_CODE, EMH.ENG_SNO) IN 
+        <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+          (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+        </iterate>
+      ORDER BY
+        EMH.MEASURE_DATETIME DESC
+    </statement>
+    
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン工程詳細:エンジン運転検査(07)ヘッダ]                                          -->
+    <!-- ************************************************************************************** -->
+    <!--ヘッダ情報-->
+    <statement id="SelectEngineTest07Header">
+      SELECT
+        EMH.ID_NO                idno,              <!--IdNo-->
+        EMH.MEASURE_DATETIME     inspectionYmdHms,  <!--測定年月日(測定開始日時)-->
+        CASE ( LENGTH(TRIM(EMH.MEASURE_DATETIME)) )
+          WHEN 14 THEN TO_DATE(EMH.MEASURE_DATETIME,'YYYYMMDDHH24MISS')
+          ELSE TO_DATE(SUBSTR(EMH.MEASURE_DATETIME,1,8),'YYYYMMDD')
+        END                      inspectionDt,      <!--測定日時(測定開始日時)-->
+        EMH.PRO_CODE             productModelCd,    <!--生産型式コード-->
+        EMH.PRO_NAME             productModelNm,    <!--エンジン型式名-->
+        EMH.ENG_PRT              enginePrt,         <!--エンジン刻印名-->
+        EMH.ENG_SNO              serial6,           <!--エンジン機番-->
+        EMH.COUNTRY              countryCd,         <!--国コード-->
+        EMH.SETUBINO             setubiNo,          <!--設備No-->
+        EMH.BENCHINO             benchiNo,          <!--ベンチNo＜1:第一 2:第二＞-->
+        TRIM(EMH.WORKER_NAME)    userNm,            <!--作業者名-->
+        CASE                                        <!--判定（総合）＜1:OK 2:NG＞-->
+          WHEN EMH.RESULT = 1 THEN 'OK'
+          ELSE 'NG'
+        END result,
+        EMH.FIT_NAME1            fitName1,          <!--ﾌｧﾐﾘｰﾈｰﾑ：適合規制名（１）-->
+        EMH.FIT_NAME2            fitName2,          <!--ﾌｧﾐﾘｰﾈｰﾑ：適合規制名（２）-->
+        EMH.FIT_NAME3            fitName3,          <!--ﾌｧﾐﾘｰﾈｰﾑ：適合規制名（３）-->
+        EMH.FMR_NAME1            fmrName1,          <!--ﾌｧﾐﾘｰﾈｰﾑ：ﾌｧﾐﾘｰﾈｰﾑ（１）-->
+        EMH.FMR_NAME2            fmrName2,          <!--ﾌｧﾐﾘｰﾈｰﾑ：ﾌｧﾐﾘｰﾈｰﾑ（２）-->
+        EMH.FMR_NAME3            fmrName3,          <!--ﾌｧﾐﾘｰﾈｰﾑ：ﾌｧﾐﾘｰﾈｰﾑ（３）-->
+        EMH.THROTTLE             throttle,          <!--スロットル位置-->
+        EMH.CYLINDER             cylinder,          <!--気筒数-->
+        CASE                                        <!--エンジン区分-->
+         WHEN EMH.ENG_KBN = '0' THEN 'N/A'
+         WHEN EMH.ENG_KBN = '1' THEN 'ターボ'
+        END engTyp,
+        EMH.ENG_L                engineL,           <!--エンジン排気量（ﾘｯﾄﾙ）-->
+        EMH.SLOPE1               slope1,            <!--低格出力：傾き-->
+        EMH.CROSSPOINT1          clossPoint1,       <!--低格出力：切辺-->
+        EMH.SLOPE2               slope2,            <!--最大トルク：傾き-->
+        EMH.CROSSPOINT2          clossPoint2,       <!--最大トルク：切辺-->
+        CASE                                        <!--ERG有無-->
+          WHEN EMH.EGR_KBN = '0' THEN '無'
+          WHEN EMH.EGR_KBN = '1' THEN '有'
+        END ergTyp,
+        CASE        
+          WHEN LENGTH(TRIM(EMH.ENG_CARRYDATE)) = 14 THEN TO_DATE(EMH.ENG_CARRYDATE,'YYYYMMDDHH24MISS')
+          WHEN LENGTH(TRIM(EMH.ENG_CARRYDATE)) IS NULL THEN TO_DATE(NULL)
+          ELSE TO_DATE(SUBSTR(EMH.ENG_CARRYDATE,1,8),'YYYYMMDD')
+        END                      engineCarryDt,     <!--エンジン搬入日時-->
+        SUBSTR(EMH.ENG_STARTTIME,1,2) || ':'||SUBSTR(EMH.ENG_STARTTIME,3,2) 
+          || ':'||SUBSTR(EMH.ENG_STARTTIME,5,2)     engineStartTime,     <!--エンジン始動時間-->
+        SUBSTR(EMH.MEASURE_STARTTIME,1,2) || ':'||SUBSTR(EMH.MEASURE_STARTTIME,3,2) 
+          || ':'||SUBSTR(EMH.MEASURE_STARTTIME,5,2) measureStartTime,    <!--調整作業開始-->
+        SUBSTR(EMH.MEASURE_ENDTIME,1,2) || ':'||SUBSTR(EMH.MEASURE_ENDTIME,3,2) 
+          || ':'||SUBSTR(EMH.MEASURE_ENDTIME,5,2) measureEndTime,        <!--調整作業終了（水抜後）-->
+        EMH.CHECK_FLAG           checkFlag,         <!--ホスト報告済フラグ＜1:済＞-->
+        EMH.TEIKAKU_RTFLJT_VAL   teikakuRtfLjtVal,  <!--定格点Ｑフラグ-->
+        EMH.TORQUE_RTFLJT_VAL    torqueRtfLjtVal,   <!--トルク点Ｑフラグ-->
+        EMH.PALETNO              paletNo,           <!--パレットNo-->
+        EMH.CREATION_DATETIME    createDt,          <!--作成日時-->
+        EMH.CREATION_BY_USER     createUserId,      <!--作成者-->
+        EMH.CREATION_BY_PGM      createUserPg,      <!--作成プログラム-->
+        EMH.LAST_UPDATE_DATETIME updateDt,          <!--最終更新日時-->
+        EMH.LAST_UPDATED_BY_USER updateUserId,      <!--最終更新者-->
+        EMH.LAST_UPDATED_BY_PGM  updateUserPg,      <!--最終更新プログラム-->
+        CASE                                        <!--排ガス規制区分：0：Ｔ３/1：Ｔ４-->
+          WHEN EMH.TIER_KBN = '0' THEN 'T3'
+          WHEN EMH.TIER_KBN = '1' THEN 'T4'
+        END tireTyp,
+        CASE                                        <!--搭載-ＯＥＭ区分：0：搭載/1：ＯＥＭ-->
+          WHEN EMH.OEM_KBN = '0' THEN '搭載'
+          WHEN EMH.OEM_KBN = '1' THEN 'OEM'
+        END oemTyp,
+        CASE                                        <!--エンジン区分-->
+          WHEN EMH.CRS_ENG_FLAG = '1' THEN 'コモンレール' <!--CRSエンジンフラグ-->
+          ELSE 'メカ式'
+        END engineTyp,
+        CASE                                        <!--インタークーラー区分 0:無/1:有-->
+          WHEN EMH.INTER_COOLER_KBN = '0' THEN '無'
+          WHEN EMH.INTER_COOLER_KBN = '1' THEN '有'
+        END interCoolerTyp,
+        CASE                                        <!--アクセル電圧区分 0:フル/1:ハーフ/2:クロス-->
+          WHEN EMH.ACCEL_VOLTAGE_KBN = '0' THEN 'フル'
+          WHEN EMH.ACCEL_VOLTAGE_KBN = '1' THEN 'ハーフ'
+          WHEN EMH.ACCEL_VOLTAGE_KBN = '2' THEN 'クロス'
+        END accelVoltageTyp,
+        CASE                                        <!--アクセル入力区分 0:CAN/1:ﾊｰﾄﾞ-->
+          WHEN EMH.ACCEL_INPUT_KBN = '0' THEN 'CAN'
+          WHEN EMH.ACCEL_INPUT_KBN = '1' THEN 'ハード'
+        END accelInputTyp,
+        CASE
+          WHEN  EMH.CAN_SPEED_KBN = '0' THEN '250kbps'
+          WHEN  EMH.CAN_SPEED_KBN = '1' THEN '500kbps'
+        END canSpeedKbn,
+        CASE
+          WHEN  EMH.ACCEL_MANUAL_RESULT_COUNT IS NOT NULL THEN LPAD(EMH.ACCEL_MANUAL_RESULT_COUNT,3) || '/' || LPAD(EMH.ACCEL_MANUAL_INS_COUNT,3)
+          ELSE null
+        END accelManualCount        
+      FROM
+        D_HEADER_07 EMH
+      WHERE
+        <!-- [機番検索](modelCd/serial6メンバを含む) -->
+        (EMH.PRO_CODE, EMH.ENG_SNO) IN 
+        <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+          (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+        </iterate>
+      ORDER BY
+        EMH.MEASURE_DATETIME DESC
+    </statement>
+    
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン工程詳細:エンジン運転検査(03)詳細検索]                                     -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineTest03Detail">
+      SELECT
+        EMD.ID_NO                idno,              <!--ＩＤNo-->
+        CASE ( LENGTH(TRIM(EMD.MEASURE_DATETIME)) )
+          WHEN 14 THEN TO_DATE(EMD.MEASURE_DATETIME,'YYYYMMDDHH24MISS')
+          ELSE TO_DATE(SUBSTR(EMD.MEASURE_DATETIME,1,8),'YYYYMMDD')
+        END                      inspectionDt,      <!--測定日時(測定開始日時)-->
+        EMD.SEQNO                seqNo,             <!--測定順序＜1～20:測定データ 21～28:ならしデータ＞-->
+        TRIM(EMD.MEASURE_NAME)   measureNm,         <!--測定項目名-->
+        SUBSTR(EMD.MEASURE_TIME,1,2) || ':'||SUBSTR(EMD.MEASURE_TIME,3,2) 
+          || ':'||SUBSTR(EMD.MEASURE_TIME,5,2) measureTime,        <!--測定時間-->
+        CASE                                        <!--判定（総合）＜1:OK 2:NG＞-->
+          WHEN EMD.MEASURE_RESULT = '1' THEN 'OK'
+          ELSE NULL
+        END result,
+        EMD.MEASURE_MODE         measureMode,       <!--測定モード-->
+        EMD.THROTTLE_KBN         throttleKbn,       <!--スロットル最小/最大-->
+        EMD.LOAD_KBN             loadKbn,           <!--負荷有/無-->
+        EMD.REG_RPM              regRpm,            <!--回転数：調整区分-->
+        EMD.RPM_MAX              rpmMax,            <!--回転数：上限値-->
+        EMD.RPM_MIN              rpmMin,            <!--回転数：下限値-->
+        EMD.RPM_TARGET           rpmTarget,         <!--回転数：目標値-->
+        EMD.REG_ST               regSt,             <!--燃料噴射量：調整区分-->
+        EMD.ST_MAX               stMax,             <!--燃料噴射量：上限値-->
+        EMD.ST_MIN               stMin,             <!--燃料噴射量：下限値-->
+        EMD.ST_TARGET            stTarget,          <!--燃料噴射量：目標値-->
+        EMD.REG_KW               regKw,             <!--出力：調整区分-->
+        EMD.KW_MAX               kwMax,             <!--出力：上限値-->
+        EMD.KW_MIN               kwMin,             <!--出力：下限値-->
+        EMD.KW_TARGET            kwTarget,          <!--出力：目標値-->
+        EMD.REG_NM               regNm,             <!--トルク：調整区分-->
+        EMD.NM_MAX               nmMax,             <!--トルク：上限値-->
+        EMD.NM_MIN               nmMin,             <!--トルク：下限値-->
+        EMD.NM_TARGET            nmTarget,          <!--トルク：目標値-->
+        EMD.REG_LPRS             regLprs,           <!--潤滑油圧力：調整区分-->
+        EMD.LPRS_MAX             lprsMax,           <!--潤滑油圧力：上限値-->
+        EMD.LPRS_MIN             lprsMin,           <!--潤滑油圧力：下限値-->
+        EMD.TRN_MAX              trnMax,            <!--回転ハンチング（上限値）rpm-->
+        EMD.POWER_RPM            powerRpm,          <!--動力計回転数＜9999＞-->
+        EMD.POWER_NM             powerNm,           <!--動力計吸収トルク＜999.9＞-->
+        EMD.COOL_TEMP_IN         coolTempIn,        <!--冷却水温度（入口）＜999.9＞-->
+        EMD.COOL_TEMP_OUT        coolTempOut,       <!--冷却水温度（出口）＜999.9＞-->
+        EMD.L_TEMP               lTemp,             <!--潤滑油温度＜999.9＞-->
+        EMD.F_SUPPLY             fSupply,           <!--燃料供給温度＜99.9＞-->
+        EMD.F_TEMP               fTemp,             <!--燃料流量測定温度＜99.9＞-->
+        EMD.IN_TEMP              inTemp,            <!--吸気温度＜99.9＞-->
+        EMD.IN_HUM               inHum,             <!--吸気湿度＜99.9＞-->
+        EMD.L_PRS                lPrs,              <!--潤滑油圧力＜9999＞-->
+        EMD.F_PRS                fPrs,              <!--燃料供給圧力＜999.9＞-->
+        EMD.PA_HG                paHg,              <!--大気圧＜999.9＞-->
+        EMD.F_ML                 fMl,               <!--燃料流量＜999.999＞-->
+        EMD.F_RML                fRml,              <!--燃料消費量(補正流量）(ml/min)＜999.999＞-->
+        EMD.TRN_RPM              trnRpm,            <!--回転ハンチング＜99＞-->
+        EMD.Q_ST                 qSt,               <!--燃料噴射量＜99.9＞-->
+        EMD.PS_KW                psKw,              <!--出力＜999.9＞-->
+        EMD.SK_KW                skKw,              <!--修正出力＜999.9＞-->
+        EMD.TK_NM                tkNm,              <!--修正トルク＜999.9＞-->
+        EMD.KEISUU               keisuu,            <!--修正係数＜9.9999＞-->
+        EMD.PA_K                 paK,               <!--大気係数-->
+        EMD.FM_K                 fmK,               <!--空燃費係数-->
+        EMD.Q_GH                 qGh,               <!--単位燃料供給量-->
+        EMD.R_HG                 rHg,               <!--過給機圧力比-->
+        EMD.PW_HG                pwHg,              <!--水蒸気分圧-->
+        EMD.L_HG                 lHg,               <!--飽和水蒸気圧-->
+        EMD.DENSITY              density,           <!--比重-->
+        EMD.PIN_PRS              pinPrs,            <!--ブースト圧力-->
+        EMD.H_TEMP               hTemp,             <!--湿球温度-->
+        EMD.CAL_KEISUU           calKeisuu,         <!--修正係数＜発電機仕様エンジン＞-->
+        SUBSTR(EMD.STEP_STARTTIME,1,2) || ':'||SUBSTR(EMD.STEP_STARTTIME,3,2) 
+          || ':'||SUBSTR(EMD.STEP_STARTTIME,5,2) stepStartTime,        <!--ならし：Step開始時刻-->
+        EMD.EGR_MAX              egrMax,            <!--EGR開弁温度 上限値-->
+        EMD.EGR_MIN              egrMin,            <!--EGR開弁温度 下限値-->
+        EMD.EGR_TEMP             egrTemp,           <!--EGR温度測定値-->
+        EMD.TEIKAKU_KBN          teikakuKbn,        <!--定格出力項目＜1=定格出力項目(測定ﾊﾟﾀｰﾝﾏｽﾀから)＞-->
+        EMD.CREATION_DATETIME    createDt,          <!--作成日時-->
+        EMD.CREATION_BY_USER     createUserId,      <!--作成者-->
+        EMD.CREATION_BY_PGM      createUserPg,      <!--作成プログラム-->
+        EMD.LAST_UPDATE_DATETIME updateDt,          <!--最終更新日時-->
+        EMD.LAST_UPDATED_BY_USER updateUserId,      <!--最終更新者-->
+        EMD.LAST_UPDATED_BY_PGM  updateUserPg,      <!--最終更新プログラム-->
+        CASE                                        <!--学習機能ステップフラグ：0：通常ステップ/1：学習ステップ-->
+          WHEN EMD.LEARN_FLAG = '0' THEN '通常'
+          WHEN EMD.LEARN_FLAG = '1' THEN '学習'
+          ELSE NULL
+        END learnFlag,
+        CASE                                        <!--無人調整狙いフラグ：0：上・下限（狙い設定なし）/1：上目（目標値より上）/2：下目（目標値より下）-->
+          WHEN EMD.TARGET_FLAG = '0' THEN '無'
+          WHEN EMD.TARGET_FLAG = '1' THEN '上目'
+          WHEN EMD.TARGET_FLAG = '2' THEN '下目'
+          ELSE NULL
+        END targetFlag,
+        CASE                                        <!--無人調整モード：0：手動/1：自動(無人)-->
+          WHEN EMD.AUTO_MODE = '0' THEN '手動'
+          WHEN EMD.AUTO_MODE = '1' THEN '自動'
+          ELSE NULL
+        END autoMode,
+        EMD.REG_MILEAGE          regMileage,        <!--燃費:計測区分-->
+        EMD.MILEAGE_MAX          mileageMax,        <!--燃費:上限値-->
+        EMD.MILEAGE_MIN          mileageMin,        <!--燃費:下限値-->
+        EMD.MILEAGE_TARGET       mileageTarget,     <!--燃費:目標値-->
+        EMD.REG_AF               regAf,             <!--空気過剰率:計測区分-->
+        EMD.AF_MAX               afMax,             <!--空気過剰率:上限値-->
+        EMD.AF_MIN               afMin,             <!--空気過剰率:下限値-->
+        EMD.AF_TARGET            afTarget,          <!--空気過剰率:目標値-->
+        EMD.REG_BE               regBe,             <!--補正値:計測区分-->
+        EMD.BE_MAX               beMax,             <!--補正値:上限値-->
+        EMD.BE_MIN               beMin,             <!--補正値:下限値-->
+        EMD.BE_TARGET            beTarget,          <!--補正値:目標値-->
+        EMD.REG_ECURPM           regEcuRpm,         <!--ECU回転数:指示区分-->
+        EMD.ECURPM_MAX           ecuRpmMax,         <!--ECU回転数:上限値-->
+        EMD.ECURPM_MIN           ecuRpmMin,         <!--ECU回転数:下限値-->
+        EMD.ECURPM_TARGET        ecuRpmTarget,      <!--ECU回転数:目標値-->
+        EMD.REG_ACCEL            regAccel,          <!--アクセル開度:指示区分-->
+        EMD.ACCEL_TARGET         accelTarget,       <!--アクセル開度:目標値-->
+        EMD.REG_O2SENSOR         regO2Sensor,       <!--O2センサ:計測区分-->
+        EMD.MILEAGE_VAL          mileageVal,        <!--燃費:計算値-->
+        EMD.AF_VAL               afVal,             <!--空気過剰率:計算値-->
+        EMD.BE_VAL               beVal,             <!--補正値:計算値-->
+        EMD.ECURPM_VAL           ecuRpmVal,         <!--ECU回転数:計測値-->
+        EMD.ECUACCEL_VAL         ecuAccelVal,       <!--アクセル開度:計測値-->
+        EMD.ECUINTAKE_PRS        ecuIntakePrs,      <!--吸気圧:計測値-->
+        EMD.ECUCOOL_TEMP         ecuCoolTemp,       <!--ECU水温:計測値-->
+        EMD.ECUTHROTTLE_VAL      ecuThrottleVal,    <!--スロットル開度:計測値-->
+        EMD.ECUMILEAGE_VAL       ecuMileageVal,     <!--ECU燃費率:計測値(g/s)-->
+        EMD.ECUPEAK_ADJUST       ecuPeakAdjust,     <!--瞬時燃料補正量:計測値-->
+        EMD.ECULEARN_ADJUST      ecuLearnAdjust,    <!--燃料補正量学習値:計測値-->
+        CASE                                        <!--O2センサ:結果(Pre-cat)-->
+          WHEN EMD.O2_PRECAT = '0'  THEN '0:未'
+          WHEN EMD.O2_PRECAT = '1'  THEN '1:Run'
+          WHEN EMD.O2_PRECAT = '2'  THEN '2:OK'
+          WHEN EMD.O2_PRECAT = '3'  THEN '3:NG'
+          WHEN EMD.O2_PRECAT = '4'  THEN '4:NG'
+          WHEN EMD.O2_PRECAT = '5'  THEN '5:NG'
+          WHEN EMD.O2_PRECAT = '6'  THEN '6:NG'
+          WHEN EMD.O2_PRECAT = '7'  THEN '7:NG'
+          ELSE NULL
+        END o2Precat,
+        CASE                                        <!--O2センサ:結果(Post-cat)-->
+          WHEN EMD.O2_POSTCAT = '0'  THEN '0:未'
+          WHEN EMD.O2_POSTCAT = '1'  THEN '1:Run'
+          WHEN EMD.O2_POSTCAT = '2'  THEN '2:OK'
+          WHEN EMD.O2_POSTCAT = '3'  THEN '3:NG'
+          WHEN EMD.O2_POSTCAT = '4'  THEN '4:NG'
+          WHEN EMD.O2_POSTCAT = '5'  THEN '5:NG'
+          WHEN EMD.O2_POSTCAT = '6'  THEN '6:NG'
+          WHEN EMD.O2_POSTCAT = '7'  THEN '7:NG'
+          ELSE NULL
+        END o2Postcat,
+        EMD.STABILITY_TIME       stabilityTime,     <!--安定時間-->
+        EMD.MEASURE_AVERAGE      measureAverage,    <!--測定時間-->
+        EMD.G_SUPPLY_LOW         gSupplyLow,        <!--出口ガス温度下限-->
+        EMD.G_SUPPLY_HIGH        gSupplyHigh,       <!--出口ガス温度上限-->
+        CASE                                        <!--1:Eco Mode/2:Standard Mode/3:Power Mode/-1:Error/0:Not available/空白:設定無-->
+          WHEN EMD.ENGINE_MODE = '-1' THEN 'Error'
+          WHEN EMD.ENGINE_MODE = '0 '  THEN 'Not available'
+          WHEN EMD.ENGINE_MODE = '1 '  THEN 'Eco'
+          WHEN EMD.ENGINE_MODE = '2 '  THEN 'Standard'
+          WHEN EMD.ENGINE_MODE = '3 '  THEN 'Power'
+          ELSE NULL
+        END engineMode,
+        EMD.ECU_IN_TEMP          ecuInTemp,         <!--ECU吸気温度(℃)-->
+        EMD.ECU_IN_TEMP_LOW      ecuInTempLow,      <!--ECU吸気温度下限<99.9>-->
+        EMD.ECU_IN_TEMP_HIGH     ecuInTempHigh      <!--ECU吸気温度上限<99.9>-->
+      FROM
+        D_DETAIL EMD
+      WHERE
+        EMD.ID_NO = #idno# AND
+        EMD.MEASURE_DATETIME = #inspectionYmdHms#
+      ORDER BY
+        EMD.SEQNO, EMD.MEASURE_NAME
+    </statement>
+    
+        <!-- ************************************************************************************** -->
+    <!-- [エンジン工程詳細:エンジン運転検査(07)詳細検索]                                     -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineTest07Detail">
+      SELECT
+        EMD.ID_NO                idno,              <!--IDNo-->
+        CASE ( LENGTH(TRIM(EMD.MEASURE_DATETIME)) )
+          WHEN 14 THEN TO_DATE(EMD.MEASURE_DATETIME,'YYYYMMDDHH24MISS')
+          ELSE TO_DATE(SUBSTR(EMD.MEASURE_DATETIME,1,8),'YYYYMMDD')
+        END                      inspectionDt,      <!--測定日時(測定開始日時)-->
+        EMD.SEQNO                seqNo,             <!--測定順序＜1～20:測定データ 21～28:ならしデータ＞-->
+        TRIM(EMD.MEASURE_NAME)   measureNm,         <!--測定項目名-->
+        SUBSTR(EMD.MEASURE_TIME,1,2) || ':'||SUBSTR(EMD.MEASURE_TIME,3,2) 
+          || ':'||SUBSTR(EMD.MEASURE_TIME,5,2) measureTime,        <!--測定時間-->
+        CASE                                        <!--判定（総合）＜1:OK 2:NG＞-->
+          WHEN EMD.MEASURE_RESULT = '1' THEN 'OK'
+          ELSE NULL
+        END result,
+        EMD.MEASURE_MODE         measureMode,       <!--測定モード-->
+        EMD.THROTTLE_KBN         throttleKbn,       <!--スロットル最小/最大-->
+        EMD.LOAD_KBN             loadKbn,           <!--負荷有/無-->
+        EMD.REG_RPM              regRpm,            <!--回転数：調整区分-->
+        EMD.RPM_MAX              rpmMax,            <!--回転数：上限値-->
+        EMD.RPM_MIN              rpmMin,            <!--回転数：下限値-->
+        EMD.RPM_TARGET           rpmTarget,         <!--回転数：目標値-->
+        EMD.REG_ST               regSt,             <!--燃料噴射量：調整区分-->
+        EMD.ST_MAX               stMax,             <!--燃料噴射量：上限値-->
+        EMD.ST_MIN               stMin,             <!--燃料噴射量：下限値-->
+        EMD.ST_TARGET            stTarget,          <!--燃料噴射量：目標値-->
+        EMD.REG_KW               regKw,             <!--出力：調整区分-->
+        EMD.KW_MAX               kwMax,             <!--出力：上限値-->
+        EMD.KW_MIN               kwMin,             <!--出力：下限値-->
+        EMD.KW_TARGET            kwTarget,          <!--出力：目標値-->
+        EMD.REG_NM               regNm,             <!--トルク：調整区分-->
+        EMD.NM_MAX               nmMax,             <!--トルク：上限値-->
+        EMD.NM_MIN               nmMin,             <!--トルク：下限値-->
+        EMD.NM_TARGET            nmTarget,          <!--トルク：目標値-->
+        EMD.REG_LPRS             regLprs,           <!--潤滑油圧力：調整区分-->
+        EMD.LPRS_MAX             lprsMax,           <!--潤滑油圧力：上限値-->
+        EMD.LPRS_MIN             lprsMin,           <!--潤滑油圧力：下限値-->
+        EMD.TRN_MAX              trnMax,            <!--回転ハンチング（上限値）rpm-->
+        EMD.POWER_RPM            powerRpm,          <!--動力計回転数＜9999＞-->
+        EMD.POWER_NM             powerNm,           <!--動力計吸収トルク＜999.9＞-->
+        EMD.COOL_TEMP_IN         coolTempIn,        <!--冷却水温度（入口）＜999.9＞-->
+        EMD.COOL_TEMP_OUT        coolTempOut,       <!--冷却水温度（出口）＜999.9＞-->
+        EMD.L_TEMP               lTemp,             <!--潤滑油温度＜999.9＞-->
+        EMD.F_SUPPLY             fSupply,           <!--燃料供給温度＜99.9＞-->
+        EMD.F_TEMP               fTemp,             <!--燃料流量測定温度＜99.9＞-->
+        EMD.IN_TEMP              inTemp,            <!--吸気温度＜99.9＞-->
+        EMD.IN_HUM               inHum,             <!--吸気湿度＜99.9＞-->
+        EMD.L_PRS                lPrs,              <!--潤滑油圧力＜9999＞-->
+        EMD.F_PRS                fPrs,              <!--燃料供給圧力＜999.9＞-->
+        EMD.PA_HG                paHg,              <!--大気圧＜999.9＞-->
+        EMD.F_ML                 fMl,               <!--燃料流量＜999.999＞-->
+        EMD.F_RML                fRml,              <!--燃料消費量(補正流量）(ml/min)＜999.999＞-->
+        EMD.TRN_RPM              trnRpm,            <!--回転ハンチング＜99＞-->
+        EMD.Q_ST                 qSt,               <!--燃料噴射量＜99.9＞-->
+        EMD.PS_KW                psKw,              <!--出力＜999.9＞-->
+        EMD.SK_KW                skKw,              <!--修正出力＜999.9＞-->
+        EMD.TK_NM                tkNm,              <!--修正トルク＜999.9＞-->
+        EMD.KEISUU               keisuu,            <!--修正係数＜9.9999＞-->
+        EMD.PA_K                 paK,               <!--大気係数-->
+        EMD.FM_K                 fmK,               <!--空燃費係数-->
+        EMD.Q_GH                 qGh,               <!--単位燃料供給量-->
+        EMD.R_HG                 rHg,               <!--過給機圧力比-->
+        EMD.PW_HG                pwHg,              <!--水蒸気分圧-->
+        EMD.L_HG                 lHg,               <!--飽和水蒸気圧-->
+        EMD.DENSITY              density,           <!--比重-->
+        EMD.PIN_PRS              pinPrs,            <!--ブースト圧力-->
+        EMD.H_TEMP               hTemp,             <!--湿球温度-->
+        EMD.CAL_KEISUU           calKeisuu,         <!--修正係数＜発電機仕様エンジン＞-->
+        SUBSTR(EMD.STEP_STARTTIME,1,2) || ':'||SUBSTR(EMD.STEP_STARTTIME,3,2) 
+          || ':'||SUBSTR(EMD.STEP_STARTTIME,5,2) stepStartTime,        <!--ならし：Step開始時刻-->
+        EMD.EGR_MAX              egrMax,            <!--EGR開弁温度 上限値-->
+        EMD.EGR_MIN              egrMin,            <!--EGR開弁温度 下限値-->
+        EMD.EGR_TEMP             egrTemp,           <!--EGR温度測定値-->
+        EMD.TEIKAKU_KBN          teikakuKbn,        <!--定格出力項目＜1=定格出力項目(測定ﾊﾟﾀｰﾝﾏｽﾀから)＞-->
+        EMD.CREATION_DATETIME    createDt,          <!--作成日時-->
+        EMD.CREATION_BY_USER     createUserId,      <!--作成者-->
+        EMD.CREATION_BY_PGM      createUserPg,      <!--作成プログラム-->
+        EMD.LAST_UPDATE_DATETIME updateDt,          <!--最終更新日時-->
+        EMD.LAST_UPDATED_BY_USER updateUserId,      <!--最終更新者-->
+        EMD.LAST_UPDATED_BY_PGM  updateUserPg,      <!--最終更新プログラム-->
+        CASE                                        <!--学習機能ステップフラグ：0：通常ステップ/1：学習ステップ-->
+          WHEN EMD.LEARN_FLAG = '0' THEN '通常'
+          WHEN EMD.LEARN_FLAG = '1' THEN '学習'
+          ELSE NULL
+        END learnFlag,
+        CASE                                        <!--無人調整狙いフラグ：0：上・下限（狙い設定なし）/1：上目（目標値より上）/2：下目（目標値より下）-->
+          WHEN EMD.TARGET_FLAG = '0' THEN '無'
+          WHEN EMD.TARGET_FLAG = '1' THEN '上目'
+          WHEN EMD.TARGET_FLAG = '2' THEN '下目'
+          ELSE NULL
+        END targetFlag,
+        CASE                                        <!--無人調整モード：0：手動/1：自動(無人)-->
+          WHEN EMD.AUTO_MODE = '0' THEN '手動'
+          WHEN EMD.AUTO_MODE = '1' THEN '自動'
+          ELSE NULL
+        END autoMode,
+        EMD.ECU_IN_TEMP          ecuInTemp,         <!--ECU吸気温度(℃)-->
+        EMD.ECU_IN_TEMP_LOW      ecuInTempLow,      <!--ECU吸気温度下限<99.9>-->
+        EMD.ECU_IN_TEMP_HIGH     ecuInTempHigh      <!--ECU吸気温度上限<99.9>-->
+      FROM
+        D_DETAIL_07 EMD
+      WHERE
+        EMD.ID_NO = #idno# AND
+        EMD.MEASURE_DATETIME = #inspectionYmdHms#
+      ORDER BY
+        EMD.SEQNO, EMD.MEASURE_NAME
+    </statement>
+    
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン工程詳細:フリクションロス実測]                                                -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineFrictionLossDetail">
+    SELECT
+        FRQ.工場コード       plantCd,                   <!--工場コード-->
+        FRQ.ラインコード     lineCd,                    <!--ラインコード-->
+        FRQ.計測端末ホスト名 inspectionTerminalNm,      <!--計測端末ホスト名-->
+        FRQ.計測日時         inspectionDt,              <!--計測日時-->
+        FRQ.検査担当コード   inspectionEmployeeCd,      <!--検査担当コード-->
+        FRQ.IDNO             idno,                      <!--IDNO-->
+        FRQ.型式コード       productModelCd,            <!--型式コード-->
+        FRQ.機番             serial6,                   <!--機番-->
+        FRQ.計測パターン     mesurePattern,             <!--計測パターン-->
+        FRQ.回転数           standardRpm,               <!--規格値：回転数(rpm)-->
+        FRQ.最大             mesureMaxVal,              <!--計測値：最大値(Nm)-->
+        FRQ.最小             mesureMinVal,              <!--計測値：最小値(Nm)-->
+        FRQ.平均             mesureAvgVal,              <!--計測値：平均値(Nm)-->
+        CASE                                            <!--計測値：平均判定-->
+          WHEN FRQ.平均判定 = '0' THEN 'NG'
+          WHEN FRQ.平均判定 = '1' THEN 'OK'
+          ELSE NULL
+        END mesureResult,
+        FRQ.気温             mesureTemperature,         <!--計測値：気温-->
+        FRQ.最大値           standardMaxVal,            <!--規格値：最大値(Nm)-->
+        FRQ.最小値           standardMinVal,            <!--規格値：最小値(Nm)-->
+        FRQ.平均上限         standardAvgUpperVal,       <!--規格値：平均値 上限(Nm)-->
+        FRQ.平均下限         standardAvgLowerVal,       <!--規格値：平均値 下限(Nm)-->
+        FRQ.伝送日時         transmissionDt,            <!--伝送日時-->
+        FRQ.伝送判定         transmissionResult,        <!--伝送判定-->
+        FRQ.作成日時         createDt,
+        FRQ.作成者           createUserId,
+        FRQ.作成プログラム   createUserPg,
+        FRQ.更新日時         updateDt,
+        FRQ.更新者           updateUserId,
+        FRQ.更新プログラム   updateUserPg
+    FROM
+        TBL_フリクションロス実測 FRQ
+    WHERE
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        (FRQ.型式コード, FRQ.機番) IN ((#paramSerial.productModelCd#, #paramSerial.serial6#))
+    ORDER BY
+        FRQ.計測日時
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン工程詳細:3C精密測定]                                                          -->
+    <!-- ************************************************************************************** -->
+    <!--詳細情報-->
+    <statement id="SelectEngine3CInspectionDetail">
+    SELECT
+        DTL_G.MODEL_CD                 productModelCd,  <!--型式コード-->
+        DTL_G.SERIAL6                  serial6,         <!--機番-->
+        PMD.DELIVERY_DATE              deliveryDt,      <!--搬入日時-->
+        PMD.INSPECTION_DATE            inspectionDt,    <!--測定日-->
+        PMD.CRITICAL_PARTS_CD          partsTypeCd,     <!--部品区分コード-->
+        PMD.OPERATION_KIND             operationKind,   <!--作業区分-->
+        PMD.CRITICAL_PARTS_NM          partsNm,         <!--部品名-->
+        PMD.MATERIAL_PROCESSING_DATE   processYmd,      <!--加工日-->
+        PMD.MATERIAL_PROCESSING_NUM    processNum,      <!--連番-->
+        PMD.PARTS_NUMBER               PartsNum,        <!--品番-->
+        PMD.RESULT                     result,          <!--結果-->
+        PMD.NOTES                      notes            <!--備考-->
+    FROM
+        TT_SQ_PRECISE_MEASURE_DATA PMD
+    INNER JOIN
+    (
+        SELECT
+            MODEL_CD, SERIAL6, CRITICAL_PARTS_CD, CRITICAL_PARTS_NM, MATERIAL_PROCESSING_DATE, MATERIAL_PROCESSING_NUM
+        FROM
+            TT_SQ_3C_DETAIL
+        GROUP BY
+            MODEL_CD, SERIAL6, CRITICAL_PARTS_CD, CRITICAL_PARTS_NM, MATERIAL_PROCESSING_DATE, MATERIAL_PROCESSING_NUM
+    )   DTL_G ON 
+            DTL_G.CRITICAL_PARTS_NM = PMD.CRITICAL_PARTS_NM AND 
+            DTL_G.MATERIAL_PROCESSING_DATE = PMD.MATERIAL_PROCESSING_DATE AND
+            DTL_G.MATERIAL_PROCESSING_NUM = PMD.MATERIAL_PROCESSING_NUM AND
+            DTL_G.CRITICAL_PARTS_CD = PMD.CRITICAL_PARTS_CD
+    WHERE
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        (DTL_G.MODEL_CD, DTL_G.SERIAL6) IN ((#paramSerial.productModelCd#, #paramSerial.serial6#)) AND
+        <!-- [部品区分検索] -->
+        PMD.CRITICAL_PARTS_CD = #paramPartsCd#
+    </statement>
+    
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン工程詳細:3C精密測定ファイル検索]                                              -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngine3CInspectionFile">
+    SELECT
+        PMF.CRITICAL_PARTS_NM              partsNm,         <!--部品名-->
+        PMF.MATERIAL_PROCESSING_DATE       processYmd,      <!--加工日-->
+        PMF.MATERIAL_PROCESSING_NUM        processNum,      <!--連番-->
+        PMF.PARTS_NUMBER                   partsNumber,     <!--品番-->
+        PMF.CRITICAL_PARTS_CD              partsTypeCd,     <!--部品区分コード-->
+        PMF.FILE_NUMBER                    fileNum,         <!--ファイル番号-->
+        PMF.FILE_NAME                      fileNm,          <!--ファイル名-->
+        PMF.FILE_DATA                      fileData,        <!--ファイルデータ-->
+        PMF.FILE_SIZE                      fileSize,        <!--ファイルサイズ-->
+        PMF.CREATION_DATETIME              createDt,
+        PMF.CREATED_BY_USER                createUserId,
+        PMF.CREATED_BY_PGM                 createUserPg,
+        PMF.LAST_UPDATE_DATETIME           updateDt,
+        PMF.LAST_UPDATED_BY_USER           updateUserId,
+        PMF.LAST_UPDATED_BY_PGM            updateUserPg
+    FROM
+        TT_SQ_PRECISE_MEASURE_FILE PMF
+    WHERE
+        PMF.CRITICAL_PARTS_NM = #partsNm#
+    AND PMF.MATERIAL_PROCESSING_DATE = #processYmd#
+    AND PMF.MATERIAL_PROCESSING_NUM = #processNum#
+    AND PMF.CRITICAL_PARTS_CD = #partsTypeCd#
+    ORDER BY
+        PMF.FILE_NUMBER
+    </statement>
+    
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン工程詳細:03エンジン燃料噴射時期検索]                                          -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineFuelInjection03Detail">
+      SELECT
+        生産型式コード              productModelCd, 
+        機番                        serial6, 
+        測定日時                    inspectionDt, 
+        エンジン刻印名              carvedSealNm, 
+        基準ポンプシム寸法          pumpShimSize, 
+        気筒数                      cylinderQty, 
+        ストローク                  stroke, 
+        ボア                        bore, 
+        燃焼方式                    combustion, 
+        ピストン出代上限            pistonBumpUpperLimit, 
+        ピストン出代下限            pistonBumpLowerLimit, 
+        トップクリアランス上限      topClearanceUpperLimit, 
+        トップクリアランス下限      topClearanceLowerLimit, 
+        燃料噴射時期上限            injectionTimingUpperLimit, 
+        燃料噴射時期下限            injectionTimingLowerLimit, 
+        セットシム量上限            symUpperLimit, 
+        セットシム量下限            symLowerLimit, 
+        進角調整                    advanceAdjust, 
+        ラック位置                  rackPosition, 
+        ラック寸法差                rackSizeDiff, 
+        ポンプネジ                  pumpScrew, 
+        噴射時期補正値              injectionTimingAdjustVal, 
+        測定パスフラグ              measurementPathTyp, 
+        ガスケット対象フラグ        gasketTyp, 
+        標準ガスケット品番          gasketNum, 
+        ピストン出代気筒1           piston01Bump, 
+        ピストン出代気筒2           piston02Bump, 
+        ピストン出代気筒3           piston03Bump, 
+        ピストン出代気筒4           piston04Bump, 
+        出代寸法誤差                bumpSizeVariance, 
+        トップクリアランス気筒1     topClearancePiston01, 
+        トップクリアランス気筒2     topClearancePiston02, 
+        トップクリアランス気筒3     topClearancePiston03, 
+        トップクリアランス気筒4     topClearancePiston04, 
+        燃料噴射時期気筒1           injectionTimingPiston01, 
+        燃料噴射時期気筒2           injectionTimingPiston02, 
+        燃料噴射時期気筒3           injectionTimingPiston03, 
+        燃料噴射時期気筒4           injectionTimingPiston04, 
+        シム枚数2                   symQty200, 
+        シム枚数25                  symQty250, 
+        シム枚数3                   symQty300, 
+        シム枚数35                  symQty350, 
+        シム枚数175                 symQty175, 
+        CASE
+          WHEN 総合判定 = 0 THEN 'OK'
+          WHEN 総合判定 = 1 THEN 'NG'
+          WHEN 総合判定 = 2 THEN '再計測'
+        END result,
+        選定ガスケット部品番号      selectedGasketNum, 
+        ガスケット寸法              gasketSize, 
+        測定点数                    measurementQty, 
+        測定値生1気筒1              measurePiston01_1, 
+        測定値生1気筒2              measurePiston01_2, 
+        測定値生1気筒3              measurePiston01_3, 
+        測定値生1気筒4              measurePiston01_4, 
+        測定値生2気筒1              measurePiston02_1, 
+        測定値生2気筒2              measurePiston02_2, 
+        測定値生2気筒3              measurePiston02_3, 
+        測定値生2気筒4              measurePiston02_4, 
+        測定値生3気筒1              measurePiston03_1, 
+        測定値生3気筒2              measurePiston03_2, 
+        測定値生3気筒3              measurePiston03_3, 
+        測定値生3気筒4              measurePiston03_4, 
+        測定値生4気筒1              measurePiston04_1, 
+        測定値生4気筒2              measurePiston04_2, 
+        測定値生4気筒3              measurePiston04_3, 
+        測定値生4気筒4              measurePiston04_4, 
+        治具補正1                   jigAdjust1, 
+        治具補正2                   jigAdjust2, 
+        治具補正3                   jigAdjust3, 
+        測定補正値1気筒1            adjustPiston01_1, 
+        測定補正値1気筒2            adjustPiston01_2, 
+        測定補正値1気筒3            adjustPiston01_3, 
+        測定補正値1気筒4            adjustPiston01_4, 
+        測定補正値2気筒1            adjustPiston02_1, 
+        測定補正値2気筒2            adjustPiston02_2, 
+        測定補正値2気筒3            adjustPiston02_3, 
+        測定補正値2気筒4            adjustPiston02_4, 
+        測定補正値3気筒1            adjustPiston03_1, 
+        測定補正値3気筒2            adjustPiston03_2, 
+        測定補正値3気筒3            adjustPiston03_3, 
+        測定補正値3気筒4            adjustPiston03_4, 
+        測定補正値4気筒1            adjustPiston04_1, 
+        測定補正値4気筒2            adjustPiston04_2, 
+        測定補正値4気筒3            adjustPiston04_3, 
+        測定補正値4気筒4            adjustPiston04_4, 
+        出代平均値                  bumpAveVal, 
+        出代最大値                  bumpMaxVal, 
+        出代最小値                  bumpMinVal, 
+        出代寸法バラツキ基準値      bumpSizeBaseVal, 
+        エラーメッセージ1           errorMessage1, 
+        エラーメッセージ2           errorMessage2, 
+        エラーメッセージ3           errorMessage3, 
+        測定号機                    measureTerminal,
+        測定方法気筒                measureMethodPiston, 
+        測定方法方向                measureMethodDirection, 
+        測定補正値                  measureAdjustVal, 
+        燃焼室リセス                combustionRecess, 
+        ＦＩＴ補正値1気筒           fitAdjustPiston01, 
+        ＦＩＴ補正値2気筒           fitAdjustPiston02, 
+        ＦＩＴ補正値3気筒           fitAdjustPiston03, 
+        ＦＩＴ補正値4気筒           fitAdjustPiston04, 
+        ＦＩＴ補正値平均値          fitAdjustAveVal
+      FROM 
+      	TBL噴射計測データ
+      WHERE
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        (生産型式コード, 機番) IN ((#paramSerial.productModelCd#, #paramSerial.serial6#))
+    </statement>
+    
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン工程詳細:07エンジン燃料噴射時期検索]                                          -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineFuelInjection07Detail">
+      SELECT 
+        生産型式コード              productModelCd, 
+        機番                        serial6, 
+        測定日時                    inspectionDt, 
+        ラインコード                stationCd, 
+        NULL                        stationNm, 
+        計測端末ホスト名            measureTerminal, 
+        検査担当コード              testerCd, 
+        検査担当名                  testerNm, 
+        噴射時期実測値1             injectionTimingVal1, 
+        噴射時期判定1               injectionTimingResult1, 
+        噴射時期実測値2             injectionTimingVal2, 
+        噴射時期判定2               injectionTimingResult2, 
+        噴射時期実測値3             injectionTimingVal3, 
+        噴射時期判定3               injectionTimingResult3, 
+        噴射時期実測値4             injectionTimingVal4, 
+        噴射時期判定4               injectionTimingResult4, 
+        噴射時期実測値平均          injectionTimingAveVal, 
+        CASE
+          WHEN 噴射時期判定平均 = '0' THEN 'NG'
+          WHEN 噴射時期判定平均 = '1' THEN 'OK'
+        END injectionTimingAveResult,
+        気温                        temperature, 
+        ピストン出代実測値1         pistonBumpVal1, 
+        ピストン出代実測値2         pistonBumpVal2, 
+        ピストン出代実測値3         pistonBumpVal3, 
+        ピストン出代実測値4         pistonBumpVal4, 
+        ピストン出代実測値平均      pistonBumpAveVal, 
+        ピストン出代ランク          pistonBumpRank, 
+        噴射時期上限                injectionTimingUpperLimit, 
+        噴射時期下限                injectionTimingLowerLimit, 
+        ピストン出代上限            pistonBumpUpperLimit, 
+        ピストン出代ランク上        pistonBumpRankUpper, 
+        ピストン出代ランク下        pistonBumpRankLower,
+        ピストン出代下限            pistonBumpLowerLimit,
+        パルスタイミング角度        pulseTimingAngle, 
+        噴射ポンプ品番              pumpNum, 
+        噴射時期気筒間誤差角度      injectionTimingVarianceAngle, 
+        伝送日付                    transferYmd, 
+        伝送判定                    transferResult
+      FROM 
+        TBL_07噴射時期計測データ
+      WHERE
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        (生産型式コード, 機番) IN ((#paramSerial.productModelCd#, #paramSerial.serial6#))
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [重要チェック_除外登録]                                                                -->
+    <!-- ************************************************************************************** -->
+    <statement id="InsertCriticalCheckExclude">
+      INSERT INTO
+      TM_SQ_CRITICAL_CHECK_EXCLUDE (
+          MODEL_CD                ,
+          SERIAL_NUMBER           ,
+          EXCLUDE_PARTS_OPR_KIND  ,
+          EXCLUDE_PARTS_OPR_VALUE ,
+          EXCLUDE_STATION         ,
+          EXCLUDE_PATRS_NAME      ,
+          NOTES                   ,
+          CREATION_DATETIME       ,
+          CREATED_BY_USER         ,
+          CREATED_BY_PGM          ,
+          LAST_UPDATE_DATETIME    ,
+          LAST_UPDATED_BY_USER    ,
+          LAST_UPDATED_BY_PGM
+      ) VALUES (
+          #paramproductModelCd#   ,
+          #paramserial#           ,
+          #paramoprKind#          ,
+          #paramoprValue#         ,
+          #paramStation#         ,
+          #paramPartsNm#      ,
+          #paramnotes#                   ,
+          SYSDATE       ,
+          #paramupdBy#         ,
+          #paramupdSys#          ,
+          SYSDATE    ,
+          #paramupdBy#    ,
+          #paramupdSys#
+      )
+    </statement>
+    
+    <!-- ************************************************************************************** -->
+    <!-- [重要チェック_除外削除]                                                                -->
+    <!-- ************************************************************************************** -->
+    <statement id="DeleteCriticalCheckExclude">
+      DELETE
+      TM_SQ_CRITICAL_CHECK_EXCLUDE
+      WHERE
+      MODEL_CD                = #paramproductModelCd# AND
+      SERIAL_NUMBER           = #paramserial#   AND
+      EXCLUDE_PARTS_OPR_KIND  = #paramoprKind#  AND
+      EXCLUDE_PARTS_OPR_VALUE = #paramoprValue#
+      <isNotEmpty property="paramStation" prepend=" AND ">
+        EXCLUDE_STATION         = #paramStation#
+      </isNotEmpty>
+      <isNotEmpty property="paramPartsNm" prepend=" AND ">
+        EXCLUDE_PATRS_NAME      = #paramPartsNm#
+      </isNotEmpty>
+      <isEmpty property="paramStation" prepend=" AND ">
+        EXCLUDE_STATION IS NULL
+      </isEmpty>
+      <isEmpty property="paramPartsNm" prepend=" AND ">
+        EXCLUDE_PATRS_NAME IS NULL
+      </isEmpty>      
+
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン:チェック対象外リスト取得]                                                    -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectNACheckList">
+      SELECT DISTINCT
+          RPAD(TIP.CODE_CLASS,3) || TIP.CODE_VALUE      KEY,
+          TIP.CODE_NAME                                 DISP_DATA
+      FROM
+          TM_SQ_CRITICAL_CHECK_TARGET TAR
+          INNER JOIN TBL_TIPS_CODE_NAMES TIP ON (
+              TAR.PARTS_OPR_KIND = TIP.CODE_CLASS AND
+              TAR.PARTS_OPR_VALUE = TIP.CODE_VALUE
+          )
+      ORDER BY
+          DISP_DATA
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン:チェック対象外リスト(詳細)取得]                                              -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectNACheckListDtl">
+      SELECT DISTINCT
+          RPAD(TAR.CHECK_STATION_CD_1,6) || TAR.TARGET_PARTS_NAME KEY,
+          RPAD(TAR.CHECK_STATION_CD_1,6) || ' ' || RPAD(MS.MS_ST_NAME,20) || ' ' || TAR.TARGET_PARTS_NAME   DISP_DATA
+      FROM
+          TM_SQ_CRITICAL_CHECK_TARGET TAR
+          INNER JOIN MS_STATION MS ON (
+              TAR.CHECK_STATION_CD_1   = MS.MS_STATION    AND
+              TAR.TARGET_PARTS_NAME   IS NOT NULL AND
+              TAR.PARTS_OPR_KIND = '4'  AND
+              TAR.PARTS_OPR_VALUE = '01'
+          )
+      ORDER BY
+          DISP_DATA
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ:生産指示データ取得]                                                          -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectInProductTrac">
+      WITH EXC_CNT AS (
+	      SELECT
+	          MODEL_CD,
+	          SERIAL_NUMBER  , 
+	          COUNT(MODEL_CD) DATA_CNT
+	      FROM   TM_SQ_CRITICAL_CHECK_EXCLUDE
+	      GROUP BY 
+	          MODEL_CD,
+	          SERIAL_NUMBER
+      )
+        SELECT DISTINCT
+            MS.MS_JUN_YYMM || '-' || LPAD(MS.MS_JUN_NO,5,0) JUN_NO,
+            SUBSTR(MS.MS_B_KATA_C,1,5) || '-' || SUBSTR(MS.MS_B_KATA_C,6,5)  MODEL_CD,
+            MS.MS_B_KATA_N  MODEL_NM,
+            MS.MS_KIBAN     SERIAL_NO,
+            MS.MS_KIBAN     SERIAL6,            
+            TO_CHAR(MS.MS_KAN_YYMMDD,'YYYY/MM/DD') KAN_YO_YM,
+            CASE 
+              WHEN EXC.DATA_CNT > 0 THEN '有'
+              ELSE '無'
+            END DATA_CNT,
+            CASE
+              WHEN MS.MS_SIJI_LVL = '1' THEN '30'
+              WHEN MS.MS_SIJI_LVL = '3' THEN '10'            
+              WHEN MS.MS_SIJI_LVL = '7' THEN '10'
+            END PTN_CD
+        FROM
+            MS_SAGYO MS
+            LEFT JOIN EXC_CNT EXC ON (
+              MS.MS_B_KATA_C = EXC.MODEL_CD AND
+              MS.MS_KIBAN    = EXC.SERIAL_NUMBER
+            )         
+      WHERE
+          MS.MS_SIJI_LVL IN ('1')
+        <isNotEmpty property="modelCd" prepend=" AND ">
+          MS.MS_B_KATA_C LIKE CONCAT(#modelCd#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="modelNm" prepend=" AND ">
+          MS.MS_B_KATA_N LIKE CONCAT(#modelNm#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="serial" prepend=" AND ">
+          MS.MS_KIBAN LIKE CONCAT(#serial#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="dtCompFrom" prepend=" AND ">
+          MS.MS_KAN_YYMMDD <![CDATA[>=]]> #dtCompFrom#
+        </isNotEmpty>
+        <isNotEmpty property="dtCompTo" prepend=" AND ">
+          MS.MS_KAN_YYMMDD <![CDATA[<=]]> #dtCompTo#
+        </isNotEmpty>
+      ORDER BY
+        JUN_NO
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン:生産指示データ取得]                                                          -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectInProductEngine">
+      WITH EXC_CNT AS (
+        SELECT
+          MODEL_CD,
+          SERIAL_NUMBER  ,
+          COUNT(MODEL_CD) DATA_CNT
+        FROM   TM_SQ_CRITICAL_CHECK_EXCLUDE
+        GROUP BY
+          MODEL_CD,
+          SERIAL_NUMBER
+      )
+      SELECT DISTINCT
+          MS.MS_JUN_YYMM || '-' || LPAD(MS.MS_JUN_NO,5,0) JUN_NO,      
+          SUBSTR(MS.MS_B_KATA_C,1,5) || '-' || SUBSTR(MS.MS_B_KATA_C,6,5)  MODEL_CD,
+          MS.MS_B_KATA_N  MODEL_NM,
+          NVL(SER7.SERIAL7,MS.MS_KIBAN)     SERIAL_NO,
+          SER7.SERIAL6                      SERIAL6,
+          TO_CHAR(MS.MS_KAN_YYMMDD,'YYYY/MM/DD') KAN_YO_YM,
+          CASE
+            WHEN EXC.DATA_CNT > 0 THEN '有'
+            ELSE '無'
+          END DATA_CNT,
+          CASE
+            WHEN MS.MS_SIJI_LVL = '1' THEN '30'
+            WHEN MS.MS_SIJI_LVL = '3' THEN '10'
+            WHEN MS.MS_SIJI_LVL = '7' THEN '10'
+          END PTN_CD
+      FROM
+          MS_SAGYO MS
+          LEFT JOIN EXC_CNT EXC ON (
+            MS.MS_B_KATA_C = EXC.MODEL_CD AND
+            MS.MS_KIBAN    = EXC.SERIAL_NUMBER
+          )
+          LEFT JOIN TT_DI_SERIAL7 SER7 ON (
+            MS.MS_B_KATA_C = SER7.MODEL_CD AND
+            MS.MS_KIBAN    = SER7.SERIAL6
+          )        
+      WHERE
+          MS.MS_SIJI_LVL IN ('3','7')
+        <isNotEmpty property="modelCd" prepend=" AND ">
+          MS.MS_B_KATA_C LIKE CONCAT(#modelCd#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="modelNm" prepend=" AND ">
+          MS.MS_B_KATA_N LIKE CONCAT(#modelNm#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="serial" prepend=" AND ">
+          SER7.SERIAL7 LIKE CONCAT(#serial#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="dtCompFrom" prepend=" AND ">
+          MS.MS_KAN_YYMMDD <![CDATA[>=]]> #dtCompFrom#
+        </isNotEmpty>
+        <isNotEmpty property="dtCompTo" prepend=" AND ">
+          MS.MS_KAN_YYMMDD <![CDATA[<=]]> #dtCompTo#
+        </isNotEmpty>
+        ORDER BY
+          JUN_NO
+
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ:チェック対象外リスト取得]                                                    -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectNotApplicableTrac">
+      WITH TAR_DATA AS (
+        SELECT DISTINCT
+          RPAD(TMP.CHECK_STATION_CD_1,6) ST_CD,
+          TMP.TARGET_PARTS_NAME          PART_NM,
+          RPAD(TMP.CHECK_STATION_CD_1,6) || ' ' || RPAD(MS.MS_ST_NAME,20) || ' ' || TMP.TARGET_PARTS_NAME   DISP_DATA
+        FROM
+          TM_SQ_CRITICAL_CHECK_TARGET TMP
+          INNER JOIN MS_STATION MS ON (
+            TMP.CHECK_STATION_CD_1   = MS.MS_STATION    AND
+            TMP.TARGET_PARTS_NAME   IS NOT NULL
+          )
+      )
+      SELECT DISTINCT
+        SUBSTR(EXC.MODEL_CD,1,5) || '-' || SUBSTR(EXC.MODEL_CD,6,5)  MODEL_CD,
+        MS.MS_KATASIKIMEI       MODEL_NM,
+        EXC.SERIAL_NUMBER        SERIAL_NO,
+        EXC.SERIAL_NUMBER        SERIAL6,        
+        TIP.CODE_NAME           PARTS_OPE,
+        RPAD(TIP.CODE_CLASS,3) || TIP.CODE_VALUE      OPE_KEY,
+        TAR.DISP_DATA  DTL,
+        RPAD(TAR.ST_CD,6) || TAR.PART_NM DTL_KEY,
+        EXC.NOTES       NOTES,
+        TO_CHAR(EXC.CREATION_DATETIME,'YYYY/MM/DD HH24:MI:SS') INS_DT,
+        EXC.CREATED_BY_USER  INS_BY,
+        MS.MS_PATURN  PTN_CD,
+        SV.指示月度 || '-' || LPAD(SV.指示連番,5,0) JUN_NO,
+        TO_CHAR(SV.完成予定日,'YYYY/MM/DD') KAN_YO_YM            
+      FROM
+        TM_SQ_CRITICAL_CHECK_EXCLUDE EXC
+        INNER JOIN TBL_TIPS_CODE_NAMES TIP ON (
+          TIP.CODE_CLASS = EXC.EXCLUDE_PARTS_OPR_KIND AND
+          TIP.CODE_VALUE = EXC.EXCLUDE_PARTS_OPR_VALUE
+        )
+        LEFT JOIN MS_GENKOU MS ON (
+          MS.MS_KATASIKI = EXC.MODEL_CD   AND
+          MS.MS_KOJOU = '28'          
+        )
+        LEFT JOIN TAR_DATA TAR ON (
+          EXC.EXCLUDE_STATION = TAR.ST_CD AND
+          EXC.EXCLUDE_PATRS_NAME = TAR.PART_NM
+        )
+        LEFT JOIN TBL_作業指示保存 SV ON (
+            SV.指示レベル = '1'  AND
+            SV.型式コード = EXC.MODEL_CD  AND
+            SV.機番 = EXC.SERIAL_NUMBER
+        )                
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="modelCd" prepend=" AND ">
+          EXC.MODEL_CD LIKE CONCAT(#modelCd#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="modelNm" prepend=" AND ">
+          MS.MS_KATASIKIMEI LIKE CONCAT(#modelNm#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="serial" prepend=" AND ">
+          EXC.SERIAL_NUMBER LIKE CONCAT(#serial#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="oprKind" prepend=" AND ">
+          EXC.EXCLUDE_PARTS_OPR_KIND = #oprKind#
+        </isNotEmpty>
+        <isNotEmpty property="oprValue" prepend=" AND ">
+          EXC.EXCLUDE_PARTS_OPR_VALUE = #oprValue#
+        </isNotEmpty>
+        <isNotEmpty property="st" prepend=" AND ">
+          EXC.EXCLUDE_STATION =  #st#
+        </isNotEmpty>
+        <isNotEmpty property="partsNm" prepend=" AND ">
+          EXC.EXCLUDE_PATRS_NAME =  #partsNm#
+        </isNotEmpty>
+        <isNotEmpty property="productKindCd" prepend=" AND ">
+          MS.MS_PATURN =  #productKindCd#
+        </isNotEmpty>
+        <isNotEmpty property="dtFrom" prepend=" AND ">
+          EXC.CREATION_DATETIME <![CDATA[>=]]> #dtFrom#
+        </isNotEmpty>
+        <isNotEmpty property="dtTo" prepend=" AND ">
+          EXC.CREATION_DATETIME <![CDATA[<=]]> #dtTo#
+        </isNotEmpty>
+        <isNotEmpty property="dtCompFrom" prepend=" AND ">
+          SV.完成予定日 <![CDATA[>=]]> #dtCompFrom#
+        </isNotEmpty>
+        <isNotEmpty property="dtCompTo" prepend=" AND ">
+          SV.完成予定日 <![CDATA[<=]]> #dtCompTo#
+        </isNotEmpty>
+      </dynamic>
+        ORDER BY
+          SERIAL_NO,OPE_KEY,DTL_KEY
+      
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン:チェック対象外リスト取得]                                                    -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectNotApplicableEngine">
+      WITH TAR_DATA AS (
+        SELECT DISTINCT
+          RPAD(TMP.CHECK_STATION_CD_1,6) ST_CD,
+          TMP.TARGET_PARTS_NAME          PART_NM,
+          RPAD(TMP.CHECK_STATION_CD_1,6) || ' ' || RPAD(MS.MS_ST_NAME,20) || ' ' || TMP.TARGET_PARTS_NAME   DISP_DATA
+        FROM
+          TM_SQ_CRITICAL_CHECK_TARGET TMP
+          INNER JOIN MS_STATION MS ON (
+            TMP.CHECK_STATION_CD_1   = MS.MS_STATION    AND
+            TMP.TARGET_PARTS_NAME   IS NOT NULL
+        )
+      )
+      SELECT DISTINCT
+        SUBSTR(EXC.MODEL_CD,1,5) || '-' || SUBSTR(EXC.MODEL_CD,6,5)  MODEL_CD,
+        MS.MS_KATASIKIMEI       MODEL_NM,
+        NVL(SER7.SERIAL7,EXC.SERIAL_NUMBER)        SERIAL_NO,
+        EXC.SERIAL_NUMBER        SERIAL6,
+        TIP.CODE_NAME           PARTS_OPE,
+        RPAD(TIP.CODE_CLASS,3) || TIP.CODE_VALUE      OPE_KEY,
+        TAR.DISP_DATA  DTL,
+        RPAD(TAR.ST_CD,6) || TAR.PART_NM DTL_KEY,
+        EXC.NOTES       NOTES,
+        TO_CHAR(EXC.CREATION_DATETIME,'YYYY/MM/DD HH24:MI:SS') INS_DT,
+        EXC.CREATED_BY_USER  INS_BY,
+        MS.MS_PATURN  PTN_CD,
+        SV.指示月度 || '-' || LPAD(SV.指示連番,5,0) JUN_NO,
+        TO_CHAR(SV.完成予定日,'YYYY/MM/DD') KAN_YO_YM        
+      FROM
+        TM_SQ_CRITICAL_CHECK_EXCLUDE EXC
+        INNER JOIN TBL_TIPS_CODE_NAMES TIP ON (
+          TIP.CODE_CLASS = EXC.EXCLUDE_PARTS_OPR_KIND AND
+          TIP.CODE_VALUE = EXC.EXCLUDE_PARTS_OPR_VALUE
+        )
+        LEFT JOIN MS_GENKOU MS ON (
+          MS.MS_KATASIKI = EXC.MODEL_CD   AND
+          MS.MS_KOJOU = '28'
+        )
+        LEFT JOIN TAR_DATA TAR ON (
+          EXC.EXCLUDE_STATION = TAR.ST_CD AND
+          EXC.EXCLUDE_PATRS_NAME = TAR.PART_NM
+        )
+        LEFT JOIN TT_DI_SERIAL7 SER7 ON (
+          EXC.MODEL_CD = SER7.MODEL_CD AND
+          EXC.SERIAL_NUMBER    = SER7.SERIAL6
+        )
+        LEFT JOIN TBL_作業指示保存 SV ON (
+            SV.指示レベル in ('3','7')  AND
+            SV.型式コード = EXC.MODEL_CD  AND
+            SV.機番 = EXC.SERIAL_NUMBER
+        )        
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="modelCd" prepend=" AND ">
+          EXC.MODEL_CD LIKE CONCAT(#modelCd#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="modelNm" prepend=" AND ">
+          MS.MS_KATASIKIMEI LIKE CONCAT(#modelNm#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="serial" prepend=" AND ">
+          SER7.SERIAL7 LIKE CONCAT(#serial#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="oprKind" prepend=" AND ">
+          EXC.EXCLUDE_PARTS_OPR_KIND = #oprKind#
+        </isNotEmpty>
+        <isNotEmpty property="oprValue" prepend=" AND ">
+          EXC.EXCLUDE_PARTS_OPR_VALUE = #oprValue#
+        </isNotEmpty>
+        <isNotEmpty property="st" prepend=" AND ">
+          EXC.EXCLUDE_STATION =  #st#
+        </isNotEmpty>
+        <isNotEmpty property="partsNm" prepend=" AND ">
+          EXC.EXCLUDE_PATRS_NAME =  #partsNm#
+        </isNotEmpty>
+        <isNotEmpty property="productKindCd" prepend=" AND ">
+          MS.MS_PATURN =  #productKindCd#
+        </isNotEmpty>
+        <isNotEmpty property="dtFrom" prepend=" AND ">
+          EXC.CREATION_DATETIME <![CDATA[>=]]> #dtFrom#
+        </isNotEmpty>
+        <isNotEmpty property="dtTo" prepend=" AND ">
+          EXC.CREATION_DATETIME <![CDATA[<=]]> #dtTo#
+        </isNotEmpty>
+        <isNotEmpty property="dtCompFrom" prepend=" AND ">
+          SV.完成予定日 <![CDATA[>=]]> #dtCompFrom#
+        </isNotEmpty>
+        <isNotEmpty property="dtCompTo" prepend=" AND ">
+          SV.完成予定日 <![CDATA[<=]]> #dtCompTo#
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+        SERIAL_NO,OPE_KEY,DTL_KEY
+
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ:チェック対象外リスト詳細取得]                                                    -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectNotApplicableDetailTrac">
+      WITH TAR_DATA AS (
+        SELECT DISTINCT
+          RPAD(TMP.CHECK_STATION_CD_1,6) ST_CD,
+          TMP.TARGET_PARTS_NAME          PART_NM,
+          RPAD(TMP.CHECK_STATION_CD_1,6) || ' ' || RPAD(MS.MS_ST_NAME,20) || ' ' || TMP.TARGET_PARTS_NAME   DISP_DATA
+        FROM
+          TM_SQ_CRITICAL_CHECK_TARGET TMP
+          INNER JOIN MS_STATION MS ON (
+            TMP.CHECK_STATION_CD_1   = MS.MS_STATION    AND
+            TMP.TARGET_PARTS_NAME   IS NOT NULL
+        )
+      )
+      SELECT DISTINCT
+        SUBSTR(EXC.MODEL_CD,1,5) || '-' || SUBSTR(EXC.MODEL_CD,6,5)  MODEL_CD,
+        MS.MS_KATASIKIMEI       MODEL_NM,
+        EXC.SERIAL_NUMBER        SERIAL_NO,
+        TIP.CODE_NAME           PARTS_OPE,
+        RPAD(TIP.CODE_CLASS,3) || TIP.CODE_VALUE      OPE_KEY,
+        TAR.DISP_DATA  DTL,
+        RPAD(TAR.ST_CD,6) || TAR.PART_NM DTL_KEY,
+        EXC.NOTES       NOTES,
+        TO_CHAR(EXC.CREATION_DATETIME,'YYYY/MM/DD HH24:MI:SS') INS_DT,
+        EXC.CREATED_BY_USER  INS_BY,
+        MS.MS_PATURN  PTN_CD
+      FROM
+        TM_SQ_CRITICAL_CHECK_EXCLUDE EXC
+        INNER JOIN TBL_TIPS_CODE_NAMES TIP ON (
+          TIP.CODE_CLASS = EXC.EXCLUDE_PARTS_OPR_KIND AND
+          TIP.CODE_VALUE = EXC.EXCLUDE_PARTS_OPR_VALUE
+        )
+        LEFT JOIN MS_GENKOU MS ON (
+          MS.MS_KATASIKI = EXC.MODEL_CD   AND
+          MS.MS_KOJOU = '28'
+        )
+        LEFT JOIN TAR_DATA TAR ON (
+          EXC.EXCLUDE_STATION = TAR.ST_CD AND
+          EXC.EXCLUDE_PATRS_NAME = TAR.PART_NM
+        )
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="modelCd" prepend=" AND ">
+          EXC.MODEL_CD LIKE CONCAT(#modelCd#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="modelNm" prepend=" AND ">
+          MS.MS_KATASIKIMEI LIKE CONCAT(#modelNm#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="serial" prepend=" AND ">
+          EXC.SERIAL_NUMBER LIKE CONCAT(#serial#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="oprKind" prepend=" AND ">
+          EXC.EXCLUDE_PARTS_OPR_KIND = #oprKind#
+        </isNotEmpty>
+        <isNotEmpty property="oprValue" prepend=" AND ">
+          EXC.EXCLUDE_PARTS_OPR_VALUE = #oprValue#
+        </isNotEmpty>
+        <isNotEmpty property="st" prepend=" AND ">
+          EXC.EXCLUDE_STATION =  #st#
+        </isNotEmpty>
+        <isNotEmpty property="partsNm" prepend=" AND ">
+          EXC.EXCLUDE_PATRS_NAME =  #partsNm#
+        </isNotEmpty>
+        <isNotEmpty property="productKindCd" prepend=" AND ">
+          MS.MS_PATURN =  #productKindCd#
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+        OPE_KEY,DTL_KEY
+
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン:チェック対象外リスト詳細取得]                                                    -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectNotApplicableDetailEngine">
+      WITH TAR_DATA AS (
+        SELECT DISTINCT
+          RPAD(TMP.CHECK_STATION_CD_1,6) ST_CD,
+          TMP.TARGET_PARTS_NAME          PART_NM,
+          RPAD(TMP.CHECK_STATION_CD_1,6) || ' ' || RPAD(MS.MS_ST_NAME,20) || ' ' || TMP.TARGET_PARTS_NAME   DISP_DATA
+        FROM
+          TM_SQ_CRITICAL_CHECK_TARGET TMP
+          INNER JOIN MS_STATION MS ON (
+            TMP.CHECK_STATION_CD_1   = MS.MS_STATION    AND
+            TMP.TARGET_PARTS_NAME   IS NOT NULL
+          )
+      )
+      SELECT DISTINCT
+        SUBSTR(EXC.MODEL_CD,1,5) || '-' || SUBSTR(EXC.MODEL_CD,6,5)  MODEL_CD,
+        MS.MS_KATASIKIMEI       MODEL_NM,
+        NVL(SER7.SERIAL7,EXC.SERIAL_NUMBER)        SERIAL_NO,
+        TIP.CODE_NAME           PARTS_OPE,
+        RPAD(TIP.CODE_CLASS,3) || TIP.CODE_VALUE      OPE_KEY,
+        TAR.DISP_DATA  DTL,
+        RPAD(TAR.ST_CD,6) || TAR.PART_NM DTL_KEY,
+        EXC.NOTES       NOTES,
+        TO_CHAR(EXC.CREATION_DATETIME,'YYYY/MM/DD HH24:MI:SS') INS_DT,
+        EXC.CREATED_BY_USER  INS_BY,
+        MS.MS_PATURN  PTN_CD
+      FROM
+        TM_SQ_CRITICAL_CHECK_EXCLUDE EXC
+        INNER JOIN TBL_TIPS_CODE_NAMES TIP ON (
+          TIP.CODE_CLASS = EXC.EXCLUDE_PARTS_OPR_KIND AND
+          TIP.CODE_VALUE = EXC.EXCLUDE_PARTS_OPR_VALUE
+        )
+        LEFT JOIN MS_GENKOU MS ON (
+          MS.MS_KATASIKI = EXC.MODEL_CD   AND
+          MS.MS_KOJOU = '28'
+        )
+        LEFT JOIN TAR_DATA TAR ON (
+          EXC.EXCLUDE_STATION = TAR.ST_CD AND
+          EXC.EXCLUDE_PATRS_NAME = TAR.PART_NM
+        )
+        LEFT JOIN TT_DI_SERIAL7 SER7 ON (
+          EXC.MODEL_CD = SER7.MODEL_CD AND
+          EXC.SERIAL_NUMBER    = SER7.SERIAL6
+        )
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="modelCd" prepend=" AND ">
+          EXC.MODEL_CD LIKE CONCAT(#modelCd#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="modelNm" prepend=" AND ">
+          MS.MS_KATASIKIMEI LIKE CONCAT(#modelNm#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="serial" prepend=" AND ">
+          SER7.SERIAL7 LIKE CONCAT(#serial#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="oprKind" prepend=" AND ">
+          EXC.EXCLUDE_PARTS_OPR_KIND = #oprKind#
+        </isNotEmpty>
+        <isNotEmpty property="oprValue" prepend=" AND ">
+          EXC.EXCLUDE_PARTS_OPR_VALUE = #oprValue#
+        </isNotEmpty>
+        <isNotEmpty property="st" prepend=" AND ">
+          EXC.EXCLUDE_STATION =  #st#
+        </isNotEmpty>
+        <isNotEmpty property="partsNm" prepend=" AND ">
+          EXC.EXCLUDE_PATRS_NAME =  #partsNm#
+        </isNotEmpty>
+        <isNotEmpty property="productKindCd" prepend=" AND ">
+          MS.MS_PATURN =  #productKindCd#
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+        OPE_KEY,DTL_KEY
+
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラック:完了日取得]                                                                  -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectHeaderInfoTrac">
+      SELECT DISTINCT
+          SV.型式コード      MODEL_CD,
+          SV.機番            SERIAL_NO,
+          TO_CHAR(SV.完成日時,'YYYY/MM/DD')        FIN_DT
+      FROM
+          TBL_作業指示保存 SV 
+      WHERE
+          指示レベル IN ('1')
+        <isNotEmpty property="modelCd" prepend=" AND ">
+          型式コード = #modelCd#
+        </isNotEmpty>
+        <isNotEmpty property="serial" prepend=" AND ">
+          機番 = #serial#
+        </isNotEmpty>
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン:完了日取得]                                                                  -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectHeaderInfoEngine">
+      SELECT DISTINCT
+          SV.型式コード      MODEL_CD,
+          SV.機番            SERIAL_NO,
+          TO_CHAR(SV.完成日時,'YYYY/MM/DD')        FIN_DT
+      FROM
+          TBL_作業指示保存 SV
+          LEFT JOIN TT_DI_SERIAL7 SER7 ON (
+            SV.型式コード = SER7.MODEL_CD AND
+            SV.機番    = SER7.SERIAL6
+          )
+      WHERE
+          SV.指示レベル IN ('3','7')
+        <isNotEmpty property="modelCd" prepend=" AND ">
+          SV.型式コード = #modelCd#
+        </isNotEmpty>
+        <isNotEmpty property="serial" prepend=" AND ">
+          SER7.SERIAL7 = #serial#
+        </isNotEmpty>
+    </statement>
+    
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン:3C加工日データ検索(一覧)]                                                    -->
+    <!-- ************************************************************************************** -->
+    <statement id="Select3CList">
+    SELECT
+        DATA.ST,
+        DATA.MODEL_CD,
+        DATA.MODEL_NM,
+        DATA.SERIAL_NO,
+        DATA.PARTS_CD_ORG,
+        DATA.PARTS_CD,
+        DATA.PARTS_NM,
+        DATA.PROC_DT,
+        DATA.NEW_YMD,
+        DATA.PROC_NUM,
+        DATA.COUNTRY,
+        DATA.REMARKS,
+        DATA.UPDATE_BY,
+        DATA.PROCESSING_LINE
+    FROM
+      (
+        SELECT /*+ LEADING(DTL, EBF) INDEX(DTL I1_SQ_3C_DETAIL) INDEX(EBF I3_ENGBKJ_F) */
+        DISTINCT
+          DTL.STATION_CD                  ST,
+          DTL.MODEL_CD                    MODEL_CD,
+          TMP.型式名                      MODEL_NM,
+          NVL(SERIAL7.SERIAL7,DTL.SERIAL6) SERIAL_NO,
+          DTL.CRITICAL_PARTS_CD           PARTS_CD_ORG,
+          CASE
+            WHEN DTL.CRITICAL_PARTS_CD = '06' THEN 'CC'
+            WHEN DTL.CRITICAL_PARTS_CD = '09' THEN 'CYH'
+            WHEN DTL.CRITICAL_PARTS_CD = '10' THEN 'CS'
+          END PARTS_CD,
+          DTL.CRITICAL_PARTS_NM           PARTS_NM,
+          DTL.MATERIAL_PROCESSING_DATE    PROC_DT,
+          TO_CHAR(EBF.NEW_YMD,'YYYY/MM/DD HH24:MI:SS')  NEW_YMD,        
+          DTL.MATERIAL_PROCESSING_NUM     PROC_NUM,
+          TRIM(TMP.国コード)              COUNTRY,
+          DTL.REMARKS                     REMARKS,
+          DTL.UPDATE_BY                   UPDATE_BY,
+          DTL.PROCESSING_LINE             PROCESSING_LINE
+        FROM
+          ENGBKJ_F EBF
+          LEFT JOIN TT_SQ_3C_DETAIL DTL ON (
+              EBF.KATA_CD = DTL.MODEL_CD              AND 
+              EBF.KIBAN = DTL.SERIAL6                 AND
+              EBF.BUHIN_KUBUN = DTL.CRITICAL_PARTS_CD AND
+              EBF.LINE_CD = DTL.STATION_CD
+              
+          )
+          INNER JOIN TT_DI_SERIAL7 SERIAL7 ON (
+            DTL.MODEL_CD = SERIAL7.MODEL_CD   AND
+            DTL.SERIAL6 = SERIAL7.SERIAL6
+          )          
+          INNER JOIN TBL_作業指示保存 TMP ON (
+            <isNotEmpty property="engineKind">
+              TMP.指示レベル = #engineKind#
+            </isNotEmpty>
+            <isEmpty property="engineKind">
+              TMP.指示レベル IN ('3','7')
+            </isEmpty>
+              AND
+            DTL.MODEL_CD = TMP.型式コード   AND
+            DTL.SERIAL6 = TMP.機番
+          )
+        WHERE
+          EBF.KOJO_CD = '28'
+          <!-- [部品区分検索] -->
+          <isNotEmpty property="productKind" prepend="AND">
+            EBF.BUHIN_KUBUN = #productKind#  AND
+            DTL.CRITICAL_PARTS_CD = #productKind#
+          </isNotEmpty>
+          <isEmpty property="productKind" prepend=" AND ">
+            DTL.CRITICAL_PARTS_CD IN ('06','09','10')
+          </isEmpty>
+          <!-- [加工日(FROM)検索] -->
+          <isNotEmpty property="dtFrom" prepend="AND">
+            DTL.MATERIAL_PROCESSING_DATE <![CDATA[>=]]> TO_CHAR(#dtFrom#,'YYMMDD')
+          </isNotEmpty>
+          <!-- [加工日(TO)検索] -->
+          <isNotEmpty property="dtTo" prepend="AND">
+            DTL.MATERIAL_PROCESSING_DATE <![CDATA[<=]]> TO_CHAR(#dtTo#,'YYMMDD')
+          </isNotEmpty>
+          <isEqual property="targetDt" compareValue="true" prepend="AND">
+            DTL.MATERIAL_PROCESSING_DATE = '999999'
+          </isEqual>
+          <!-- [取付日(FROM)検索] -->
+          <isNotEmpty property="assemblyFrom" prepend="AND">
+            EBF.NEW_YMD <![CDATA[>=]]> #assemblyFrom#
+          </isNotEmpty>
+          <!-- [取付日(TO)検索] -->
+          <isNotEmpty property="assemblyTo" prepend="AND">
+            EBF.NEW_YMD <![CDATA[<=]]> #assemblyTo#
+          </isNotEmpty>
+      ) DATA
+      ORDER BY
+        DATA.NEW_YMD DESC,DATA.PARTS_CD,DATA.PROC_DT,DATA.PROC_NUM,DATA.MODEL_CD
+    </statement>
+    
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン:3C加工日データ更新]                                                          -->
+    <!-- ************************************************************************************** -->
+    <statement id="Update3CDetail">
+      UPDATE
+        TT_SQ_3C_DETAIL
+      SET
+        <isNotEmpty property="paramProcDt">
+          MATERIAL_PROCESSING_DATE = #paramProcDt#,
+        </isNotEmpty>
+        <isNotEmpty property="paramProcNum">
+          MATERIAL_PROCESSING_NUM = #paramProcNum#,
+        </isNotEmpty>
+        <isNotEmpty property="paramProcLine">
+          PROCESSING_LINE = #paramProcLine#,
+        </isNotEmpty>
+        <isNotEmpty property="paramRemarks">
+          REMARKS   = #paramRemarks#,
+        </isNotEmpty>
+        UPDATE_DT = SYSDATE,
+        UPDATE_BY = #paramupdBy#,
+        UPDATE_PG = #paramupdSys#
+        WHERE
+        STATION_CD = #paramSt#  AND
+        MODEL_CD = #paramModelCd#  AND
+        SERIAL6 = #paramSerial6#    AND
+        CRITICAL_PARTS_CD = #paramPartsCd#
+      </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [DPF機番情報検索(一覧)]                                                                -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectDpfSerialList">
+      SELECT
+        TO_CHAR(DPF.取付日時,'YYYY/MM/DD HH24:MI:SS')  ATTACHMENT_DT,
+        DPF.DPFフルアッシ型式コード DPF_MODEL_CD,
+        DPF.DPFフルアッシ機番       DPF_SERIAL_NO,
+        DPF.ライン                  LINE_CD,
+        DPF.ステーション            ST,
+        DPF.トラクタIDNO            TRC_IDNO,
+        DPF.トラクタ型式コード      TRC_MODEL_CD,
+        PROD_T.PRODUCT_MODEL_NM  TRC_MODEL_NM,  
+        TRIM(DPF.トラクタ国コード)  TRC_COUNTRY,
+        DPF.トラクタ機番            TRC_SERIAL_NO,
+        DPF.エンジンIDNO            ENG_IDNO,
+        DPF.エンジン型式コード      ENG_MODEL_CD,
+        PROD_E.PRODUCT_MODEL_NM  ENG_MODEL_NM,
+        Ltrim(Nvl(DPF.工場ライン識別,' ') || DPF.エンジン機番)            ENG_SERIAL_NO,
+        TO_CHAR(DPF.更新日時,'YYYY/MM/DD HH24:MI:SS')  UPDATE_DT,
+        DPF.更新者                  UPDATE_BY,
+        null                        JUN_NO,
+        null                        KAN_YO_YM,
+        CASE
+          WHEN DPF.抜取検査サイン = '0' THEN '対象外'
+          WHEN DPF.抜取検査サイン = '1' THEN '対象'
+          ELSE NULL
+        END                         SAMPLE_CHECK,
+        DPF.取付日時                ASSEMBLY_DT,
+        DPF.部品区分                PARTS_KBN,
+        '有'                        DATA_CNT,
+        #productKind#               PTN_CD
+      FROM
+        TBL_DPF機番情報 DPF
+      LEFT JOIN VM_CC_PRODUCT_MODEL PROD_T ON (
+        DPF.トラクタ型式コード = PROD_T.PRODUCT_MODEL_CD AND
+        PROD_T.PLANT_CD = '28'  
+      )
+      LEFT JOIN VM_CC_PRODUCT_MODEL PROD_E ON (
+        DPF.エンジン型式コード = PROD_E.PRODUCT_MODEL_CD AND
+        PROD_E.PLANT_CD = '28'  
+      )
+      WHERE
+        DPF.工場コード = '28' AND
+        DPF.部品区分 IS NOT NULL
+        <isNotEmpty property="modelCdDpf" prepend=" AND ">
+          DPF.DPFフルアッシ型式コード LIKE CONCAT(#modelCdDpf#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="serialDpf" prepend=" AND ">
+          DPF.DPFフルアッシ機番 LIKE CONCAT(#serialDpf#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="lineCd" prepend=" AND ">
+          DPF.ライン = #lineCd#
+        </isNotEmpty>
+        <isNotEmpty property="st" prepend=" AND ">
+          DPF.ステーション = #st#
+        </isNotEmpty>
+        <!-- エンジン -->
+        <isEqual property="productKind" compareValue="10">
+          <isNotEmpty property="modelCd" prepend="AND">
+            DPF.エンジン型式コード = #modelCd#
+          </isNotEmpty>
+          <isNotEmpty property="serial" prepend="AND">
+            Ltrim(Nvl(DPF.工場ライン識別,' ') || DPF.エンジン機番) = #serial#
+          </isNotEmpty>
+          <isNotEmpty property="idno" prepend="AND">
+            DPF.エンジンIDNO = #idno#
+          </isNotEmpty>
+          <isNotEmpty property="modelNm" prepend="AND">
+            PROD_E.PRODUCT_MODEL_NM  LIKE CONCAT(#modelNm#,'%')
+          </isNotEmpty>
+        </isEqual>
+        <!-- トラクタ -->
+        <isEqual property="productKind" compareValue="30">
+          <isNotEmpty property="modelCd" prepend="AND">
+            DPF.トラクタ型式コード = #modelCd#
+          </isNotEmpty>
+          <isNotEmpty property="serial" prepend="AND">
+            DPF.トラクタ機番 = #serial#
+          </isNotEmpty>
+          <isNotEmpty property="idno" prepend="AND">
+            DPF.トラクタIDNO = #idno#
+          </isNotEmpty>
+          <isNotEmpty property="modelNm" prepend="AND">
+            PROD_T.PRODUCT_MODEL_NM LIKE CONCAT(#modelNm#,'%')
+          </isNotEmpty>
+        </isEqual>
+        <!-- DPF -->
+        <isEqual property="productKind" compareValue="DPF">
+          <isNotEmpty property="modelCd" prepend="AND">
+            DPF.DPFフルアッシ型式コード = #modelCd#
+          </isNotEmpty>
+          <isNotEmpty property="serial" prepend="AND">
+            DPF.DPFフルアッシ機番 = #serial#
+          </isNotEmpty>
+        </isEqual>
+        <!-- [加工日(FROM)検索] -->
+        <isNotEmpty property="dtFrom" prepend="AND">
+          DPF.更新日時 <![CDATA[>=]]> TO_CHAR(#dtFrom#,'YYMMDD')
+        </isNotEmpty>
+        <!-- [加工日(TO)検索] -->
+        <isNotEmpty property="dtTo" prepend="AND">
+          DPF.更新日時 <![CDATA[<=]]> TO_CHAR(#dtTo#,'YYMMDD')
+        </isNotEmpty>
+        <!-- [取付日(FROM)検索] -->
+        <isNotEmpty property="assemblyFrom" prepend="AND">
+          DPF.取付日時 <![CDATA[>=]]> #assemblyFrom#
+        </isNotEmpty>
+        <!-- [取付日(TO)検索] -->
+        <isNotEmpty property="assemblyTo" prepend="AND">
+          DPF.取付日時 <![CDATA[<=]]> #assemblyTo#
+        </isNotEmpty>
+        <isNotEmpty property="parts" prepend="AND">
+          DPF.部品区分 = #parts#
+        </isNotEmpty>
+        <isNotEmpty property="regKind" prepend="AND">
+          DPF.強制登録サイン = #regKind#
+        </isNotEmpty>
+        <isNotEmpty property="sample" prepend="AND">
+          DPF.抜取検査サイン = #sample#
+        </isNotEmpty>
+      ORDER BY
+        DPF.工場コード,
+        DPF.ライン,
+        DPF.ステーション,
+        DPF.取付日時,
+        DPF.DPFフルアッシ型式コード,
+        DPF.DPFフルアッシ機番,
+        DPF.トラクタIDNO,
+        DPF.トラクタ型式コード
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [DPF機番情報登録]                                                                      -->
+    <!-- ************************************************************************************** -->
+    <statement id="InsertDpfSerial">
+      INSERT INTO TBL_DPF機番情報
+        (
+          工場コード,
+          ライン,
+          ステーション,
+          トラクタIDNO,
+          トラクタ型式コード,
+          トラクタ国コード,
+          トラクタ機番,
+          エンジンIDNO,
+          エンジン型式コード,
+          工場ライン識別,
+          エンジン機番,
+          取付日時,
+          強制登録サイン,
+          抜取検査サイン,
+          DPFフルアッシ型式コード,
+          DPFフルアッシ機番,
+          作成日時,
+          作成者,
+          作成プログラム,
+          更新日時,
+          更新者,
+          更新プログラム,
+          部品区分
+        )
+        SELECT
+          '28',
+          #lineCd#,
+          #st#,
+        <!-- エンジン -->          
+        <isEqual property="productKind" compareValue="10">
+          RPAD(' ',7),
+          RPAD(' ',10),
+          RPAD(' ',6),
+          RPAD(' ',6),
+          KEP.MS_IDNO,
+          KEP.MS_B_KATA_C,
+          PKG_COM_E7.GET_PLANT_CODE(KEP.MS_B_KATA_C,KEP.MS_KIBAN),
+          KEP.MS_KIBAN,
+        </isEqual>
+        <!-- トラクタ -->
+        <isEqual property="productKind" compareValue="30">
+          KEP.MS_IDNO,
+          KEP.MS_B_KATA_C,
+          KEP.MS_B_KUNI_C,
+          KEP.MS_KIBAN,
+          NVL(TMP.MS_IDNO,RPAD(' ',7)),
+          KEP.MS_E_KATA_C,
+          PKG_COM_E7.GET_PLANT_CODE(KEP.MS_E_KATA_C,KEP.MS_E_KIBAN),
+          KEP.MS_E_KIBAN,
+        </isEqual>
+          #assDt#,
+          '0',
+          '0',
+          #modelCdDpf#,
+          #serialDpf#,
+          sysdate,
+          #updBy#,
+          #updSys#,
+          sysdate,
+          #updBy#,
+          #updSys#,
+          #parts#
+        FROM
+            MS_SAGYO_KEEP KEP
+      <isEqual property="productKind" compareValue="30">
+          LEFT JOIN MS_SAGYO_KEEP TMP ON (
+            TMP.MS_SIJI_LVL IN ('3','7')  AND
+            TMP.MS_B_KATA_C = KEP.MS_E_KATA_C    AND
+            TMP.MS_KIBAN    = KEP.MS_E_KIBAN          
+          )        
+      </isEqual>            
+      <dynamic prepend="WHERE">
+        <!-- エンジン -->
+        <isEqual property="productKind" compareValue="10" prepend="AND">
+          KEP.MS_SIJI_LVL IN ('3','7')
+        </isEqual>
+        <!-- トラクタ -->
+        <isEqual property="productKind" compareValue="30" prepend="AND">
+          KEP.MS_SIJI_LVL IN ('2')
+        </isEqual>
+        <isNotEmpty property="idno" prepend="AND">
+          KEP.MS_IDNO = #idno#
+        </isNotEmpty>
+      </dynamic>
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [DPF機番情報更新]                                                                      -->
+    <!-- ************************************************************************************** -->
+    <statement id="UpdateDpfSerial">
+      UPDATE
+        TBL_DPF機番情報
+      SET
+        DPFフルアッシ型式コード = #modelCdDpf#,
+        DPFフルアッシ機番   = #serialDpf#,
+        更新日時 = SYSDATE,
+        更新者 = #updBy#,
+        更新プログラム = #updSys#
+      WHERE
+        工場コード = '28'  AND
+        ライン = #lineCd#  AND
+        ステーション = #st# AND
+        DPFフルアッシ型式コード = #modelCdOrg#  AND
+        DPFフルアッシ機番 = #serialOrg#
+    </statement>
+
+
+    <!-- ************************************************************************************** -->
+    <!-- [NutRunner共通検索条件]                                                                -->
+    <!-- ************************************************************************************** -->    
+    <sql id="SubConditionNutRunner">
+      <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+      <isNotEmpty property="paramSerialList" prepend="AND">
+        (INFO.生産型式コード, INFO.機番) IN
+        <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+          (#paramSerialList[].productModelCd#, #paramSerialList[].serial#)
+        </iterate>
+      </isNotEmpty>
+      <!-- [生産型式コード検索] -->
+      <isNotEmpty property="paramProductModelCd" prepend="AND">
+        INFO.生産型式コード like #paramProductModelCd# || '%'
+      </isNotEmpty>
+      <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+      <isNotEmpty property="paramProductModelCdList" prepend="AND">
+        INFO.生産型式コード IN
+        <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+          #paramProductModelCdList[]#
+        </iterate>
+      </isNotEmpty>
+      <!-- [測定日(FROM)検索] -->
+      <isNotEmpty property="paramInspectionDtFrom" prepend="AND">
+        TIRE.実績年月日 <![CDATA[>=]]> #paramInspectionDtFrom#
+      </isNotEmpty>
+      <!-- [測定日(TO)検索] -->
+      <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+        TIRE.実績年月日 <![CDATA[<=]]> #paramInspectionDtTo#
+      </isNotEmpty>
+    </sql>
+
+    <!-- ************************************************************************************** -->
+    <!-- [NutRunner一覧取得]                                                                    -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectNutRunnerList">
+      WITH
+        <!--位置の件数取得-->
+        TMP2 AS (
+          SELECT 
+            INFO.生産型式コード    PRODUCTMODELCD,
+            INFO.機番              SERIAL6,
+            INFO.IDNO              IDNO,
+            COUNT(DISTINCT 位置)   POS_CNT
+          FROM
+            TBL_検査記録機種情報   INFO,
+            TBL_タイヤ締付記録     TIRE
+          WHERE
+            INFO.IDNO = TIRE.IDNO   AND
+            <!--型式－機番で紐付られないので、±6ヶ月で紐付ける-->
+            TIRE.実績年月日 BETWEEN ADD_MONTHS(INFO.作成日時,-6) AND ADD_MONTHS(INFO.作成日時,6)            
+            <!--共通検索条件-->
+            <include refid="SubConditionNutRunner" />
+          GROUP BY
+            INFO.生産型式コード,
+            INFO.機番,
+            INFO.IDNO
+        ),
+        <!--OKの締付結果件数取得-->        
+        TMP_OK AS (
+          SELECT
+            INFO.生産型式コード    PRODUCTMODELCD,
+            INFO.機番              SERIAL6,
+            INFO.IDNO              IDNO,
+            TIRE.位置              POSITION,
+            MAX(TIRE.実績年月日)   RESDT,
+            COUNT(DISTINCT TIRE.締付結果)   OK_RES
+          FROM
+            TBL_検査記録機種情報   INFO,
+            TBL_タイヤ締付記録     TIRE
+          WHERE
+            TIRE.締付結果 = 'OK'    AND
+            INFO.IDNO = TIRE.IDNO   AND
+            <!--型式－機番で紐付られないので、±6ヶ月で紐付ける-->
+            TIRE.実績年月日 BETWEEN ADD_MONTHS(INFO.作成日時,-6) AND ADD_MONTHS(INFO.作成日時,6)                        
+            <!--共通検索条件-->
+            <include refid="SubConditionNutRunner" />
+          GROUP BY 
+            INFO.生産型式コード,
+            INFO.機番,
+            INFO.IDNO,
+            TIRE.位置
+        ),
+        <!--NGの締付結果件数取得-->        
+        TMP_NG AS (
+          SELECT
+            INFO.生産型式コード    PRODUCTMODELCD,
+            INFO.機番              SERIAL6,
+            INFO.IDNO              IDNO,
+            TIRE.位置              POSITION,
+            MAX(TIRE.実績年月日)   RESDT,
+            COUNT(TIRE.締付結果)   NG_RES
+          FROM
+            TBL_検査記録機種情報   INFO,
+            TBL_タイヤ締付記録     TIRE,
+            (SELECT TIRE2.IDNO,
+                    TIRE2.位置      位置,
+                    MAX(TIRE2.実績年月日)   実績年月日
+              FROM
+                    TBL_タイヤ締付記録 TIRE2 
+        			GROUP BY
+			              TIRE2.IDNO,
+			              TIRE2.位置    
+                ) TMP            
+          WHERE
+            TIRE.締付結果 = 'NG'    AND
+            INFO.IDNO = TIRE.IDNO   AND
+            TIRE.IDNO = TMP.IDNO    AND
+            TIRE.実績年月日 = TMP.実績年月日 AND
+            TIRE.位置 = TMP.位置    AND            
+            <!--型式－機番で紐付られないので、±6ヶ月で紐付ける-->
+            TIRE.実績年月日 BETWEEN ADD_MONTHS(INFO.作成日時,-6) AND ADD_MONTHS(INFO.作成日時,6)                        
+            <!--共通検索条件-->
+            <include refid="SubConditionNutRunner" />
+          GROUP BY 
+            INFO.生産型式コード,
+            INFO.機番,
+            INFO.IDNO,
+            TIRE.位置
+        )
+      SELECT 
+        INFO.生産型式コード     productModelCd,
+        INFO.機番               serial6,
+        MAX(TIRE.実績年月日)    inspectionDt,
+        <!--「位置の件数-位置でOKとなった件数=0」なら、結果OKとする -->
+        DECODE(
+            GET_CNT.POS_CNT - NVL(SUM(GET_RES.OK_RES),0),0,'OK：' || SUM(GET_RES.OK_RES) ,
+	            DECODE(
+	                SIGN(0-SUM(GET_NG.NG_RES)),-1,'NG','CANCEL')
+              ) check_result
+      FROM
+        TBL_検査記録機種情報 INFO
+        INNER JOIN TBL_タイヤ締付記録 TIRE ON (
+          INFO.IDNO = TIRE.IDNO   AND
+          <!--型式－機番で紐付られないので、±6ヶ月で紐付ける-->
+          TIRE.実績年月日 BETWEEN ADD_MONTHS(INFO.作成日時,-6) AND ADD_MONTHS(INFO.作成日時,6)
+        )
+        LEFT JOIN TMP2 GET_CNT ON (
+          INFO.生産型式コード = GET_CNT.PRODUCTMODELCD   AND
+          INFO.機番  = GET_CNT.SERIAL6    AND
+          INFO.IDNO  = GET_CNT.IDNO
+        )
+        LEFT JOIN TMP_OK GET_RES ON (
+          INFO.生産型式コード = GET_RES.PRODUCTMODELCD   AND
+          INFO.機番  = GET_RES.SERIAL6  AND
+          INFO.IDNO  = GET_RES.IDNO AND
+          TIRE.位置  = GET_RES.POSITION AND
+          TIRE.実績年月日= GET_RES.RESDT
+        )
+        LEFT JOIN TMP_NG GET_NG ON (
+          INFO.生産型式コード = GET_NG.PRODUCTMODELCD   AND
+          INFO.機番  = GET_NG.SERIAL6  AND
+          INFO.IDNO  = GET_NG.IDNO AND
+          TIRE.位置  = GET_NG.POSITION AND
+          TIRE.実績年月日= GET_NG.RESDT
+        )        
+      <dynamic prepend="WHERE">
+        <!--共通検索条件-->
+        <include refid="SubConditionNutRunner" />
+      </dynamic>
+      GROUP BY
+        INFO.生産型式コード,
+        INFO.機番,
+        GET_CNT.POS_CNT
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [NutRunner明細取得]                                                                    -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectNutRunner">
+      SELECT  DISTINCT
+        INFO.IDNO               idno,
+        INFO.生産型式名         modelNm,
+        INFO.生産型式コード     modelCd,
+        INFO.生産国コード       country,
+        INFO.機番               serial,
+        TIRE.位置               position,
+        TIRE.機体_締付回数      benchiNo,
+        DECODE(TIRE.締付結果,'CN','CANCEL',TIRE.締付結果)   result,
+        DECODE(TIRE.NR1軸判定,'-',null,TIRE.NR1軸判定) nr1,
+        TO_CHAR(TIRE.NR1軸トルク,'FM990.0')            shaft1,
+        TO_CHAR(TIRE.NR1軸角度,'FM990.0')              angle1,
+        DECODE(TIRE.NR2軸判定,'-',null,TIRE.NR2軸判定) nr2,
+        TO_CHAR(TIRE.NR2軸トルク,'FM990.0')            shaft2,
+        TO_CHAR(TIRE.NR2軸角度,'FM990.0')              angle2,        
+        DECODE(TIRE.NR3軸判定,'-',null,TIRE.NR3軸判定) nr3,
+        TO_CHAR(TIRE.NR3軸トルク,'FM990.0')            shaft3,
+        TO_CHAR(TIRE.NR3軸角度,'FM990.0')              angle3,        
+        DECODE(TIRE.NR4軸判定,'-',null,TIRE.NR4軸判定) nr4,
+        TO_CHAR(TIRE.NR4軸トルク,'FM990.0')            shaft4,
+        TO_CHAR(TIRE.NR4軸角度,'FM990.0')              angle4,        
+        DECODE(TIRE.NR5軸判定,'-',null,TIRE.NR5軸判定) nr5,
+        TO_CHAR(TIRE.NR5軸トルク,'FM990.0')            shaft5,
+        TO_CHAR(TIRE.NR5軸角度,'FM990.0')              angle5,        
+        DECODE(TIRE.NR6軸判定,'-',null,TIRE.NR6軸判定) nr6,
+        TO_CHAR(TIRE.NR6軸トルク,'FM990.0')            shaft6,
+        TO_CHAR(TIRE.NR6軸角度,'FM990.0')              angle6,
+        DECODE(TIRE.NR7軸判定,'-',null,TIRE.NR7軸判定) nr7,
+        TO_CHAR(TIRE.NR7軸トルク,'FM990.0')            shaft7,
+        TO_CHAR(TIRE.NR7軸角度,'FM990.0')              angle7,        
+        DECODE(TIRE.NR8軸判定,'-',null,TIRE.NR8軸判定) nr8,
+        TO_CHAR(TIRE.NR8軸トルク,'FM990.0')            shaft8,
+        TO_CHAR(TIRE.NR8軸角度,'FM990.0')              angle8,        
+        TO_CHAR(TIRE.実績年月日,'yyyy/mm/dd')          inspectionDt,
+        TO_CHAR(TIRE.実績年月日,'hh24:mi:ss')          inspectionTime,
+        TIRE.NR1軸トルク                      shaft1_bk,
+        TIRE.NR2軸トルク                      shaft2_bk,
+        TIRE.NR3軸トルク                      shaft3_bk,
+        TIRE.NR4軸トルク                      shaft4_bk,
+        TIRE.NR5軸トルク                      shaft5_bk,
+        TIRE.NR6軸トルク                      shaft6_bk,
+        TIRE.NR7軸トルク                      shaft7_bk,
+        TIRE.NR8軸トルク                      shaft8_bk
+      FROM
+        TBL_検査記録機種情報 INFO,
+        TBL_タイヤ締付記録   TIRE
+      WHERE
+        TIRE.IDNO = INFO.IDNO   AND
+        <!--型式－機番で紐付られないので、±6ヶ月で紐付ける-->
+        TIRE.実績年月日 BETWEEN ADD_MONTHS(INFO.作成日時,-6) AND ADD_MONTHS(INFO.作成日時,6)        
+      <!-- [生産型式コード検索] -->
+      <isNotEmpty property="paramProductModelCd" prepend="AND">
+        INFO.生産型式コード = #paramProductModelCd#
+      </isNotEmpty>
+      <!-- [生産型式コード検索] -->
+      <isNotEmpty property="paramSerial" prepend="AND">
+        INFO.機番 = #paramSerial#
+      </isNotEmpty>
+      ORDER BY
+        TIRE.機体_締付回数 ,
+        TIRE.位置
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン部品詳細:出荷部品詳細]                                                        -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectShipmentParts">
+      SELECT
+      CASE LENGTH(RESULT_VAL)
+      WHEN 9  THEN SUBSTR(RESULT_VAL ,1 ,5) || '-' || SUBSTR(RESULT_VAL ,6 ,4)
+      WHEN 20 THEN SUBSTR(RESULT_VAL ,1 ,5) || '-' || SUBSTR(RESULT_VAL ,6 ,5) || ' ' || SUBSTR(RESULT_VAL ,11 ,7) || ' ' || SUBSTR(RESULT_VAL ,18 ,3)
+      ELSE         RESULT_VAL
+      END PARTS_NUM
+      FROM
+      TT_PW_TRC_DETAIL DT
+      WHERE
+      DT.LINE_CD = '008580'
+      AND
+      DT.PROCESS_CD = '1001'
+      AND
+      DT.WORK_CD = '1001'
+      AND
+      DT.MODEL_CD = #paramSerial.productModelCd#
+      AND
+      DT.SERIAL = #paramSerial.serial6#
+      ORDER BY
+      DEVICE_NO,RECORD_NO
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン部品詳細:梱包作業指示書]                                                      -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectPackingOrderSheet">
+      SELECT
+      PO.PACKING_DT,
+      CI.イメージ IMAGE
+      FROM
+      TT_DS_PACKING_ORDER PO
+      LEFT JOIN
+      (
+      SELECT
+      IDNO,
+      イメージ,
+      枝番
+      FROM
+      TBL_チェックシートイメージ
+      WHERE
+      ステーション IN (
+      <iterate property="stationList" conjunction=",">
+        #stationList[]#
+      </iterate>
+      )
+      ) CI
+      ON
+      PO.IDNO = CI.IDNO
+      WHERE
+      PO.IDNO IN (
+      <iterate property="idNoList" conjunction=",">
+        #idNoList[]#
+      </iterate>
+      )
+      ORDER BY CI.枝番
+    </statement>
+  </statements>
+</sqlMap>

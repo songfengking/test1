@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="ClassGroup"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <statement id="Select">
+      SELECT
+        CLASS_CD,
+        CLASS_NM
+      FROM
+        TM_PW_TRC_CLASS_GROUP
+      WHERE
+        PRODUCT_KIND_CD = #PRODUCT_KIND_CD#
+        AND GROUP_CD = #GROUP_CD#
+        AND DISPLAY_ORDER > 0
+      ORDER BY
+        DISPLAY_ORDER
+    </statement>
+    <statement id="SelectAll">
+      SELECT
+        PRODUCT_KIND_CD,
+        GROUP_CD,
+        CLASS_CD,
+        CLASS_NM,
+        DISPLAY_ORDER
+      FROM
+        TM_PW_TRC_CLASS_GROUP
+      WHERE
+        DISPLAY_ORDER > 0
+      ORDER BY
+        PRODUCT_KIND_CD, 
+        GROUP_CD, 
+        CLASS_CD, 
+        DISPLAY_ORDER
+    </statement>
+  </statements>
+</sqlMap>

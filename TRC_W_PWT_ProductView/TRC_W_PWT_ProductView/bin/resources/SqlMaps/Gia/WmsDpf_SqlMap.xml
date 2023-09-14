@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="WmsDpf"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    
+    <!-- ************************************************************************************** -->
+    <!-- 出荷情報取得                                                                            -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectShipData">
+      WITH WMS AS(
+          SELECT
+              工場,
+              型式コード,
+              機番,
+              種別コード,
+              作業日,
+              伝票NO
+          FROM
+              TBL_WMSDPF同梱台帳
+          WHERE
+              工場 = '28'
+          AND 種別コード = '2'
+          AND 状態コード != '3'
+          UNION
+          SELECT
+              工場,
+              型式コード,
+              機番,
+              種別コード,
+              作業日,
+              伝票NO
+          FROM
+              TBL_WMSDPF同梱台帳KP
+          WHERE
+              工場 = '28'
+          AND 種別コード = '2'
+          AND 状態コード != '3'
+      )
+      SELECT
+          型式コード                                    AS modelCd,
+          機番                                          AS serial,
+          TO_CHAR(WMS.作業日, 'YYYY/MM/DD HH24:MI:SS')  AS shipDt,
+          REPLACE(WMS.伝票NO, '-')                      AS shipTicketNo
+      FROM
+          WMS
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="serialList" prepend="AND">
+          (型式コード, 機番) IN
+          <iterate property="serialList" open="(" close=")" conjunction=",">
+            (#serialList[].productModelCd#, #serialList[].serial#)
+          </iterate>
+        </isNotEmpty>
+      </dynamic>
+    </statement>
+
+  </statements>
+</sqlMap>

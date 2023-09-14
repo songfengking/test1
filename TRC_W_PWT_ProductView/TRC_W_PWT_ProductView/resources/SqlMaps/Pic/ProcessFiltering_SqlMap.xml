@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="ProcessFiltering"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <!-- ライン一覧取得 -->
+    <statement id="SelectLineList">
+      SELECT
+        TP.LINE_CD "lineCd",
+        TP.LINE_CD || ':' || LM.LINE_SHORT_NM "lineNm"
+      FROM
+        TM_PW_TRC_PROCESS TP
+      LEFT OUTER JOIN
+        TM_CC_LINE LM ON TP.LINE_CD = LM.LINE_CD
+      LEFT OUTER JOIN
+        TM_PW_TRC_PROCESS_CLASS TPC ON TP.LINE_CD = TPC.LINE_CD AND TP.PROCESS_CD = TPC.PROCESS_CD
+      WHERE
+        TP.TRC_DISPLAY_FLG = 1
+        AND TPC.GENERAL_PATTERN_CD = #productKnd#
+        AND SYSDATE BETWEEN LM.APPLY_START_DT AND LM.APPLY_END_DT
+      GROUP BY
+        TP.LINE_CD,
+        LM.LINE_SHORT_NM,
+        LM.DISPLAY_ORDER4
+      ORDER BY
+        LM.DISPLAY_ORDER4
+    </statement>
+
+    <!-- 工程作業一覧取得 -->
+    <statement id="SelectProcessWorkList">
+      SELECT
+      TP.LINE_CD "lineCd",
+      TP.LINE_CD || ':' || LM.LINE_SHORT_NM "lineNm",
+      TP.PROCESS_CD "processCd",
+      TP.PROCESS_NM "processNm",
+      TP.SEARCH_TARGET_FLG "searchTargetFlg",
+      TW.WORK_CD "workCd",
+      TW.WORK_NM "workNm"
+      FROM
+      TM_PW_TRC_PROCESS TP
+      LEFT OUTER JOIN
+      TM_CC_LINE LM ON TP.LINE_CD = LM.LINE_CD
+      LEFT OUTER JOIN
+      TM_PW_TRC_WORK TW ON TP.LINE_CD = TW.LINE_CD AND TP.PROCESS_CD = TW.PROCESS_CD
+      WHERE
+      TP.TRC_DISPLAY_FLG = 1
+      AND SYSDATE BETWEEN LM.APPLY_START_DT AND LM.APPLY_END_DT
+      <isNotEmpty property="lineCd" prepend="AND">
+        TP.LINE_CD = #lineCd#
+      </isNotEmpty>
+      <isNotEmpty property="processNm" prepend="AND">
+        UPPER(PROCESS_NM) LIKE UPPER('%' || #processNm# || '%')
+      </isNotEmpty>
+      <isNotEmpty property="workNm" prepend="AND">
+        UPPER(WORK_NM) LIKE UPPER('%' || #workNm# || '%')
+      </isNotEmpty>
+      ORDER BY
+      TP.DISPLAY_ODR,
+      TW.DISPLAY_ODR
+    </statement>
+  </statements>
+</sqlMap>

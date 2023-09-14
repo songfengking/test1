@@ -1,0 +1,76 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.33801.447
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TRC_W_PWT_ProductView", "TRC_W_PWT_ProductView\TRC_W_PWT_ProductView.csproj", "{3B302012-BBC5-4656-AA1B-5F209E0D2123}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KTWebInheritance", "KTWebInheritance\KTWebInheritance.csproj", "{265AAF67-CB61-4F90-AA9B-2A3A75495004}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KTWebControl", "KTWebControl\KTWebControl.csproj", "{35A4776F-9E7C-4BA7-A5D4-028A2249316F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lib", "Lib", "{8A59540C-C766-4107-B01B-24E230A37E65}"
+	ProjectSection(SolutionItems) = preProject
+		lib\IBatisNet.Common.dll = lib\IBatisNet.Common.dll
+		lib\IBatisNet.DataMapper.dll = lib\IBatisNet.DataMapper.dll
+		lib\ICSharpCode.SharpZipLib.dll = lib\ICSharpCode.SharpZipLib.dll
+		lib\KTC1CommonUtils.dll = lib\KTC1CommonUtils.dll
+		lib\KTC1CommonUtils.pdb = lib\KTC1CommonUtils.pdb
+		lib\KTC1CommonUtils.XML = lib\KTC1CommonUtils.XML
+		lib\KTCommon.dll = lib\KTCommon.dll
+		lib\KTCommon.pdb = lib\KTCommon.pdb
+		lib\KTCommon.XML = lib\KTCommon.XML
+		lib\KTCommonApp.dll = lib\KTCommonApp.dll
+		lib\KTCommonApp.pdb = lib\KTCommonApp.pdb
+		lib\KTCommonApp.XML = lib\KTCommonApp.XML
+		lib\KTCommonDao.dll = lib\KTCommonDao.dll
+		lib\KTCommonDao.pdb = lib\KTCommonDao.pdb
+		lib\KTCommonDao.XML = lib\KTCommonDao.XML
+		lib\KTDataAccess.dll = lib\KTDataAccess.dll
+		lib\KTDataAccess.pdb = lib\KTDataAccess.pdb
+		lib\KTDataAccess.XML = lib\KTDataAccess.XML
+		lib\KTDataAccessFactory.dll = lib\KTDataAccessFactory.dll
+		lib\KTDataAccessFactory.pdb = lib\KTDataAccessFactory.pdb
+		lib\KTDataAccessFactory.XML = lib\KTDataAccessFactory.XML
+		lib\KTExcel.dll = lib\KTExcel.dll
+		lib\log4net.dll = lib\log4net.dll
+		lib\NPOI.dll = lib\NPOI.dll
+		lib\NPOI.OOXML.dll = lib\NPOI.OOXML.dll
+		lib\NPOI.OpenXml4Net.dll = lib\NPOI.OpenXml4Net.dll
+		lib\NPOI.OpenXmlFormats.dll = lib\NPOI.OpenXmlFormats.dll
+		lib\PdfSharp.dll = lib\PdfSharp.dll
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+		Test|Any CPU = Test|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3B302012-BBC5-4656-AA1B-5F209E0D2123}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B302012-BBC5-4656-AA1B-5F209E0D2123}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B302012-BBC5-4656-AA1B-5F209E0D2123}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B302012-BBC5-4656-AA1B-5F209E0D2123}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B302012-BBC5-4656-AA1B-5F209E0D2123}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{3B302012-BBC5-4656-AA1B-5F209E0D2123}.Test|Any CPU.Build.0 = Release|Any CPU
+		{265AAF67-CB61-4F90-AA9B-2A3A75495004}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{265AAF67-CB61-4F90-AA9B-2A3A75495004}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{265AAF67-CB61-4F90-AA9B-2A3A75495004}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{265AAF67-CB61-4F90-AA9B-2A3A75495004}.Release|Any CPU.Build.0 = Release|Any CPU
+		{265AAF67-CB61-4F90-AA9B-2A3A75495004}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{265AAF67-CB61-4F90-AA9B-2A3A75495004}.Test|Any CPU.Build.0 = Release|Any CPU
+		{35A4776F-9E7C-4BA7-A5D4-028A2249316F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35A4776F-9E7C-4BA7-A5D4-028A2249316F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35A4776F-9E7C-4BA7-A5D4-028A2249316F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35A4776F-9E7C-4BA7-A5D4-028A2249316F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35A4776F-9E7C-4BA7-A5D4-028A2249316F}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{35A4776F-9E7C-4BA7-A5D4-028A2249316F}.Test|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AD14E2EB-C5E3-4BF9-B806-144E3B7C56DB}
+	EndGlobalSection
+EndGlobal

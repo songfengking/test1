@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="MsZiseki"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+
+    <!-- ************************************************************************************** -->
+    <!-- ステーション実績リスト取得                                                                       -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectStationJissekiList">
+      WITH
+      TMP_実績一覧 AS (
+      SELECT
+      Z.MS_S_PATAN,
+      Z.MS_IDNO,
+      Z.MS_SIJI_LVL,
+      NVL(S1.MS_YYMM_NO,NVL(S2.MS_YYMM_NO,S3.MS_YYMM_NO)) MS_YYMM_NO,
+      S4.MS_YYMM_NO 確定月度連番,
+      NVL(S1.MS_KAN_YYMMDD,NVL(S2.MS_KAN_YYMMDD,S3.MS_KAN_YYMMDD)) MS_KAN_YYMMDD,
+      NVL(S1.MS_K_PATAN,NVL(S2.MS_K_PATAN,S3.MS_K_PATAN)) MS_K_PATAN,
+      NVL(S1.MS_B_KATA_C,NVL(S2.MS_B_KATA_C,S3.MS_B_KATA_C)) MS_B_KATA_C,
+      NVL(S1.MS_B_KUNI_C,NVL(S2.MS_B_KUNI_C,S3.MS_B_KUNI_C)) MS_B_KUNI_C,
+      NVL(S1.MS_B_KATA_N,NVL(S2.MS_B_KATA_N,S3.MS_B_KATA_N)) MS_B_KATA_N,
+      NVL(S1.MS_KIBAN,NVL(S2.MS_KIBAN,S3.MS_KIBAN)) MS_KIBAN,
+      NVL(S1.MS_TOKKIJIKOU,NVL(S2.MS_TOKKIJIKOU,S3.MS_TOKKIJIKOU)) MS_TOKKIJIKOU,
+      Z.MS_J_TUKINO,
+      Z.MS_JITU_YMD,
+      S1.MS_E_KATA_C,
+      S1.MS_E_KATA_N,
+      Z.MS_ENG_IDNO,
+      Z.MS_ENG_KIBAN,
+      R.RANK
+      FROM
+      MS_ZISEKI Z
+      LEFT JOIN MS_SAGYO S1 ON (S1.MS_SIJI_LVL = '1' AND S1.MS_IDNO = Z.MS_IDNO)
+      LEFT JOIN MS_SAGYO S2 ON (S2.MS_SIJI_LVL = '3' AND S2.MS_IDNO = Z.MS_IDNO)
+      LEFT JOIN MS_SAGYO S3 ON (S3.MS_SIJI_LVL = '7' AND S3.MS_IDNO = Z.MS_IDNO)
+      LEFT JOIN MS_SAGYO S4 ON (S4.MS_SIJI_LVL = '2' AND S4.MS_IDNO = Z.MS_IDNO)
+      LEFT JOIN (SELECT DISTINCT K.RANK, S.MS_IDNO FROM TBL_AP型式情報M K INNER JOIN MS_SAGYO S ON (K.PRO_CODE = S.MS_B_KATA_C AND K.COUNTRY = S.MS_B_KUNI_C)) R
+      ON (R.MS_IDNO = Z.MS_IDNO)
+      WHERE
+      Z.MS_STATION = #station#
+      <isNotEmpty property="jissekiYMD" prepend="AND">
+        TO_CHAR(Z.MS_JITU_YMD,'YYYY/MM/DD') = #jissekiYMD#
+      </isNotEmpty>
+      <isEmpty property="jissekiYMD" prepend="AND">
+        TO_CHAR(Z.MS_JITU_YMD,'YYYY/MM/DD') <![CDATA[>]]> '1970/01/01'
+      </isEmpty>
+      ),
+      TMP_検索対象 AS (
+      SELECT
+      MS_IDNO,
+      MS_SIJI_LVL,
+      MS_YYMM_NO,
+      確定月度連番,
+      MS_KAN_YYMMDD,
+      MS_K_PATAN,
+      MS_B_KATA_C,
+      MS_B_KUNI_C,
+      MS_B_KATA_N,
+      CASE WHEN MS_S_PATAN='10' THEN SUBSTR(PKG_COM_E7.Get_Plant_Code(MS_B_KATA_C, MS_KIBAN)||MS_KIBAN,1,7) ELSE MS_KIBAN END MS_KIBAN,
+      MS_TOKKIJIKOU,
+      MS_J_TUKINO,
+      MS_JITU_YMD,
+      MS_E_KATA_C,
+      MS_E_KATA_N,
+      MS_ENG_IDNO,
+      CASE WHEN MS_S_PATAN='30' THEN SUBSTR(PKG_COM_E7.Get_Plant_Code(MS_E_KATA_C, MS_ENG_KIBAN)||MS_ENG_KIBAN,1,7) ELSE MS_ENG_KIBAN END MS_ENG_KIBAN,
+      RANK
+      FROM
+      TMP_実績一覧
+      )
+      SELECT
+      TMP2.*,
+      CASE
+      WHEN MS_YYMM_NO <![CDATA[<]]> ( SELECT MAX(MS_YYMM_NO) FROM TMP_検索対象 TMP1 WHERE TMP1.MS_JITU_YMD <![CDATA[<]]> TMP2.MS_JITU_YMD ) THEN 0
+      ELSE 1
+      END AS 直通
+      FROM
+      TMP_検索対象 TMP2
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="kiban" prepend="AND">
+          MS_KIBAN LIKE '%$kiban$%'
+        </isNotEmpty>
+        <isNotEmpty property="idno"  prepend="AND">
+          MS_IDNO = '$idno$'
+        </isNotEmpty>
+        <isNotEmpty property="katashikiCode" prepend="AND">
+          MS_B_KATA_C LIKE '$katashikiCode$%'
+        </isNotEmpty>
+        <isNotEmpty property="kuniCode" prepend="AND">
+          MS_B_KUNI_C LIKE '$kuniCode$%'
+        </isNotEmpty>
+        <isNotEmpty property="katashikiName"  prepend="AND">
+          MS_B_KATA_N LIKE '$katashikiName$%'
+        </isNotEmpty>
+        <isNotEmpty property="tokki" prepend="AND">
+          MS_TOKKIJIKOU LIKE '%$tokki$%'
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+      MS_J_TUKINO
+    </statement>
+  </statements>
+</sqlMap>

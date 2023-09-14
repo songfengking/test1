@@ -1,0 +1,147 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="MasterMain.master.cs" Inherits="TRC_W_PWT_ProductView.UI.MasterForm.MasterMain" %>
+<%@ Import Namespace="TRC_W_PWT_ProductView.Common" %>
+<%@ Register src="~/UI/Pages/UserControl/LoadingData.ascx" tagname="LoadingData" tagprefix="UC" %>
+
+<!DOCTYPE html>
+<html lang="ja">
+<head runat="server">
+    <meta http-equiv="X-UA-Compatible" content="IE=EDGE"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title><%: Page.Title %> - <%: WebAppInstance.GetInstance().ProjectCode %></title>
+    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+
+    <meta name="viewport" content="width=device-width" />
+    <%-- マスター画面CSS/スクリプト定義領域 --%>
+<%--    <link href="~/CSS/jquery-ui.theme.min.css" rel="stylesheet" />--%>
+    <link href="~/CSS/cobalt/jquery-wijmo.css" rel="stylesheet" />
+    <link href="~/CSS/Base.css" rel="stylesheet" />
+    <link href="~/CSS/TRC.css" rel="stylesheet" />
+
+    <asp:PlaceHolder ID="BaseScripts" runat="server">
+        <script src="<%: ResolveUrl( "~/Scripts/LibScript/jquery-1.11.1.min.js") %>" ></script>
+        <script src="<%: ResolveUrl( "~/Scripts/LibScript/jquery-ui.min.js") %>" ></script>   
+        <script src="<%: ResolveUrl( "~/Scripts/LibScript/modernizr-2.5.3.js") %>" ></script>
+        <script src="<%: PageUtils.ResolveUrl( this.Page, "~/Scripts/KeyControl.js") %>" ></script>
+        <script src="<%: PageUtils.ResolveUrl( this.Page, "~/Scripts/Common.js") %>" ></script>
+        <script src="<%: PageUtils.ResolveUrl( this.Page, "~/Scripts/ControlCommon.js") %>" ></script>
+        <script src="<%: PageUtils.ResolveUrl( this.Page, "~/Scripts/MasterMain.js") %>" ></script>
+        <script src="<%: PageUtils.ResolveUrl( this.Page, "~/Scripts/SubmitControl.js") %>" ></script>
+        <script src="<%: PageUtils.ResolveUrl( this.Page, "~/Scripts/Ready.js") %>" ></script>
+    </asp:PlaceHolder>
+    <%-- 画面別CSS/スクリプト定義領域 --%>
+    <asp:ContentPlaceHolder runat="server" ID="MasterScript" />
+</head>
+<body onload="MasterMain.Resize(true);" onresize="MasterMain.Resize();">
+    <form id="frmMain" runat="server">
+        <ASP:ScriptManager ID="spnMaster" runat="server" ScriptMode="Inherit" EnableScriptLocalization="true" />
+        <%-- コンテナ --%>
+        <div id="main-container">
+            <%-- ヘッダ領域 --%>
+            <header id="header-area">
+                <%-- ヘッダー表示領域 --%>
+                <div class="header-area">
+                    <%-- ロゴ --%>
+                    <div class="header-logo-area">
+                        <img alt="logo" src="/ENVLOGO/kubota.png" class="logo-style" runat="server" />
+                    </div>
+                    <%-- アプリケーション情報 --%>
+                    <div class="header-application-info-area">
+                        <div class="header-info-area-sub">
+                            <span class="header-info-app-id">
+                                <%: WebAppInstance.GetInstance().ProjectCode %> <%: WebAppInstance.GetInstance().ShortAssemblyVer %>
+                            </span>
+                        </div>
+                        <div class="header-info-area-sub">
+                            <span class="header-info-app-name">
+                                <%: WebAppInstance.GetInstance().AppName %>
+                            </span>
+                        </div>
+                    </div>
+                    <%-- ユーザ情報（所属・氏名） --%>
+                    <div class="header-user-info-area">
+                        <div class="header-info-area-sub">
+                            <asp:Label ID="lblBelongsToLB" runat="server" CssClass="belong-title font-default" Text="所  属"></asp:Label>
+                            <asp:Label ID="lblBelongsTo" runat="server" CSSClass="font-default"></asp:Label>
+                        </div>
+                        <div class="header-info-area-sub">
+                            <asp:Label ID="lblUserNameLB" runat="server" CssClass="belong-title font-default" Text="氏  名"></asp:Label>
+                            <asp:Label ID="lblUserName" runat="server" CSSClass="font-default"></asp:Label>
+                        </div>
+                    </div>
+
+                    <%-- リンク・時計 --%>
+                    <div class="header-etc-info-area">
+                        <div class="header-info-area-sub">
+                            <KTCC:KTButton ID="btnManual" runat="server" OnClick="btnManual_Click" CssClass="link-style font-default" Text="マニュアル" OnClientClick="SubmitControl.SetLoadingType(SubmitControl.TYPE_NONE);"></KTCC:KTButton>
+                            <KTCC:KTButton ID="btnMaintenanceMenu" runat="server" CssClass="link-style font-default" OnClick="btnMaintenanceMenu_Click" Text="メニュー"></KTCC:KTButton>
+                            <KTCC:KTButton ID="btnMainView" runat="server" CssClass="link-style font-default" OnClick="btnMainView_Click" Text="検索画面"></KTCC:KTButton>
+                            <KTCC:KTButton ID="btnChangeUser" runat="server" CssClass="link-style font-default" OnClick="btnChangeUser_Click" Text="ログイン"></KTCC:KTButton>
+                            <KTCC:KTButton ID="btnLogout" runat="server" CssClass="link-style font-default" OnClientClick="return ControlCommon.BeforeWindowClose();" OnClick="btnLogout_Click" Text="閉じる"></KTCC:KTButton>
+                        </div>
+                        <div class="header-info-area-sub">
+                            <asp:Label ID="lblNowDateTime" runat="server" ForeColor="Gray" EnableViewState="false"><%: DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") %></asp:Label>
+                        </div>
+                    </div>
+                </div>
+                <div style="clear: both;"></div>
+                <%-- 画面タイトル --%>
+                <div class="ui-widget-header header-title-area">
+                    <asp:Label ID="lblTitle" runat="server" Text=""></asp:Label>
+                </div>
+            </header>
+            <%-- コンテンツ領域(上) --%>
+            <div id="containts-area-top">
+                <%--  画面別コンテンツ領域 --%>
+                <asp:ContentPlaceHolder runat="server" ID="MasterBodyTop" />
+            </div>
+            <%-- コンテンツ領域(中央 可変) --%>
+            <div id="containts-area">
+                <%--  画面別コンテンツ領域 --%>
+                <asp:ContentPlaceHolder runat="server" ID="MasterBody" />
+            </div>
+            <%-- コンテンツ領域(下) --%>
+            <div id="containts-area-bottom">
+                <%--  画面別コンテンツ領域 --%>
+                <asp:ContentPlaceHolder runat="server" ID="MasterBodyBottom" />
+            </div>
+        </div>
+        <%-- セッションタイムアウト対策 --%>
+        <asp:ContentPlaceHolder runat="server" ID="MasterSessionKeep" >
+            <iframe id="frmSessionKeep" class="invisible size-zero" runat="server" ></iframe>
+        </asp:ContentPlaceHolder>
+        <%-- フッタ領域 --%>
+        <footer id="footer-area">
+            <div id="footer-group">
+                <div id="footer-message-area">
+                    <asp:UpdatePanel ID="upnApplicationMessage" runat="server">
+                        <ContentTemplate>
+                            <asp:TextBox ID="txtApplicationMessage" runat="server" CssClass="footer-message-box" ReadOnly="True" Rows="2" TextMode="MultiLine" />
+                            <div id="divGrvMainView" runat="server" class="condition-imadoko" visible="false">
+                                <asp:GridView ID="grvMainView" runat="server" CssClass="grid-layout-imadoko ui-widget-content" OnRowDataBound="grvMainView_RowDataBound">
+                                    <HeaderStyle CssClass="grid-header-imadoko  ui-state-default" Wrap="true"/>
+                                    <RowStyle CssClass="grid-row-imadoko font-default ui-widget al-ct" />
+                                </asp:GridView>
+                            </div>
+                        </ContentTemplate>
+                    </asp:UpdatePanel>
+                </div>
+                <%-- フッター表示領域 --%>
+                <div id="footer-copyrights">
+                    &copy; <%: DateTime.Now.Year %> - <%: WebAppInstance.GetInstance().AppDisplayName %>
+                </div>
+            </div>
+        </footer>
+        <div class="invisible">
+            <%-- 画面トークン退避 --%>
+            <asp:HiddenField ID="hdnToken" runat="server" />
+            <%-- フォーカスコントロール --%>
+            <asp:HiddenField ID="hdnFocus" runat="server" />
+        </div>
+        <UC:LoadingData ID="divLoadingData" runat="server" />
+    </form>
+</body>
+</html>

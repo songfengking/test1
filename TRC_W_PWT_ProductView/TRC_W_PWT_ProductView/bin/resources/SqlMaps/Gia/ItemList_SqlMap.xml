@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="ItemList"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+
+    <!-- ************************************************************************************** -->
+    <!-- 実績ステーションリスト取得                                                                            -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectJissekiStationList">
+      SELECT DISTINCT
+      MS_STATION VALUE,
+      MS_STATION || ' ' || REPLACE(MS_ST_NAME,CHR(13)||CHR(10),'') TEXT
+      FROM
+      MS_ZISEKI
+      LEFT JOIN MS_STATION USING (MS_STATION)
+      WHERE
+      TO_CHAR(MS_JITU_YMD,'YYYYMMDD') <![CDATA[>]]> '19700101'
+      ORDER BY
+      MS_STATION
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- 作業指示月度リスト取得                                                                            -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectSagyoGatsudoList">
+      SELECT DISTINCT
+      指示月度 VALUE,
+      SUBSTR(指示月度,1,4) || '年' || SUBSTR(指示月度,5,6) || '月' TEXT
+      FROM
+      TBL_作業指示保存
+      UNION
+      SELECT DISTINCT
+      MS_JUN_YYMM VALUE,
+      SUBSTR(MS_JUN_YYMM,1,4) || '年' || SUBSTR(MS_JUN_YYMM,5,6) || '月' TEXT
+      FROM
+      MS_SAGYO_KEEP
+      ORDER BY
+      VALUE DESC
+    </statement>
+  </statements>
+</sqlMap>

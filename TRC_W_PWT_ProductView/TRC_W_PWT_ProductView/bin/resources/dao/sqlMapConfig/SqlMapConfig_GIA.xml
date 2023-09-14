@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<sqlMapConfig xmlns="http://ibatis.apache.org/dataMapper"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <settings>
+    <setting useStatementNamespaces="true"/>
+  </settings>
+
+  <!-- プロバイダ -->
+  <providers resource="./resources/dao/Providers.config"/>
+  <!-- データベース接続情報 -->
+  <database>
+    <provider name="Oracle"/>
+    <dataSource name="DUMMY" connectionString="DUMMY" />
+  </database>
+
+  <!-- SQLマップ -->
+  <sqlMaps>
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Gia.ProductKind_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Gia.ClassGroup_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Gia.Model_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Gia.Serial_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Gia.Products_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Gia.TractorParts_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Gia.AccessCounter_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Gia.Kintai_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Gia.KTAuth_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Gia.WmsDpf_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Gia.JobControlInfo_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Gia.TmCcAuthUser_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Gia.TmGeServerPrinter_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Gia.PickingSummary_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Gia.PickingDetail_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Gia.KatashikiMaster_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Gia.MsSagyo_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Gia.Imadoko_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Gia.StationTsuukaJunjo_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Gia.MsZiseki_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Gia.ItemList_SqlMap.xml, TRC_W_PWT_ProductView" />
+    <sqlMap embedded="TRC_W_PWT_ProductView.resources.SqlMaps.Gia.TeRittaiLocation_SqlMap.xml, TRC_W_PWT_ProductView" />
+  </sqlMaps>
+</sqlMapConfig>

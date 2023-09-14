@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="GenericTable"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <!-- 検索対象フラグの取得 -->
+    <statement id="SelectSearchTargetFlag">
+      SELECT
+      SEARCH_TARGET_FLG
+      FROM
+      TM_PW_TRC_PROCESS
+      WHERE
+      LINE_CD = #lineCd#
+      AND PROCESS_CD = #processCd#
+      AND SEARCH_TARGET_FLG = 1
+      AND TRC_DISPLAY_FLG = 1
+    </statement>
+    <!-- 汎用テーブル情報検索 -->
+    <statement id="SelectGenericTable">
+      WITH
+      MAX_HEADER AS (
+          SELECT
+              MODEL_CD,
+              SERIAL,
+              LINE_CD,
+              PROCESS_CD,
+              WORK_CD,
+              MAX(RECORD_NO) RECORD_NO
+          FROM
+              TT_PW_TRC_HEADER
+          <dynamic prepend="WHERE">
+            <isNotEmpty property="dtFrom" prepend="AND">
+              TRUNC(RESULT_DT) <![CDATA[>=]]> #dtFrom#
+            </isNotEmpty>
+            <isNotEmpty property="dtTo" prepend="AND">
+              TRUNC(RESULT_DT) <![CDATA[<=]]> #dtTo#
+            </isNotEmpty>
+          </dynamic>
+          GROUP BY
+              MODEL_CD,
+              SERIAL,
+              LINE_CD,
+              PROCESS_CD,
+              WORK_CD
+      )
+      SELECT
+          TH.MODEL_CD                 "modelCd",
+          TH.MODEL_CD                 "productModelCd",
+          NVL(DS.SERIAL7,TH.SERIAL)   "serial",
+          TH.SERIAL                   "serial6",
+          TH.LINE_CD                  "lineCd",
+          TH.PROCESS_CD               "processCd",
+          TH.WORK_CD                  "workCd",
+          TH.RESULT_CD                "resultCd",
+          TR.RESULT_NM                "resultNm",
+          TH.RESULT_VAL1              "resultVal1",
+          TH.RESULT_VAL2              "resultVal2",
+          TH.RESULT_VAL3              "resultVal3",
+          TH.RESULT_VAL4              "resultVal4",
+          TH.RESULT_VAL5              "resultVal5",
+          TH.RESULT_DT                "resultDt"
+      FROM
+          TT_PW_TRC_HEADER TH
+      LEFT OUTER JOIN MAX_HEADER MH
+          ON  TH.MODEL_CD = MH.MODEL_CD
+          AND TH.SERIAL = MH.SERIAL
+          AND TH.LINE_CD = MH.LINE_CD
+          AND TH.PROCESS_CD = MH.PROCESS_CD
+          AND TH.WORK_CD = MH.WORK_CD
+      LEFT OUTER JOIN TM_PW_TRC_RESULT TR
+          ON  TH.LINE_CD = TR.LINE_CD
+          AND TH.PROCESS_CD = TR.PROCESS_CD
+          AND TH.WORK_CD = TR.WORK_CD
+          AND TH.RESULT_CD = TR.RESULT_CD
+      LEFT OUTER JOIN TT_DI_SERIAL7 DS 
+          ON  TH.MODEL_CD = DS.MODEL_CD 
+          AND TH.SERIAL = DS.SERIAL6
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="dtFrom" prepend="AND">
+          TRUNC(TH.RESULT_DT) <![CDATA[>=]]> #dtFrom#
+        </isNotEmpty>
+        <isNotEmpty property="dtTo" prepend="AND">
+          TRUNC(TH.RESULT_DT) <![CDATA[<=]]> #dtTo#
+        </isNotEmpty>
+        <isNotEmpty property="serialsList" prepend="AND">
+          (TH.MODEL_CD, TH.SERIAL) IN
+          <iterate property="serialsList" open="(" close=")" conjunction="," >
+            (#serialsList[].productModelCd#, #serialsList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <isNotEmpty property="modelCdList" prepend="AND">
+          TH.MODEL_CD IN
+          <iterate property="modelCdList" open="(" close=")" conjunction="," >
+            #modelCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <isNotEmpty property="lineCd" prepend="AND">
+          TH.LINE_CD = #lineCd#
+        </isNotEmpty>
+        <isNotEmpty property="processCd" prepend="AND">
+          TH.PROCESS_CD = #processCd#
+        </isNotEmpty>
+        <isNotEmpty property="workCd" prepend="AND">
+          TH.WORK_CD = #workCd#
+        </isNotEmpty>
+        <dynamic prepend="AND">
+          TH.RECORD_NO = MH.RECORD_NO
+        </dynamic>
+      </dynamic>
+      ORDER BY
+          TH.MODEL_CD,
+          TH.SERIAL,
+          TH.LINE_CD,
+          TH.PROCESS_CD,
+          TH.WORK_CD
+    </statement>
+  </statements>
+</sqlMap>

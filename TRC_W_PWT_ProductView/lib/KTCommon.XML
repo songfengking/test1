@@ -1,0 +1,4084 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>KTCommon</name>
+    </assembly>
+    <members>
+        <member name="T:KTFramework.Common.LayoutData">
+            <summary>
+            ファイルレイアウト用データ定義クラス
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.LayoutData.TIMESTAMP_BYTE_SIZE">
+            <summary>タイムスタンプ型のバイトサイズ</summary>
+        </member>
+        <member name="F:KTFramework.Common.LayoutData.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="F:KTFramework.Common.LayoutData._name">
+            <summary>データ名</summary>
+        </member>
+        <member name="F:KTFramework.Common.LayoutData._type">
+            <summary>データタイプ</summary>
+        </member>
+        <member name="F:KTFramework.Common.LayoutData._length">
+            <summary>桁数又は文字数(DataType=NumericChar又はDecimalの場合は小数桁含む、DataType=Timestampでは不要)</summary>
+        </member>
+        <member name="F:KTFramework.Common.LayoutData._scale">
+            <summary>小数桁(DataType=NumericChar又はDecimalの場合のみ有効)</summary>
+        </member>
+        <member name="F:KTFramework.Common.LayoutData._data">
+            <summary>データ</summary>
+        </member>
+        <member name="M:KTFramework.Common.LayoutData.#ctor(System.String,KTFramework.Common.LayoutData.DataType,System.Int32,System.Int32)">
+            <summary>
+            ファイルレイアウト用のデータを定義する
+            </summary>
+            <param name="name">データ定義名</param>
+            <param name="type">データタイプ</param>
+            <param name="length">桁数又は文字数(DataType=NumericChar又はDecimalの場合は小数桁含む、DataType=Timestampでは不要)</param>
+            <param name="scale">小数桁(DataType=NumericChar又はDecimalの場合のみ有効)</param>
+        </member>
+        <member name="M:KTFramework.Common.LayoutData.ToByteArray(System.Text.Encoding)">
+            <summary>
+            データをバイト配列に変換する
+            </summary>
+            <param name="encode">エンコーディング</param>
+            <returns>バイト配列</returns>
+        </member>
+        <member name="M:KTFramework.Common.LayoutData.Clear">
+            <summary>
+            データをクリアする(null)
+            </summary>
+        </member>
+        <member name="P:KTFramework.Common.LayoutData.Name">
+            <summary>データ名</summary>
+        </member>
+        <member name="P:KTFramework.Common.LayoutData.Type">
+            <summary>データタイプ</summary>
+        </member>
+        <member name="P:KTFramework.Common.LayoutData.Length">
+            <summary>桁数又は文字数(DataType=NumericChar又はDecimalの場合は小数桁含む、DataType=Timestampでは不要)</summary>
+        </member>
+        <member name="P:KTFramework.Common.LayoutData.Scale">
+            <summary>小数桁(DataType=NumericChar又はDecimalの場合のみ有効)</summary>
+        </member>
+        <member name="P:KTFramework.Common.LayoutData.Data">
+            <summary>データ</summary>
+        </member>
+        <member name="P:KTFramework.Common.LayoutData.ByteSize">
+            <summary>
+            バイトサイズを取得する
+            </summary>
+        </member>
+        <member name="T:KTFramework.Common.LayoutData.DataType">
+            <summary>データタイプ</summary>
+        </member>
+        <member name="F:KTFramework.Common.LayoutData.DataType.Char">
+            <summary>半角文字</summary>
+        </member>
+        <member name="F:KTFramework.Common.LayoutData.DataType.Graphic">
+            <summary>全角文字</summary>
+        </member>
+        <member name="F:KTFramework.Common.LayoutData.DataType.NumericChar">
+            <summary>数値(文字列,小数点なし)</summary>
+        </member>
+        <member name="F:KTFramework.Common.LayoutData.DataType.NumericCharWithPoint">
+            <summary>数値(文字列,小数点あり)</summary>
+        </member>
+        <member name="F:KTFramework.Common.LayoutData.DataType.Decimal">
+            <summary>数値(BCD)</summary>
+        </member>
+        <member name="F:KTFramework.Common.LayoutData.DataType.Timestamp">
+            <summary>タイムスタンプ</summary>
+        </member>
+        <member name="T:KTFramework.Common.FileLayout">
+            <summary>
+            ファイルレイアウト管理クラス
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.FileLayout.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="F:KTFramework.Common.FileLayout._layout">
+            <summary>レイアウト</summary>
+        </member>
+        <member name="F:KTFramework.Common.FileLayout._layoutMap">
+            <summary>レイアウトマップ</summary>
+        </member>
+        <member name="F:KTFramework.Common.FileLayout._encode">
+            <summary>エンコード</summary>
+        </member>
+        <member name="M:KTFramework.Common.FileLayout.#ctor(System.Text.Encoding)">
+            <summary>
+            レイアウトデータ定義をマッピングします
+            </summary>
+            <param name="encode">エンコード</param>
+        </member>
+        <member name="M:KTFramework.Common.FileLayout.#ctor(System.Collections.Generic.List{KTFramework.Common.LayoutData},KTFramework.Common.Encoding)">
+            <summary>
+            レイアウトデータ定義をマッピングします
+            </summary>
+            <param name="layout">レイアウト</param>
+            <param name="encode">エンコード</param>
+        </member>
+        <member name="M:KTFramework.Common.FileLayout.AddLayoutData(System.String,KTFramework.Common.LayoutData.DataType,System.Int32,System.Int32)">
+            <summary>
+            レイアウトデータ定義を追加する
+            </summary>
+            <param name="name">データ定義名</param>
+            <param name="type">データタイプ</param>
+            <param name="length">桁数又は文字数(DataType=NumericChar又はDecimalの場合は小数桁含む、DataType=Timestampでは不要)</param>
+            <param name="scale">小数桁(DataType=NumericChar又はDecimalの場合のみ有効)</param>
+        </member>
+        <member name="M:KTFramework.Common.FileLayout.AddLayoutData(KTFramework.Common.LayoutData)">
+            <summary>
+            レイアウトデータ定義を追加する
+            </summary>
+            <param name="layoutData">レイアウトデータ定義</param>
+        </member>
+        <member name="M:KTFramework.Common.FileLayout.GetStartPosition(System.Int32)">
+            <summary>
+            指定データの開始バイト位置を取得します
+            </summary>
+            <param name="index">レイアウトインデックス</param>
+            <returns>開始バイト位置</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileLayout.GetStartPosition(System.String)">
+            <summary>
+            指定データの開始バイト位置を取得します
+            </summary>
+            <param name="name">データ定義名</param>
+            <returns>開始バイト位置</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileLayout.Put(System.Byte[])">
+            <summary>
+            バイト配列を解析してレイアウトにマッピングします
+            </summary>
+            <param name="byteArray">バイト配列</param>
+        </member>
+        <member name="M:KTFramework.Common.FileLayout.Put(System.Object[])">
+            <summary>
+            データ配列をレイアウトにマッピングします
+            </summary>
+            <param name="dataArray">データ配列</param>
+            <returns>バイト配列</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileLayout.Put(System.String)">
+            <summary>
+            文字列として読み込んだデータをレイアウトにマッピングします
+            </summary>
+            <param name="inStr">文字列データ</param>
+        </member>
+        <member name="M:KTFramework.Common.FileLayout.Put(System.Int32,System.Object)">
+            <summary>
+            データをレイアウトの指定位置にマッピングします
+            </summary>
+            <param name="index">レイアウトインデックス</param>
+            <param name="data">データ</param>
+        </member>
+        <member name="M:KTFramework.Common.FileLayout.Put(System.String,System.Object)">
+            <summary>
+            データをレイアウトの指定定義名にマッピングします
+            </summary>
+            <param name="name">データ定義名</param>
+            <param name="data">データ</param>
+        </member>
+        <member name="M:KTFramework.Common.FileLayout.Get(System.Int32)">
+            <summary>
+            レイアウトの指定位置のデータを取得します
+            </summary>
+            <param name="index">レイアウトインデックス</param>
+            <returns>データ</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileLayout.Get(System.String)">
+            <summary>
+            レイアウトの指定定義名のデータを取得します
+            </summary>
+            <param name="name">データ定義名</param>
+            <returns>データ</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileLayout.ToArray">
+            <summary>
+            レイアウトにマッピングされた全てのデータをバイト配列に変換します
+            </summary>
+            <returns>バイト配列</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileLayout.ToArrayLine">
+            <summary>
+            レイアウトにマッピングされた全てのデータをバイト配列に変換します
+            末尾に改行コードが付加されます
+            </summary>
+            <returns>バイト配列</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileLayout.ToMemoryStream(System.Boolean)">
+            <summary>
+            レイアウトにマッピングされた全てのデータをバイト配列に変換します
+            </summary>
+            <param name="withLineFeed">改行有無フラグ</param>
+            <returns>メモリストリーム</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileLayout.ToString">
+            <summary>
+            レイアウトにマッピングされた全てのデータを文字列に変換します
+            </summary>
+            <returns>文字列</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileLayout.ToStringLine">
+            <summary>
+            レイアウトにマッピングされた全てのデータを文字列に変換します
+            末尾に改行コードが付加されます
+            </summary>
+            <returns>文字列</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileLayout.Clear">
+            <summary>
+            レイアウトの全データをクリアする(null)
+            </summary>
+        </member>
+        <member name="P:KTFramework.Common.FileLayout.Item(System.Int32)">
+            <summary>
+            指定されたインデックスのレイアウトデータ定義を返します
+            </summary>
+            <param name="index">データ定義インデックス</param>
+            <returns>データ定義</returns>
+        </member>
+        <member name="P:KTFramework.Common.FileLayout.Item(System.String)">
+            <summary>
+            指定されたデータ定義名のレイアウトデータ定義を返します
+            </summary>
+            <param name="name">データ定義名</param>
+            <returns>データ定義</returns>
+        </member>
+        <member name="P:KTFramework.Common.FileLayout.Length">
+            <summary>
+            レイアウトの全体バイト長を取得します
+            </summary>
+            <returns>全体バイト長</returns>
+        </member>
+        <member name="T:KTFramework.Common.BinaryUtils">
+            <summary>
+            バイナリデータユーティリティクラス
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.BinaryUtils.DEFAULT_ENCODING">
+            <summary>デフォルトエンコーディング</summary>
+        </member>
+        <member name="M:KTFramework.Common.BinaryUtils.ToString(System.Byte[])">
+            <summary>
+            バイト配列を文字列に変換します
+            エンコードにはShift_JISが指定されます
+            </summary>
+            <param name="byteArray">バイト配列</param>
+            <returns>文字列データ</returns>
+        </member>
+        <member name="M:KTFramework.Common.BinaryUtils.ToString(System.Byte[],System.Text.Encoding)">
+            <summary>
+            バイト配列を文字列に変換します
+            </summary>
+            <param name="byteArray">バイト配列</param>
+            <param name="encode">エンコード</param>
+            <returns>文字列データ</returns>
+        </member>
+        <member name="M:KTFramework.Common.BinaryUtils.ToString(System.Byte[],System.Int32)">
+            <summary>
+            バイト配列の指定位置から最終端までを切り出して文字列に変換します
+            エンコードにはShift_JISが指定されます
+            </summary>
+            <param name="byteArray">バイト配列</param>
+            <param name="offset">取得開始位置</param>
+            <returns>文字列データ</returns>
+        </member>
+        <member name="M:KTFramework.Common.BinaryUtils.ToString(System.Byte[],System.Int32,System.Text.Encoding)">
+            <summary>
+            バイト配列の指定位置から最終端までを切り出して文字列に変換します
+            </summary>
+            <param name="byteArray">バイト配列</param>
+            <param name="offset">取得開始位置</param>
+            <param name="encode">エンコード</param>
+            <returns>文字列データ</returns>
+        </member>
+        <member name="M:KTFramework.Common.BinaryUtils.ToString(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            バイト配列の指定位置から指定長分のデータを切り出して文字列に変換します
+            エンコードにはShift_JISが指定されます
+            </summary>
+            <param name="byteArray">バイト配列</param>
+            <param name="offset">取得開始位置</param>
+            <param name="length">長さ</param>
+            <returns>文字列データ</returns>
+        </member>
+        <member name="M:KTFramework.Common.BinaryUtils.ToString(System.Byte[],System.Int32,System.Int32,System.Text.Encoding)">
+            <summary>
+            バイト配列の指定位置から指定長分のデータを切り出して文字列に変換します
+            </summary>
+            <param name="byteArray">バイト配列</param>
+            <param name="offset">取得開始位置</param>
+            <param name="length">長さ</param>
+            <param name="encode">エンコード</param>
+            <returns>文字列データ</returns>
+        </member>
+        <member name="M:KTFramework.Common.BinaryUtils.ToHexString(System.Byte[])">
+            <summary>
+            バイト配列をHEX文字列に変換します
+            </summary>
+            <param name="byteArray">バイト配列</param>
+            <returns>HEX文字列</returns>
+        </member>
+        <member name="M:KTFramework.Common.BinaryUtils.ToDecimal(System.Byte[])">
+            <summary>
+            バイト配列の指定位置から指定長分のパック10進データを切り出してdecimal型に変換して返す
+            </summary>
+            <param name="src">パック10進データ</param>
+            <returns>取得した数値</returns>
+        </member>
+        <member name="M:KTFramework.Common.BinaryUtils.ToDecimal(System.Byte[],System.Int32)">
+            <summary>
+            バイト配列の指定位置から指定長分のパック10進データを切り出してdecimal型に変換して返す
+            </summary>
+            <param name="src">パック10進データ</param>
+            <param name="offset">取り出し開始位置</param>
+            <returns>取得した数値</returns>
+        </member>
+        <member name="M:KTFramework.Common.BinaryUtils.ToDecimal(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            バイト配列の指定位置から指定長分のパック10進データを切り出してdecimal型に変換して返す
+            </summary>
+            <param name="src">パック10進データ</param>
+            <param name="offset">取り出し開始位置</param>
+            <param name="len">長さ</param>
+            <returns>取得した数値</returns>
+        </member>
+        <member name="M:KTFramework.Common.BinaryUtils.ToBcd(System.Decimal,System.Int32,System.Int32)">
+            <summary>
+            decimal型をパック10進データに変換する
+            <para>
+            桁数が指定桁数よりも大きい場合は、<br />
+            指定桁数よりも上位桁を除き、下桁のみを残します。<br />
+            また、桁数が指定桁数よりも小さい場合は不足桁数は0パディングされます。
+            </para>
+            </summary>
+            <param name="src">入力数値</param>
+            <param name="digit">整数部桁数</param>
+            <param name="scale">小数部桁数</param>
+            <returns>パック10進データ</returns>
+        </member>
+        <member name="M:KTFramework.Common.BinaryUtils.ToBcd(System.String,System.Int32,System.Boolean)">
+            <summary>
+            文字列型をパック10進データに変換する
+            <para>
+            文字列桁数が指定桁数よりも大きい場合は、<br />
+            指定桁数よりも上位桁を除き、下桁のみを残します。<br />
+            また、文字列桁数が指定桁数よりも小さい場合は不足桁数は0パディングされます。
+            </para>
+            </summary>
+            <param name="inStr">文字列データ</param>
+            <param name="digit">パック10進にしたい文字数</param>
+            <param name="isFraction">true:小数(不足桁のパディング時に後方にパディングします)</param>
+            <returns>パック10進データ</returns>
+        </member>
+        <member name="M:KTFramework.Common.BinaryUtils.GetLength(System.String)">
+            <summary>
+            指定文字列のバイト長を返します
+            指定文字列が空文字の場合は0が返ります
+            エンコードにはShift_JISが指定されます
+            </summary>
+            <param name="inStr">指定文字列</param>
+            <returns>バイト長</returns>
+        </member>
+        <member name="M:KTFramework.Common.BinaryUtils.GetLength(System.String,System.Text.Encoding)">
+            <summary>
+            指定文字列のバイト長を返します
+            指定文字列が空文字の場合は0が返ります
+            </summary>
+            <param name="inStr">指定文字列</param>
+            <param name="encode">エンコード</param>
+            <returns>バイト長</returns>
+        </member>
+        <member name="M:KTFramework.Common.BinaryUtils.GetLength(System.Char)">
+            <summary>
+            指定文字のバイト長を返します
+            指定文字が空文字の場合は0が返ります
+            エンコードにはShift_JISが指定されます
+            </summary>
+            <param name="inChar">指定文字列</param>
+            <returns>バイト長</returns>
+        </member>
+        <member name="M:KTFramework.Common.BinaryUtils.GetLength(System.Char,System.Text.Encoding)">
+            <summary>
+            指定文字のバイト長を返します
+            指定文字が空文字の場合は0が返ります
+            </summary>
+            <param name="inChar">指定文字列</param>
+            <param name="encode">エンコード</param>
+            <returns>バイト長</returns>
+        </member>
+        <member name="T:KTFramework.Common.CsvUtils">
+            <summary>
+            CSV/TSVデータユーティリティクラス
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.CsvUtils.ENCLOSURE">
+            <summary>囲み文字(ダブルクォーテーション)</summary>
+        </member>
+        <member name="M:KTFramework.Common.CsvUtils.GetCsvString(System.Object,System.Object,System.Char)">
+            <summary>
+            CSV/TSVのセルデータを作成します。
+            データ内にセパレータが含まれている場合はデータを囲み文字で括ります。
+            </summary>
+            <param name="inObj">データ</param>
+            <param name="nullObj">データがnullだった場合の表示文字</param>
+            <param name="separator">区切り文字</param>
+            <returns>セルデータ</returns>
+        </member>
+        <member name="M:KTFramework.Common.CsvUtils.GetCsvString(System.String,System.String,System.Char)">
+            <summary>
+            CSV/TSVのセルデータを作成します。
+            データ内にセパレータが含まれている場合はデータを囲み文字で括ります。
+            </summary>
+            <param name="inStr">データ</param>
+            <param name="nullValue">データがnullだった場合の表示文字</param>
+            <param name="separator">区切り文字</param>
+            <returns>セルデータ</returns>
+        </member>
+        <member name="M:KTFramework.Common.CsvUtils.GetCsvString(System.String,System.Char)">
+            <summary>
+            CSV/TSVのセルデータを作成します。
+            データ内にセパレータが含まれている場合はデータを囲み文字で括ります。
+            </summary>
+            <param name="inStr">データ</param>
+            <param name="separator">区切り文字</param>
+            <returns>セルデータ</returns>
+        </member>
+        <member name="M:KTFramework.Common.CsvUtils.GetCsvList(System.String,System.Char)">
+            <summary>
+            文字列をセパレータで分割し文字列リストで返します。
+            データが囲み文字で括られている場合は囲み文字を除去します。
+            </summary>
+            <param name="inStr">データ</param>
+            <param name="separator">区切り文字</param>
+            <returns>文字列リスト</returns>
+        </member>
+        <member name="T:KTFramework.Common.FileAlreadyExistsException">
+            <summary>
+            ファイル既存例外
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.FileAlreadyExistsException.#ctor">
+            <summary>
+            ファイル既存例外
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.FileAlreadyExistsException.#ctor(System.String)">
+            <summary>
+            ファイル既存例外
+            </summary>
+            <param name="message">メッセージ</param>
+        </member>
+        <member name="T:KTFramework.Common.FileHandler">
+            <summary>
+            ファイル操作ユーティリティクラス
+            </summary>
+            <remarks>
+            インスタンスを作成し、Writer/Readerプロパティを介してファイルアクセスを行います。<br />
+            Writer/ReaderはそれぞれStreamWriter/StreamReaderを独自に拡張した、StreamWriterEx/StreamReaderExを使用していますので、
+            通常のStreamWriter/StreamReaderと同様にファイルアクセスすることができます。<br />
+            また、拡張子がZIP又はGZのファイルについてはストリームを作成する際にSystem.IO.Compression.GZipStreamを経由していますので、
+            通常のファイルと同様にファイル操作を行うことができます。<br />
+            </remarks>
+        </member>
+        <member name="F:KTFramework.Common.FileHandler.SEPARATOR_COMMA">
+            <summary>セパレータ(カンマ)</summary>
+        </member>
+        <member name="F:KTFramework.Common.FileHandler.SEPARATOR_TAB">
+            <summary>セパレータ(タブ)</summary>
+        </member>
+        <member name="F:KTFramework.Common.FileHandler.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="F:KTFramework.Common.FileHandler._fileOpenMode">
+            <summary>ファイルオープンモード</summary>
+        </member>
+        <member name="F:KTFramework.Common.FileHandler._separator">
+            <summary>セパレータ</summary>
+        </member>
+        <member name="M:KTFramework.Common.FileHandler.GetSeparatorChar(KTFramework.Common.FileHandler.Separator)">
+            <summary>
+            セパレータを取得します
+            </summary>
+            <param name="separator">セパレータ</param>
+        </member>
+        <member name="F:KTFramework.Common.FileHandler._baseStream">
+            <summary>ベースストリーム</summary>
+        </member>
+        <member name="F:KTFramework.Common.FileHandler._reader">
+            <summary>読込ストリーム</summary>
+        </member>
+        <member name="F:KTFramework.Common.FileHandler._writer">
+            <summary>書込ストリーム</summary>
+        </member>
+        <member name="F:KTFramework.Common.FileHandler._filePath">
+            <summary>ファイルパス</summary>
+        </member>
+        <member name="F:KTFramework.Common.FileHandler._encoding">
+            <summary>エンコード</summary>
+        </member>
+        <member name="M:KTFramework.Common.FileHandler.#ctor(System.String,KTFramework.Common.FileHandler.FileOpenMode)">
+            <summary>
+            FileHandlerを作成します。<br />
+            EncodingはShift-JISが指定されます。<br />
+            セパレータはカンマが指定されます。<br />
+            </summary>
+            <param name="filePath">ファイルパス</param>
+            <param name="fileOpenMode">ファイルオープンモード</param>
+        </member>
+        <member name="M:KTFramework.Common.FileHandler.#ctor(System.String,KTFramework.Common.FileHandler.FileOpenMode,System.Text.Encoding)">
+            <summary>
+            FileHandlerを作成します。<br />
+            セパレータはカンマが指定されます。<br />
+            </summary>
+            <param name="filePath">ファイルパス</param>
+            <param name="fileOpenMode">ファイルオープンモード</param>
+            <param name="encoding">エンコード</param>
+        </member>
+        <member name="M:KTFramework.Common.FileHandler.#ctor(System.String,KTFramework.Common.FileHandler.FileOpenMode,KTFramework.Common.FileHandler.Separator)">
+            <summary>
+            FileHandlerを作成します。<br />
+            EncodingはShift-JISが指定されます。<br />
+            </summary>
+            <param name="filePath">ファイルパス</param>
+            <param name="fileOpenMode">ファイルオープンモード</param>
+            <param name="separator">区切り文字</param>
+        </member>
+        <member name="M:KTFramework.Common.FileHandler.#ctor(System.String,KTFramework.Common.FileHandler.FileOpenMode,System.Text.Encoding,KTFramework.Common.FileHandler.Separator)">
+            <summary>
+            FileHandlerを作成します。<br />
+            </summary>
+            <param name="filePath">ファイルパス</param>
+            <param name="fileOpenMode">ファイルオープンモード</param>
+            <param name="encoding">エンコード</param>
+            <param name="separator">セパレータ</param>
+        </member>
+        <member name="M:KTFramework.Common.FileHandler.Open">
+            <summary>
+            ファイルオープン
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.FileHandler.Close">
+            <summary>
+            ファイルクローズ
+            </summary>
+        </member>
+        <member name="P:KTFramework.Common.FileHandler.BaseStream">
+            <summary>ファイルストリーム</summary>
+        </member>
+        <member name="P:KTFramework.Common.FileHandler.Reader">
+            <summary>読込ストリーム</summary>
+        </member>
+        <member name="P:KTFramework.Common.FileHandler.Writer">
+            <summary>書込ストリーム</summary>
+        </member>
+        <member name="T:KTFramework.Common.FileHandler.FileOpenMode">
+            <summary>
+            ファイルオープンモード
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.FileHandler.FileOpenMode.Read">
+            <summary>読込モード</summary>
+        </member>
+        <member name="F:KTFramework.Common.FileHandler.FileOpenMode.Write">
+            <summary>書込モード</summary>
+        </member>
+        <member name="F:KTFramework.Common.FileHandler.FileOpenMode.Append">
+            <summary>追記モード</summary>
+        </member>
+        <member name="T:KTFramework.Common.FileHandler.Separator">
+            <summary>セパレータ</summary>
+        </member>
+        <member name="F:KTFramework.Common.FileHandler.Separator.Comma">
+            <summary>カンマ区切り</summary>
+        </member>
+        <member name="F:KTFramework.Common.FileHandler.Separator.Tab">
+            <summary>タブ区切り</summary>
+        </member>
+        <member name="T:KTFramework.Common.BoolUtils">
+            <summary>
+            論理型データ操作クラス
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.BoolUtils.ToBool(System.String)">
+            <summary>
+            文字列を論理型に変換します。
+            変換できない場合はfalseを返します。
+            </summary>
+            <param name="value">変換する値</param>
+            <returns>変換された値</returns>
+        </member>
+        <member name="M:KTFramework.Common.BoolUtils.ToBool(System.String,System.Boolean)">
+            <summary>
+            文字列を論理型に変換します。<br />
+            変換できない場合はdefaultValueを返します。<br />
+            </summary>
+            <param name="value">変換する値</param>
+            <param name="defaultValue">変換できなかった際の返値</param>
+            <returns>変換された値</returns>
+        </member>
+        <member name="T:KTFramework.Common.Encoding">
+            <summary>
+            System.Text.Encoding拡張クラス
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Encoding.GetChars(System.Byte[],System.Int32,System.Int32,System.Char[],System.Int32)">
+            <summary>
+            オーバーライドメソッド
+            </summary>
+            <remarks>
+            実装なし
+            </remarks>
+            <param name="bytes"></param>
+            <param name="byteIndex"></param>
+            <param name="byteCount"></param>
+            <param name="chars"></param>
+            <param name="charIndex"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.Encoding.GetCharCount(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            オーバーライドメソッド
+            </summary>
+            <remarks>
+            実装なし
+            </remarks>
+            <param name="bytes"></param>
+            <param name="index"></param>
+            <param name="count"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.Encoding.GetMaxCharCount(System.Int32)">
+            <summary>
+            オーバーライドメソッド
+            </summary>
+            <remarks>
+            実装なし
+            </remarks>
+            <param name="byteCount"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.Encoding.GetBytes(System.Char[],System.Int32,System.Int32,System.Byte[],System.Int32)">
+            <summary>
+            オーバーライドメソッド
+            </summary>
+            <remarks>
+            実装なし
+            </remarks>
+            <param name="chars"></param>
+            <param name="charIndex"></param>
+            <param name="charCount"></param>
+            <param name="bytes"></param>
+            <param name="byteIndex"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.Encoding.GetByteCount(System.Char[],System.Int32,System.Int32)">
+            <summary>
+            オーバーライドメソッド
+            </summary>
+            <remarks>
+            実装なし
+            </remarks>
+            <param name="chars"></param>
+            <param name="index"></param>
+            <param name="count"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.Encoding.GetMaxByteCount(System.Int32)">
+            <summary>
+            オーバーライドメソッド
+            </summary>
+            <remarks>
+            実装なし
+            </remarks>
+            <param name="charCount"></param>
+            <returns></returns>
+        </member>
+        <member name="P:KTFramework.Common.Encoding.ShiftJIS">
+            <summary>Shift-JIS形式のエンコーディング(System.Text.Encoding)を取得します</summary>
+        </member>
+        <member name="T:KTFramework.Common.FileUtils">
+            <summary>
+            ファイル関連共通ユーティリティクラス
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.FileUtils.IsZipFile(System.String)">
+            <summary>
+            拡張子がZIPまたはGZかをチェックします。
+            </summary>
+            <param name="path">ファイルパス</param>
+            <returns>検査結果 true:ZIPorGZ</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileUtils.GetFolderPath(System.String)">
+            <summary>
+            フォルダパスを作成します。<br />
+            "/"区切りのパスを"\"区切りに置き換え、<br />
+            文字列の最終端に"\"を付加します。<br />
+            </summary>
+            <param name="folderName">フォルダ名</param>
+            <returns>フォルダパス</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileUtils.GetFilePath(System.String,System.String)">
+            <summary>
+            ファイルのフルパスを作成します。<br />
+            "/"区切りのパスを"\"区切りに置き換え、<br />
+            フォルダ名とファイル名を連結したフルパス文字列を作成します。<br />
+            </summary>
+            <param name="folderName">フォルダ名</param>
+            <param name="fileName">ファイル名</param>
+            <returns>フルパス</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileUtils.GetFileSize(System.String)">
+            <summary>
+            ファイルサイズを取得します。
+            ファイルが存在しない場合は0が返されます。
+            </summary>
+            <param name="path">ファイルパス</param>
+            <returns>ファイルサイズ</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileUtils.Move(System.String,System.String)">
+            <summary>
+            ファイルを移動(コピー後に元ファイルを削除)します
+            移動先のフォルダがなければ作成します。
+            </summary>
+            <remarks>
+            同名ファイルが既にある場合は上書きします
+            </remarks>
+            <param name="srcPath">移動元ファイルパス</param>
+            <param name="destPath">移動先ファイルパス</param>
+            <returns>true:移動成功 false:移動失敗</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileUtils.Move(System.String,System.String,System.Boolean)">
+            <summary>
+            ファイルを移動(コピー後に元ファイルを削除)します
+            移動先のフォルダがなければ作成します。
+            </summary>
+            <param name="srcPath">移動元ファイルパス</param>
+            <param name="destPath">移動先ファイルパス</param>
+            <param name="overwrite">上書き true:する false:しない</param>
+            <returns>true:移動成功 false:移動失敗</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileUtils.Copy(System.String,System.String)">
+            <summary>
+            ファイルをコピーします
+            コピー先のフォルダがなければ作成します。
+            </summary>
+            <remarks>
+            同名ファイルが既にある場合は上書きします
+            </remarks>
+            <param name="srcPath">移動元ファイルパス</param>
+            <param name="destPath">移動先ファイルパス</param>
+            <returns>true:コピー成功 false:コピー失敗</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileUtils.Copy(System.String,System.String,System.Boolean)">
+            <summary>
+            ファイルをコピーします
+            コピー先のフォルダがなければ作成します。
+            </summary>
+            <param name="srcPath">移動元ファイルパス</param>
+            <param name="destPath">移動先ファイルパス</param>
+            <param name="overwrite">上書き true:する false:しない</param>
+            <returns>true:コピー成功 false:コピー失敗</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileUtils.CreateDirectory(System.String)">
+            <summary>
+            フォルダを作成します
+            作成前に存否をチェックします。
+            </summary>
+            <param name="path">パス</param>
+        </member>
+        <member name="M:KTFramework.Common.FileUtils.Delete(System.String)">
+            <summary>
+            ファイルを削除します
+            </summary>
+            <param name="destPath">削除ファイルパス</param>
+            <returns>true:削除成功 false:削除失敗</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileUtils.Delete(System.String,System.Int32)">
+            <summary>
+            指定日以前のファイルを削除します
+            </summary>
+            <param name="destPath">検査フォルダ</param>
+            <param name="keepDay">保存期間(指定日以前のファイルを削除 削除しない場合は0を指定)</param>
+            <returns>削除件数</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileUtils.Backup(System.String,System.String,System.Int32,System.Boolean)">
+            <summary>
+            ファイルをバックアップします。
+            </summary>
+            <remarks>
+            同名ファイルが既にある場合は上書きします。
+            バックアップ先にはベースフォルダをしてください。
+            配下にアセンブリ名のフォルダが自動作成され、
+            その下にバックアップファイルが作成されます。
+            その際、拡張子の手前に年月日時分秒(yyyyMMddHHmmss)を付加します。
+            また、引数に保存期間を指定した場合は、
+            上記バックアップフォルダ配下の全ファイルをチェックします。
+            </remarks>
+            <param name="srcPath">元ファイル</param>
+            <param name="destPath">バックアップ先のベースフォルダを指定(プロジェクト名やファイル名などは不要)</param>
+            <param name="keepDay">保存期間(指定日以前のファイルを削除 削除しない場合は0を指定)</param>
+            <param name="compress">バックアップファイルのZIP圧縮有無 true:ZIP圧縮する false:ZIP圧縮しない</param>
+        </member>
+        <member name="M:KTFramework.Common.FileUtils.DecompressZip(System.String)">
+            <summary>
+            ZIPファイルを解凍します。<br />
+            ZIP書庫の解凍はできません。<br />
+            ZIP書庫の解凍はZipFileHandlerを使用してください。(GrapeCity CompornentOneを利用しています)<br />
+            </summary>
+            <remarks>
+            同名ファイルが既にある場合は上書きします
+            </remarks>
+            <param name="srcPath">圧縮ファイルフルパス</param>
+            <returns>実行結果</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileUtils.DecompressZip(System.String,System.Boolean)">
+            <summary>
+            ZIPファイルを解凍します。<br />
+            ZIP書庫の解凍はできません。<br />
+            ZIP書庫の解凍はZipFileHandlerを使用してください。(GrapeCity CompornentOneを利用しています)<br />
+            </summary>
+            <param name="srcPath">圧縮ファイルフルパス</param>
+            <param name="overwrite">上書き true:する false:しない</param>
+            <returns>実行結果</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileUtils.DecompressZip(System.String,System.String)">
+            <summary>
+            ZIPファイルを解凍します。<br />
+            ZIP書庫の解凍はできません。<br />
+            ZIP書庫の解凍はZipFileHandlerを使用してください。(GrapeCity CompornentOneを利用しています)<br />
+            </summary>
+            <remarks>
+            同名ファイルが既にある場合は上書きします
+            </remarks>
+            <param name="srcPath">圧縮ファイルフルパス</param>
+            <param name="destPath">解凍後ファイルフルパス</param>
+            <returns>実行結果</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileUtils.DecompressZip(System.String,System.String,System.Boolean)">
+            <summary>
+            ZIPファイルを解凍します。<br />
+            ZIP書庫の解凍はできません。<br />
+            ZIP書庫の解凍はZipFileHandlerを使用してください。(GrapeCity CompornentOneを利用しています)<br />
+            </summary>
+            <param name="srcPath">圧縮ファイルフルパス</param>
+            <param name="destPath">解凍後ファイルフルパス</param>
+            <param name="overwrite">上書き true:する false:しない</param>
+            <returns>実行結果</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileUtils.CompressZip(System.String)">
+            <summary>
+            ファイルをZIP圧縮します。<br />
+            </summary>
+            <remarks>
+            同名ファイルが既にある場合は上書きします
+            </remarks>
+            <param name="srcPath">入力ファイルフルパス</param>
+            <returns>実行結果</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileUtils.CompressZip(System.String,System.Boolean)">
+            <summary>
+            ファイルをZIP圧縮します。
+            </summary>
+            <param name="srcPath">入力ファイルフルパス</param>
+            <param name="overwrite">上書き true:する false:しない</param>
+            <returns>実行結果</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileUtils.CompressZip(System.String,System.String)">
+            <summary>
+            ファイルをZIP圧縮します。
+            </summary>
+            <remarks>
+            同名ファイルが既にある場合は上書きします
+            </remarks>
+            <param name="srcPath">入力ファイルフルパス</param>
+            <param name="destPath">圧縮後ファイルフルパス</param>
+            <returns>実行結果</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileUtils.CompressZip(System.String,System.String,System.Boolean)">
+            <summary>
+            ファイルをZIP圧縮します。
+            </summary>
+            <param name="srcPath">入力ファイルフルパス</param>
+            <param name="destPath">圧縮後ファイルフルパス</param>
+            <param name="overwrite">上書き true:する false:しない</param>
+            <returns>実行結果</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileUtils.CompressZip(System.IO.FileStream,System.String)">
+            <summary>
+            ファイルをZIP圧縮します。
+            </summary>
+            <remarks>
+            同名ファイルが既にある場合は上書きします
+            </remarks>
+            <param name="srcFile">入力ファイルフルパス</param>
+            <param name="destPath">圧縮後ファイルフルパス</param>
+            <returns>実行結果</returns>
+        </member>
+        <member name="M:KTFramework.Common.FileUtils.CompressZip(System.IO.FileStream,System.String,System.Boolean)">
+            <summary>
+            ファイルをZIP圧縮します。
+            </summary>
+            <param name="srcFile">入力ファイルフルパス</param>
+            <param name="destPath">圧縮後ファイルフルパス</param>
+            <param name="overwrite">上書き true:する false:しない</param>
+            <returns>実行結果</returns>
+        </member>
+        <member name="T:KTFramework.Common.FileUtils.Extention">
+            <summary>
+            拡張子
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.FileUtils.Extention.Gz">
+            <summary>GZ</summary>
+        </member>
+        <member name="F:KTFramework.Common.FileUtils.Extention.Zip">
+            <summary>ZIP</summary>
+        </member>
+        <member name="F:KTFramework.Common.FileUtils.Extention.Csv">
+            <summary>CSV</summary>
+        </member>
+        <member name="F:KTFramework.Common.FileUtils.Extention.Txt">
+            <summary>TXT</summary>
+        </member>
+        <member name="F:KTFramework.Common.FileUtils.Extention.Pdf">
+            <summary>PDF</summary>
+        </member>
+        <member name="F:KTFramework.Common.FileUtils.Extention.Xlsx">
+            <summary>XLSX</summary>
+        </member>
+        <member name="F:KTFramework.Common.FileUtils.Extention.Xls">
+            <summary>XLS</summary>
+        </member>
+        <member name="T:KTFramework.Common.FolderAlreadyExistsException">
+            <summary>
+            フォルダ既存例外
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.FolderAlreadyExistsException.#ctor">
+            <summary>
+            フォルダ既存例外
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.FolderAlreadyExistsException.#ctor(System.String)">
+            <summary>
+            フォルダ既存例外
+            </summary>
+            <param name="message">メッセージ</param>
+        </member>
+        <member name="T:KTFramework.Common.ObjectUtils">
+            <summary>
+            オブジェクト型データ操作クラス
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.ObjectUtils.IsNull(System.Object)">
+            <summary>
+            対象のNULLチェックを行います。
+            nullまたはDB.nullの場合にtrueを返します。
+            </summary>
+            <param name="target">評価する値</param>
+            <returns>true:null false:null以外</returns>
+        </member>
+        <member name="M:KTFramework.Common.ObjectUtils.IsNotNull(System.Object)">
+            <summary>
+            対象のNULLチェックを行います。
+            nullまたはDB.nullの場合にfalseを返します。
+            </summary>
+            <param name="target">評価する値</param>
+            <returns>true:null以外 false:null</returns>
+        </member>
+        <member name="M:KTFramework.Common.ObjectUtils.GetType(System.Reflection.MemberInfo)">
+            <summary>
+            メンバの型を取得します
+            Nullableの場合はベースの型を取得します。
+            </summary>
+            <param name="member">検査対象</param>
+            <returns>メンバの型</returns>
+        </member>
+        <member name="M:KTFramework.Common.ObjectUtils.IsNullable(System.Type)">
+            <summary>
+            型がNullableかチェックする
+            </summary>
+            <param name="type">型</param>
+            <returns>true:Null許容型 false:非Null許容型</returns>
+        </member>
+        <member name="M:KTFramework.Common.ObjectUtils.GetValue``1(``0,System.String,System.Object@)">
+            <summary>
+            指定したプロパティ又はフィールドから値を取得する
+            </summary>
+            <typeparam name="T">エンティティクラスの型</typeparam>
+            <param name="entity">エンティティ</param>
+            <param name="name">フィールド名</param>
+            <param name="value">値</param>
+            <returns>取得フラグ</returns>
+        </member>
+        <member name="M:KTFramework.Common.ObjectUtils.GetValue``1(``0,System.Reflection.MemberInfo,System.Object@)">
+            <summary>
+            指定したプロパティ又はフィールドから値を取得する
+            </summary>
+            <typeparam name="T">エンティティクラスの型</typeparam>
+            <param name="entity">エンティティ</param>
+            <param name="member">メンバ</param>
+            <param name="value">値</param>
+            <returns>取得フラグ</returns>
+        </member>
+        <member name="M:KTFramework.Common.ObjectUtils.SetValue``1(``0@,System.String,System.Object)">
+            <summary>
+            指定したプロパティ又はフィールドに値をセットする
+            </summary>
+            <typeparam name="T">エンティティクラスの型</typeparam>
+            <param name="entity">エンティティ</param>
+            <param name="name">フィールド名</param>
+            <param name="value">値</param>
+            <returns>設定フラグ</returns>
+        </member>
+        <member name="M:KTFramework.Common.ObjectUtils.SetValue``1(``0@,System.Reflection.MemberInfo,System.Object)">
+            <summary>
+            指定したプロパティ又はフィールドに値をセットする
+            </summary>
+            <typeparam name="T">エンティティクラスの型</typeparam>
+            <param name="entity">エンティティ</param>
+            <param name="member">メンバ</param>
+            <param name="value">値</param>
+            <returns>設定フラグ</returns>
+        </member>
+        <member name="M:KTFramework.Common.ObjectUtils.ToDataTable``1(``0[],System.Boolean)">
+            <summary>
+            Entityクラスの配列をDataTable型に変換
+            </summary>
+            <typeparam name="T">エンティティクラスの型</typeparam>
+            <param name="array">エンティティの配列</param>
+            <param name="declareTypeAtColumn">true:型定義もコピーする false:object型で定義</param>
+            <returns>変換後DataTable</returns>
+        </member>
+        <member name="M:KTFramework.Common.ObjectUtils.ToDataTable``1(System.Collections.Generic.List{``0},System.Boolean)">
+            <summary>
+            IList型をDataTable型に変換
+            </summary>
+            <typeparam name="T">エンティティクラスの型</typeparam>
+            <param name="list">エンティティのリスト</param>
+            <param name="declareTypeAtColumn">true:型定義もコピーする false:object型で定義</param>
+            <returns>変換後DataTable</returns>
+        </member>
+        <member name="M:KTFramework.Common.ObjectUtils.ToDictionary``1(``0)">
+            <summary>
+            EntityクラスをDictionary型に変換
+            </summary>
+            <param name="entity">エンティティ</param>
+            <returns>変換後Dictionary</returns>
+        </member>
+        <member name="M:KTFramework.Common.ObjectUtils.ToDictionary``1(``0,System.Boolean)">
+            <summary>
+            EntityクラスをDictionary型に変換
+            </summary>
+            <param name="entity">エンティティ</param>
+            <param name="nullValueMapping">true:NULL値をマッピングする false:しない</param>
+            <returns>変換後Dictionary</returns>
+        </member>
+        <member name="M:KTFramework.Common.ObjectUtils.MapToEntity``1(System.Collections.Generic.Dictionary{System.String,System.Object},``0@)">
+            <summary>
+            DictionaryデータをEntityクラスにマッピング
+            </summary>
+            <typeparam name="T">エンティティクラスの型</typeparam>
+            <param name="map">変換前Dictionary</param>
+            <param name="entity">変換後エンティティ</param>
+        </member>
+        <member name="M:KTFramework.Common.ObjectUtils.MapToEntity``1(System.Collections.Generic.Dictionary{System.String,System.Object}[],System.Collections.Generic.List{``0}@)">
+            <summary>
+            DictionaryデータをEntityクラスにマッピング
+            </summary>
+            <typeparam name="T">エンティティクラスの型</typeparam>
+            <param name="mapList">変換前Dictionaryのリスト</param>
+            <param name="entityList">変換後エンティティのリスト</param>
+        </member>
+        <member name="M:KTFramework.Common.ObjectUtils.MapToEntity``1(System.Data.DataRow,``0@)">
+            <summary>
+            DataRowデータをEntityクラスにマッピング
+            </summary>
+            <typeparam name="T">エンティティクラスの型</typeparam>
+            <param name="row">変換前DataRow</param>
+            <param name="entity">変換後エンティティ</param>
+        </member>
+        <member name="M:KTFramework.Common.ObjectUtils.MapToEntity``1(System.Data.DataTable,System.Collections.Generic.List{``0}@)">
+            <summary>
+            DataRowデータをEntityクラスにマッピング
+            </summary>
+            <typeparam name="T">エンティティクラスの型</typeparam>
+            <param name="table">変換前DataTable</param>
+            <param name="entityList">変換後エンティティのリスト</param>
+        </member>
+        <member name="T:KTFramework.Common.QueueCachedEntry">
+            <summary>
+            QueueManager用キャッシュエントリクラス
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.QueueCachedEntry._buffer">
+            <summary>バッファ</summary>
+        </member>
+        <member name="F:KTFramework.Common.QueueCachedEntry._offset">
+            <summary>オフセット</summary>
+        </member>
+        <member name="F:KTFramework.Common.QueueCachedEntry._count">
+            <summary>キャッシュバイト長</summary>
+        </member>
+        <member name="M:KTFramework.Common.QueueCachedEntry.#ctor(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="buffer"></param>
+            <param name="offset"></param>
+            <param name="count"></param>
+        </member>
+        <member name="P:KTFramework.Common.QueueCachedEntry.Buffer">
+            <summary>バッファ</summary>
+        </member>
+        <member name="P:KTFramework.Common.QueueCachedEntry.Offset">
+            <summary>オフセット</summary>
+        </member>
+        <member name="P:KTFramework.Common.QueueCachedEntry.Count">
+            <summary>キャッシュバイト長</summary>
+        </member>
+        <member name="T:KTFramework.Common.ConcurrentMinimalLock">
+            <summary>
+            MinimalLock(log4net)拡張クラス
+            ログ書き込みをキューにバッファリングし順次ファイルに書き込みを行います
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.ConcurrentMinimalLock.OpenFile(System.String,System.Boolean,System.Text.Encoding)">
+            <summary>
+            Prepares to open the file when the first message is logged.
+            </summary>
+            <param name="filename">The filename to use</param>
+            <param name="append">Whether to append to the file, or overwrite</param>
+            <param name="encoding">The encoding to use</param>
+            <remarks>
+            <para>
+            Open the file specified and prepare for logging. 
+            No writes will be made until AcquireLock is called.
+            Must be called before any calls to AcquireLock, ReleaseLock and CloseFile.
+            </para>
+            </remarks>
+        </member>
+        <member name="M:KTFramework.Common.ConcurrentMinimalLock.CloseFile">
+            <summary>
+            Close the file
+            </summary>
+            <remarks>
+            <para>
+            Close the file. No further writes will be made.
+            </para>
+            </remarks>
+        </member>
+        <member name="M:KTFramework.Common.ConcurrentMinimalLock.AcquireLock">
+            <summary>
+            Acquire the lock on the file
+            </summary>
+            <returns>A stream that is ready to be written to.</returns>
+            <remarks>
+            <para>
+            Acquire the lock on the file in preparation for writing to it. 
+            Return a stream pointing to the file.
+            ReleaseLock must be called to release the lock on the output file.
+            </para>
+            </remarks>
+        </member>
+        <member name="M:KTFramework.Common.ConcurrentMinimalLock.ReleaseLock">
+            <summary>
+            Release the lock on the file
+            </summary>
+            <remarks>
+            <para>
+            Release the lock on the file. No further writes will be made to the 
+            stream until AcquireLock is called again.
+            </para>
+            </remarks>
+        </member>
+        <member name="T:KTFramework.Common.ConcurrentStream">
+            <summary>
+            Stream拡張クラス
+            StreamをQueueにバッファリングし、順次ファイルに書き込みします
+            ファイル書き込み処理はQueueManagerに委譲しています
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.ConcurrentStream.GetInstance(System.String,System.Boolean,System.IO.FileAccess,System.IO.FileShare)">
+            <summary>
+            インスタンスの作成
+            </summary>
+            <param name="path">ファイルパス</param>
+            <param name="append">追記 true:追記する false:しない</param>
+            <param name="access">ファイルアクセスモード(FileAccess)</param>
+            <param name="share">ファイルアクセス種類(FileShare)</param>
+            <returns>インスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Common.ConcurrentStream.#ctor(System.String,System.Boolean,System.IO.FileAccess,System.IO.FileShare)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="path">ファイルパス</param>
+            <param name="append">追記 true:追記する false:しない</param>
+            <param name="access">ファイルアクセスモード(FileAccess)</param>
+            <param name="share">ファイルアクセス種類(FileShare)</param>
+        </member>
+        <member name="M:KTFramework.Common.ConcurrentStream.Read(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            読込位置(0固定)
+            </summary>
+            <param name="buffer">読込ソース</param>
+            <param name="offset">開始位置</param>
+            <param name="count">長さ</param>
+            <returns>読込位置(0固定)</returns>
+        </member>
+        <member name="M:KTFramework.Common.ConcurrentStream.Seek(System.Int64,System.IO.SeekOrigin)">
+            <summary>
+            検索位置(0固定)
+            </summary>
+            <param name="offset">開始位置</param>
+            <param name="origin">シーク時のストリーム参照ポイント</param>
+            <returns>検索位置(0固定)</returns>
+        </member>
+        <member name="M:KTFramework.Common.ConcurrentStream.SetLength(System.Int64)">
+            <summary>
+            Stream長設定(処理なし)
+            </summary>
+            <param name="value">長さ</param>
+        </member>
+        <member name="M:KTFramework.Common.ConcurrentStream.Flush">
+            <summary>
+            書込(処理なし)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.ConcurrentStream.Write(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            出力
+            </summary>
+            <remarks>
+            QueueManagerを介してファイルに書き込みます
+            </remarks>
+            <param name="buffer">書込ソース</param>
+            <param name="offset">開始位置</param>
+            <param name="count">長さ</param>
+        </member>
+        <member name="P:KTFramework.Common.ConcurrentStream.CanRead">
+            <summary>読取可否(false固定)</summary>
+        </member>
+        <member name="P:KTFramework.Common.ConcurrentStream.CanSeek">
+            <summary>検索可否(false固定)</summary>
+        </member>
+        <member name="P:KTFramework.Common.ConcurrentStream.CanWrite">
+            <summary>書込可否(true固定)</summary>
+        </member>
+        <member name="P:KTFramework.Common.ConcurrentStream.Length">
+            <summary>Stream長(0固定)</summary>
+        </member>
+        <member name="P:KTFramework.Common.ConcurrentStream.Position">
+            <summary>現在位置(0固定)</summary>
+        </member>
+        <member name="T:KTFramework.Common.ConfigXml">
+            <summary>
+            アセンブリの設定ファイル(Config.xml)をロードし管理します。
+            設定ファイルはsectionタグとkeyタグで構成され、categoryタグはname属性にカテゴリ名、
+            sectionタグはname属性にセクション名、keyタグにはname属性にキー名、value属性に値を設定します。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXml.#ctor(System.String,System.String)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="configFilePath">設定ファイルのパス</param>
+            <param name="configName">取得対象のConfigタグのname属性</param>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXml.LoadConfigFile">
+            <summary>
+            XML形式の設定ファイルを読み込みます。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXml.CreateConfig(System.String,System.String)">
+            <summary>
+            設定用XMLファイルをロードし解析する
+            </summary>
+            <param name="configFilePath">設定ファイルのパス</param>
+            <param name="configName">取得対象のConfigタグのname属性</param>
+            <returns>設定情報</returns>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXml.SetCategory(System.Xml.XmlNode@)">
+            <summary>
+            Categoryノードを解析し、子(Section)ノード情報をセットする
+            </summary>
+            <param name="root">ルートノード</param>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXml.SetSection(System.Xml.XmlNode@,KTFramework.Common.ConfigXmlCategory@)">
+            <summary>
+            Sectionノードを解析し、子(Key)ノード情報をセットする
+            </summary>
+            <param name="categoryNode">カテゴリノード</param>
+            <param name="category">カテゴリ情報</param>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXml.SetKey(System.Xml.XmlNode@,KTFramework.Common.ConfigXmlSection@)">
+            <summary>
+            Keyノードを解析しSection管理情報にセットする
+            </summary>
+            <param name="sectionNode"></param>
+            <param name="section"></param>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXml.Save">
+            <summary>
+            XMLファイルを保存します
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXml.Save(System.String,System.String,System.String,System.Object)">
+            <summary>
+            XMLファイルを保存します
+            </summary>
+            <param name="categoryName">カテゴリ名</param>
+            <param name="sectionName">セクション名</param>
+            <param name="key">キー</param>
+            <param name="value">設定値</param>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXml.Save(System.String,System.String,System.String,System.String,System.Object)">
+            <summary>
+            XMLファイルを保存します
+            </summary>
+            <param name="rootName">ルート名</param>
+            <param name="categoryName">カテゴリ名</param>
+            <param name="sectionName">セクション名</param>
+            <param name="key">キー</param>
+            <param name="value">設定値</param>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXml.SetValue(System.String,System.String,System.String,System.Object)">
+            <summary>
+            キーに値をセットします
+            </summary>
+            <param name="categoryName">カテゴリ名</param>
+            <param name="sectionName">セクション名</param>
+            <param name="key">キー</param>
+            <param name="value">設定値</param>
+            <returns>true:成功 false:失敗</returns>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXml.SetValue(System.String,System.String,System.String,System.String,System.Object)">
+            <summary>
+            XMLファイルを保存します
+            </summary>
+            <param name="rootName">ルート名</param>
+            <param name="categoryName">カテゴリ名</param>
+            <param name="sectionName">セクション名</param>
+            <param name="key">キー</param>
+            <param name="value">設定値</param>
+            <returns>true:成功 false:失敗</returns>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXml.SearchNode(System.Xml.XmlNode,System.String,System.String)">
+            <summary>
+            指定name属性のノードを検索する
+            </summary>
+            <param name="node">検索対象となる先頭のノード</param>
+            <param name="nodeName">検索対象タグ</param>
+            <param name="name">検索対象name属性値</param>
+            <returns></returns>
+        </member>
+        <member name="P:KTFramework.Common.ConfigXml.Config">
+            <summary>
+            設定情報を取得します
+            </summary>
+        </member>
+        <member name="T:KTFramework.Common.ConfigXmlRoot">
+            <summary>
+            Config.xmlのルート情報(カテゴリ集合)を管理します。
+            CONFIGタグの子ノードとして設定されているCATEGORYタグを管理します。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXmlRoot.#ctor(KTFramework.Common.ConfigXml,System.String)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="xml">設定XMLファイル</param>
+            <param name="configName">Configタグname属性値(通常はアセンブリ名)</param>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXmlRoot.Add(System.String)">
+            <summary>
+            カテゴリ情報追加処理。
+            </summary>
+            <param name="categoryName">キー(カテゴリ名)</param>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXmlRoot.Add(System.String,KTFramework.Common.ConfigXmlCategory)">
+            <summary>
+            カテゴリ情報追加処理。
+            </summary>
+            <param name="categoryName">キー(カテゴリ名)</param>
+            <param name="category">値(カテゴリ情報)</param>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXmlRoot.Remove(System.String)">
+            <summary>
+            カテゴリ情報削除処理。
+            </summary>
+            <param name="categoryName">キー(カテゴリ名)</param>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXmlRoot.RemoveAll">
+            <summary>
+            全カテゴリ情報削除処理。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXmlRoot.ContainsCategory(System.String)">
+            <summary>
+            カテゴリが含まれているかチェックします
+            </summary>
+            <param name="categoryName">チェックするカテゴリ名</param>
+            <returns>true:含まれている false:含まれていない</returns>
+        </member>
+        <member name="P:KTFramework.Common.ConfigXmlRoot.Item(System.String)">
+            <summary>
+            Valueインデクサ。
+            指定されたカテゴリ情報を取得、設定します。
+            </summary>
+            <param name="categoryName">カテゴリ名</param>
+            <returns>カテゴリ情報</returns>
+        </member>
+        <member name="P:KTFramework.Common.ConfigXmlRoot.CategoryNames">
+            <summary>
+            カテゴリ名の一覧を取得します
+            </summary>
+        </member>
+        <member name="P:KTFramework.Common.ConfigXmlRoot.Length">
+            <summary>
+            カテゴリ数を取得します
+            </summary>
+        </member>
+        <member name="T:KTFramework.Common.ConfigXmlSection">
+            <summary>
+            Config.xmlのセクション情報(キー集合)を管理します。
+            SECTIONタグの子ノードとして設定されているKEYタグを管理します。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXmlSection.#ctor(KTFramework.Common.ConfigXml,System.String,System.String,System.String)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="xml">設定XMLファイル</param>
+            <param name="configName">Configタグname属性値(通常はアセンブリ名)</param>
+            <param name="categoryName">Categoryタグname属性値</param>
+            <param name="sectionName">Sectionタグname属性値</param>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXmlSection.Add(System.String,System.String)">
+            <summary>
+            キー情報追加処理。
+            </summary>
+            <param name="key">キー</param>
+            <param name="value">値</param>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXmlSection.Add(System.String,System.Collections.Generic.List{System.String})">
+            <summary>
+            キー情報追加処理
+            </summary>
+            <param name="key">キー</param>
+            <param name="values">値リスト</param>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXmlSection.Remove(System.String)">
+            <summary>
+            キー情報削除処理。
+            </summary>
+            <param name="key">キー</param>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXmlSection.RemoveAll">
+            <summary>
+            全キー情報削除処理。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXmlSection.Get(System.String)">
+            <summary>
+            指定キーの全データ(List形式)を取得
+            </summary>
+            <param name="key">キー</param>
+            <returns>指定キーの全データのリスト</returns>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXmlSection.ContainsKey(System.String)">
+            <summary>
+            キーが含まれているかチェックします
+            </summary>
+            <param name="key">チェックするキー名</param>
+            <returns>true:含まれている false:含まれていない</returns>
+        </member>
+        <member name="P:KTFramework.Common.ConfigXmlSection.Item(System.String)">
+            <summary>
+            Valueインデクサ。
+            指定されたキーの単一の値を取得、設定します。
+            指定キーのvalueに複数データが登録されている場合(value.Count > 1)は、
+            先頭の1つだけを返します。
+            </summary>
+            <param name="key">キー</param>
+            <returns>値</returns>
+        </member>
+        <member name="P:KTFramework.Common.ConfigXmlSection.Keys">
+            <summary>
+            キーの配列を取得します
+            </summary>
+        </member>
+        <member name="P:KTFramework.Common.ConfigXmlSection.Length">
+            <summary>
+            キー数を取得します
+            </summary>
+        </member>
+        <member name="T:KTFramework.Common.ErrorControl">
+            <summary>
+            共通エラー制御ロジックを提供します。
+            1.システム管理者へのエラーメール送信
+            2.タスク管理(JP1)通知
+            </summary>
+        </member>
+        <member name="T:KTFramework.Common.CommonConsts">
+            <summary>
+            共通定数クラス
+            </summary>
+        </member>
+        <member name="T:KTFramework.Common.FtpHandler">
+            <summary>
+            FTPユーティリティクラス<br />
+            接続先のIP,ポート,ユーザID,パスワードが必要です。<br />
+            ポートを指定しない場合はデフォルトポート(21)が指定されます。<br />
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.FtpHandler.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="F:KTFramework.Common.FtpHandler._commonSettingFilePath">
+            <summary>FTP共通設定ファイル</summary>
+        </member>
+        <member name="F:KTFramework.Common.FtpHandler._commonConfig">
+            <summary>FTP共通設定情報</summary>
+        </member>
+        <member name="F:KTFramework.Common.FtpHandler._assemblyName">
+            <summary>アセンブリ名</summary>
+        </member>
+        <member name="F:KTFramework.Common.FtpHandler._indivisualConfig">
+            <summary>FTP個別設定情報</summary>
+        </member>
+        <member name="F:KTFramework.Common.FtpHandler._indivisualSettingFilePath">
+            <summary>FTP個別設定ファイル</summary>
+        </member>
+        <member name="F:KTFramework.Common.FtpHandler._useBinary">
+            <summary>バイナリモード(true=有効 false=無効:ASCIIモード)</summary>
+        </member>
+        <member name="F:KTFramework.Common.FtpHandler._usePassive">
+            <summary>PASSIVEモード(true=有効 false=無効)</summary>
+        </member>
+        <member name="F:KTFramework.Common.FtpHandler._proxy">
+            <summary>プロキシ</summary>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.#ctor">
+            <summary>
+            設定ファイル(FtpSettings.xml)から接続先情報をロードしてFtpHandlerを作成します。
+            設定ファイルにはサーバIPアドレス、ユーザID、パスワードの記載が必要です。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.#ctor(System.String,System.String,System.String)">
+            <summary>
+            FtpHandlerを作成します。
+            ポートはデフォルトポート(21)が指定されます。
+            </summary>
+            <param name="ftpIp">サーバIPアドレス</param>
+            <param name="userName">ユーザID</param>
+            <param name="password">パスワード</param>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.#ctor(System.String,System.String,System.String,System.String)">
+            <summary>
+            FtpHandlerを作成します。
+            </summary>
+            <param name="ftpIp">サーバIPアドレス</param>
+            <param name="ftpPort">サーバポート</param>
+            <param name="userName">ユーザID</param>
+            <param name="password">パスワード</param>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.LoadConfig">
+            <summary>
+            設定ファイルロード
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.InitFtpWebRequest(System.String,System.Boolean)">
+            <summary>
+            FtpWebRequestのインスタンスを生成し接続情報を初期化する
+            </summary>
+            <param name="command">FTPコマンド(WebRequestMethods.Ftp)</param>
+            <param name="keepAlive">コマンド送信後切断有無 true:切断しない false:切断する</param>
+            <returns>FTPリクエスト</returns>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.InitFtpWebRequestWithoutLog(System.String,System.Boolean)">
+            <summary>
+            FtpWebRequestのインスタンスを生成し接続情報を初期化する(ログ出力しない)
+            </summary>
+            <param name="command">FTPコマンド(WebRequestMethods.Ftp)</param>
+            <param name="keepAlive">コマンド送信後切断有無 true:切断しない false:切断する</param>
+            <returns>FTPリクエスト</returns>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.InitFtpWebRequest(System.String,System.String,System.Boolean)">
+            <summary>
+            FtpWebRequestのインスタンスを生成し接続情報を初期化する
+            </summary>
+            <param name="serverPath">操作対象サーバパス</param>
+            <param name="command">FTPコマンド(WebRequestMethods.Ftp)</param>
+            <param name="keepAlive">コマンド送信後切断有無 true:切断しない false:切断する</param>
+            <returns>FTPリクエスト</returns>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.InitFtpWebRequest(System.String,System.String,System.Boolean,System.Boolean)">
+            <summary>
+            FtpWebRequestのインスタンスを生成し接続情報を初期化する
+            </summary>
+            <param name="serverPath">操作対象サーバパス</param>
+            <param name="command">FTPコマンド(WebRequestMethods.Ftp)</param>
+            <param name="keepAlive">コマンド送信後切断有無 true:切断しない false:切断する</param>
+            <param name="logging">ログ出力有無 true:出力する false:出力しない</param>
+            <returns>FTPリクエスト</returns>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.ExecFtpCommand(System.Net.FtpWebRequest)">
+            <summary>
+            FTPレスポンスを取得する
+            </summary>
+            <param name="ftpReq">FTPリクエスト</param>
+            <returns>FTPレスポンス</returns>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.ExecFtpCommandWithoutLog(System.Net.FtpWebRequest)">
+            <summary>
+            FTPレスポンスを取得する(ログ出力しない)
+            </summary>
+            <remarks>
+            エラーログは出力されます
+            </remarks>
+            <param name="ftpReq">FTPリクエスト</param>
+            <returns>FTPレスポンス</returns>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.ExecFtpCommand(System.Net.FtpWebRequest,System.Boolean,System.Boolean)">
+            <summary>
+            FTPレスポンスを取得する
+            </summary>
+            <param name="ftpReq">FTPリクエスト</param>
+            <param name="logging">ログ出力有無 true:出力する false:出力しない</param>
+            <param name="errorLogging">エラーログ出力有無 true:出力する false:出力しない</param>
+            <returns>FTPレスポンス</returns>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.Disconnect">
+            <summary>
+            切断
+            ※FtpWebRequestには切断コマンドがないため、
+              KeepAlive=falseでダミーコマンド(PWD)を送信しています。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.GetFtpFileList(System.IO.StreamReader)">
+            <summary>
+            ファイルリストを解析し、List<![CDATA[<FtpFile>]]>形式で取得する
+            </summary>
+            <param name="reader">FTPレスポンスから取得したファイルリストデータ</param>
+            <returns>解析済みファイルリスト</returns>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.GetFileListStyle(System.String)">
+            <summary>
+            リストの形式を取得(Unix or Windows or Not)
+            </summary>
+            <param name="data">リストデータ</param>
+            <returns>リストの形式</returns>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.ParseFileStructFromUnixStyleRecord(System.String)">
+            <summary>
+            UNIX形式のリストデータを解析
+            </summary>
+            <param name="data">リストデータ</param>
+            <returns>解析結果</returns>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.ParseFileStructFromWindowsStyleRecord(System.String)">
+            <summary>
+            Windows形式のリストデータを解析
+            </summary>
+            <param name="data">リストデータ</param>
+            <returns>解析結果</returns>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.CreateConnectionString(System.String,System.String)">
+            <summary>
+            FTP接続先文字列の作成
+            </summary>
+            <param name="ftpIp">接続先IPアドレス</param>
+            <param name="ftpPort">接続先ポート</param>
+            <returns>FTP接続文字列</returns>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.GetConnectToUri">
+            <summary>
+            接続先URI取得
+            ftp://[_connectToStr]
+            </summary>
+            <returns>接続先URI</returns>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.GetConnectToUri(System.String)">
+            <summary>
+            接続先URI取得
+            ftp://[_connectToStr]/[path]
+            </summary>
+            <param name="path">サーバ側フォルダパス</param>
+            <returns>接続先URI</returns>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.GetFolderPath(System.String)">
+            <summary>
+            パスからフォルダ部分を抽出する
+            </summary>
+            <param name="path">フルパス</param>
+            <returns>フォルダパス</returns>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.GetFilename(System.String)">
+            <summary>
+            パスからファイル名を抽出する
+            </summary>
+            <param name="path">フルパス</param>
+            <returns>ファイル名</returns>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.GetCurrentDirectory">
+            <summary>
+            カレントディレクトリパスを取得します。
+            </summary>
+            <returns>カレントディレクトリパス</returns>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.GetFile(System.String,System.String)">
+            <summary>
+            ファイルを受信します。
+            </summary>
+            <param name="serverPath">受信元ファイルパス(相対パス、[./]不要)</param>
+            <param name="clientPath">保存先ファイルパス</param>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.PutFile(System.String,System.String,KTFramework.Common.FtpHandler.WriteMode)">
+            <summary>
+            ファイルを送信します。
+            </summary>
+            <param name="serverPath">送信先ファイルパス(相対パス、[./]不要)</param>
+            <param name="clientPath">送信元ファイルパス</param>
+            <param name="writeMode">書込モード(上書or追記)</param>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.ClearFile(System.String)">
+            <summary>
+            ファイルをクリア(空データで上書)します。
+            </summary>
+            <param name="serverPath">対象ファイルパス</param>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.Delete(System.String)">
+            <summary>
+            ディレクトリ又はファイルを削除します。
+            </summary>
+            <param name="serverPath">対象ディレクトリパス又はファイルパス</param>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.GetFileSize(System.String)">
+            <summary>
+            ファイルサイズを取得します。
+            </summary>
+            <param name="serverPath">対象ファイルパス</param>
+            <returns>ファイルサイズ</returns>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.GetDateTimestamp(System.String)">
+            <summary>
+            タイムスタンプ(最終更新日時)を取得します。
+            </summary>
+            <param name="serverPath">対象ディレクトリパス又はファイルパス</param>
+            <returns>タイムスタンプ(最終更新日時)</returns>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.GetList(System.String)">
+            <summary>
+            ディレクトリリストを取得します。
+            検査対象フォルダにファイルが無い場合にもWebExceptionがスローされるため、
+            WebExceptionのスローを抑止しています。
+            WebExceptionをcatchしたい場合は同名メソッドの第2引数にtrueをセットしてください。
+            </summary>
+            <param name="serverPath">対象ディレクトリパス</param>
+            <returns>解析済みファイルリスト</returns>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.GetList(System.String,System.Boolean)">
+            <summary>
+            ディレクトリリストを取得します。
+            検査対象フォルダにファイルが無い場合にもWebExceptionがスローされるため、
+            WebExceptionのスローを抑止しています。
+            WebExceptionをcatchしたい場合は第2引数にtrueをセットしてください。
+            </summary>
+            <param name="serverPath">対象ディレクトリパス</param>
+            <param name="throwsWebException">WebExceptionスロー有無 true:スローする false:例外をスローしない</param>
+            <returns>解析済みファイルリスト</returns>
+        </member>
+        <member name="M:KTFramework.Common.FtpHandler.IsExistFile(System.String)">
+            <summary>
+            ファイルの存否をチェックします。
+            </summary>
+            <param name="serverPath">対象ディレクトリパス</param>
+            <returns>ファイル存否 true:存在する false:存在しない</returns>
+        </member>
+        <member name="P:KTFramework.Common.FtpHandler.UseBinary">
+            <summary>バイナリモード(true=有効 false=無効:ASCIIモード)</summary>
+        </member>
+        <member name="P:KTFramework.Common.FtpHandler.UsePassive">
+            <summary>PASSIVEモード(true=有効 false=無効)</summary>
+        </member>
+        <member name="P:KTFramework.Common.FtpHandler.Proxy">
+            <summary>プロキシ</summary>
+        </member>
+        <member name="T:KTFramework.Common.FtpHandler.WriteMode">
+            <summary>
+            FTPファイル書込モード
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.FtpHandler.WriteMode.OverWrite">
+            <summary>上書モード</summary>
+        </member>
+        <member name="F:KTFramework.Common.FtpHandler.WriteMode.Append">
+            <summary>追記モード</summary>
+        </member>
+        <member name="T:KTFramework.Common.FtpHandler.FtpFile">
+            <summary>
+            FTPファイル情報
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.FtpHandler.FtpFile.properties">
+            <summary>ファイルプロパティ(UNIX only)</summary>
+        </member>
+        <member name="F:KTFramework.Common.FtpHandler.FtpFile.owner">
+            <summary>所有者(UNIX only)</summary>
+        </member>
+        <member name="F:KTFramework.Common.FtpHandler.FtpFile.group">
+            <summary>所有者(UNIX only)</summary>
+        </member>
+        <member name="F:KTFramework.Common.FtpHandler.FtpFile.isDirectory">
+            <summary>ディレクトリフラグ</summary>
+        </member>
+        <member name="F:KTFramework.Common.FtpHandler.FtpFile.createTime">
+            <summary>作成日</summary>
+        </member>
+        <member name="F:KTFramework.Common.FtpHandler.FtpFile.name">
+            <summary>ファイル名</summary>
+        </member>
+        <member name="T:KTFramework.Common.FtpHandler.FileListStyle">
+            <summary>
+            ファイルリストの形式
+            </summary>
+        </member>
+        <member name="T:KTFramework.Common.Logger">
+            <summary>
+            ログユーティリティクラス
+            Log4Netを使用しています。
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.Logger.LOG_FORMAT_BAR">
+            <summary>ログ定型：バー</summary>
+        </member>
+        <member name="F:KTFramework.Common.Logger.LOG_FORMAT_DOUBLE_BAR">
+            <summary>ログ定型：二重バー</summary>
+        </member>
+        <member name="F:KTFramework.Common.Logger.LOG_FORMAT_PLUS_BAR">
+            <summary>ログ定型：十字バー</summary>
+        </member>
+        <member name="F:KTFramework.Common.Logger.LOG_FORMAT_SHARP_BAR">
+            <summary>ログ定型：井桁バー</summary>
+        </member>
+        <member name="M:KTFramework.Common.Logger.#ctor(System.Type)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="methodType">メソッドタイプ(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType)</param>
+        </member>
+        <member name="M:KTFramework.Common.Logger.Debug(System.String,System.Object[])">
+            <summary>
+            Debugログを出力する
+            </summary>
+            <param name="format">書式文字列</param>
+            <param name="args">埋め込みパラメータ</param>
+        </member>
+        <member name="M:KTFramework.Common.Logger.Debug(System.String)">
+            <summary>
+            Debugログを出力する
+            </summary>
+            <param name="message">ログメッセージ</param>
+        </member>
+        <member name="M:KTFramework.Common.Logger.DebugBar">
+            <summary>
+            区切り線を出力する(Debug)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Logger.DebugDoubleBar">
+            <summary>
+            二重区切り線を出力する(Debug)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Logger.DebugPlusBar">
+            <summary>
+            十字区切り線を出力する(Debug)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Logger.DebugSharpBar">
+            <summary>
+            井桁区切り線を出力する(Debug)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Logger.DebugSectionHeader(System.String)">
+            <summary>
+            ログセクションヘッダを出力する(Debug)
+            </summary>
+            <param name="message">セクションヘッダ</param>
+        </member>
+        <member name="M:KTFramework.Common.Logger.Info(System.String,System.Object[])">
+            <summary>
+            Infoログを出力する
+            </summary>
+            <param name="format">書式文字列</param>
+            <param name="args">埋め込みパラメータ</param>
+        </member>
+        <member name="M:KTFramework.Common.Logger.Info(System.String)">
+            <summary>
+            Infoログを出力する
+            </summary>
+            <param name="message">ログメッセージ</param>
+        </member>
+        <member name="M:KTFramework.Common.Logger.InfoBar">
+            <summary>
+            区切り線を出力する(Info)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Logger.InfoDoubleBar">
+            <summary>
+            二重区切り線を出力する(Info)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Logger.InfoPlusBar">
+            <summary>
+            十字区切り線を出力する(Info)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Logger.InfoSharpBar">
+            <summary>
+            井桁区切り線を出力する(Info)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Logger.InfoApplicationTitle(System.String)">
+            <summary>
+            アプリケーションタイトルを出力する(Info)
+            </summary>
+            <param name="message">タイトルメッセージ</param>
+        </member>
+        <member name="M:KTFramework.Common.Logger.InfoSectionHeader(System.String)">
+            <summary>
+            ログセクションヘッダを出力する(Info)
+            </summary>
+            <param name="message">セクションヘッダ</param>
+        </member>
+        <member name="M:KTFramework.Common.Logger.Notice(System.String,System.Object[])">
+            <summary>
+            Noticeログを出力する
+            </summary>
+            <param name="format">書式文字列</param>
+            <param name="args">埋め込みパラメータ</param>
+        </member>
+        <member name="M:KTFramework.Common.Logger.Notice(System.String)">
+            <summary>
+            Noticeログを出力する
+            </summary>
+            <param name="message">ログメッセージ</param>
+        </member>
+        <member name="M:KTFramework.Common.Logger.NoticeBar">
+            <summary>
+            区切り線を出力する(Notice)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Logger.NoticeDoubleBar">
+            <summary>
+            二重区切り線を出力する(Notice)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Logger.NoticePlusBar">
+            <summary>
+            十字区切り線を出力する(Notice)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Logger.NoticeSharpBar">
+            <summary>
+            井桁区切り線を出力する(Notice)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Logger.NoticeSectionHeader(System.String)">
+            <summary>
+            ログセクションヘッダを出力する(Notice)
+            </summary>
+            <param name="message">セクションヘッダ</param>
+        </member>
+        <member name="M:KTFramework.Common.Logger.Warn(System.String,System.Object[])">
+            <summary>
+            Warnログを出力する
+            </summary>
+            <param name="format">書式文字列</param>
+            <param name="args">埋め込みパラメータ</param>
+        </member>
+        <member name="M:KTFramework.Common.Logger.Warn(System.String)">
+            <summary>
+            Warnログを出力する
+            </summary>
+            <param name="message">ログメッセージ</param>
+        </member>
+        <member name="M:KTFramework.Common.Logger.WarnBar">
+            <summary>
+            区切り線を出力する(Warn)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Logger.WarnDoubleBar">
+            <summary>
+            二重区切り線を出力する(Warn)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Logger.WarnPlusBar">
+            <summary>
+            十字区切り線を出力する(Warn)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Logger.WarnSharpBar">
+            <summary>
+            井桁区切り線を出力する(Warn)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Logger.WarnSectionHeader(System.String)">
+            <summary>
+            ログセクションヘッダを出力する(Warn)
+            </summary>
+            <param name="message">セクションヘッダ</param>
+        </member>
+        <member name="M:KTFramework.Common.Logger.Error(System.String,System.Object[])">
+            <summary>
+            Errorログを出力する
+            </summary>
+            <param name="format">書式文字列</param>
+            <param name="args">埋め込みパラメータ</param>
+        </member>
+        <member name="M:KTFramework.Common.Logger.Error(System.String)">
+            <summary>
+            Errorログを出力する
+            </summary>
+            <param name="message">ログメッセージ</param>
+        </member>
+        <member name="M:KTFramework.Common.Logger.ErrorBar">
+            <summary>
+            区切り線を出力する(Error)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Logger.ErrorDoubleBar">
+            <summary>
+            二重区切り線を出力する(Error)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Logger.ErrorPlusBar">
+            <summary>
+            十字区切り線を出力する(Error)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Logger.ErrorSharpBar">
+            <summary>
+            井桁区切り線を出力する(Error)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Logger.ErrorSectionHeader(System.String)">
+            <summary>
+            ログセクションヘッダを出力する(Error)
+            </summary>
+            <param name="message">セクションヘッダ</param>
+        </member>
+        <member name="M:KTFramework.Common.Logger.Fatal(System.String,System.Object[])">
+            <summary>
+            Fatalログを出力する
+            </summary>
+            <param name="format">書式文字列</param>
+            <param name="args">埋め込みパラメータ</param>
+        </member>
+        <member name="M:KTFramework.Common.Logger.Fatal(System.String)">
+            <summary>
+            Fatalログを出力する
+            </summary>
+            <param name="message">ログメッセージ</param>
+        </member>
+        <member name="M:KTFramework.Common.Logger.Write(KTFramework.Common.Logger.Level,System.Object)">
+            <summary>
+            ログを出力します。
+            </summary>
+            <param name="level">ログ出力レベル</param>
+            <param name="message">ログメッセージ</param>
+        </member>
+        <member name="M:KTFramework.Common.Logger.Exception(System.Exception)">
+            <summary>
+            例外ログを出力する
+            </summary>
+            <param name="ex">例外</param>
+        </member>
+        <member name="T:KTFramework.Common.Logger.Level">
+            <summary>
+            ログ出力レベル
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.Logger.Level.Debug">
+            <summary>デバッグログ</summary>
+        </member>
+        <member name="F:KTFramework.Common.Logger.Level.Info">
+            <summary>情報ログ</summary>
+        </member>
+        <member name="F:KTFramework.Common.Logger.Level.Notice">
+            <summary>情報ログ(イベントログあり)</summary>
+        </member>
+        <member name="F:KTFramework.Common.Logger.Level.Warn">
+            <summary>警告ログ(イベントログあり)</summary>
+        </member>
+        <member name="F:KTFramework.Common.Logger.Level.Error">
+            <summary>エラーログ(イベントログあり)</summary>
+        </member>
+        <member name="F:KTFramework.Common.Logger.Level.Fatal">
+            <summary>ハードウェア障害ログ(イベントログあり)</summary>
+        </member>
+        <member name="T:KTFramework.Common.LoggerAppenderSettings">
+            <summary>
+            ログファイル用アペンダ定義クラス
+            </summary>
+            <remarks>
+            <para>
+            <h3>
+            [定義例]
+            </h3>
+            <code>
+            LoggerAppenderSettings settings = new LoggerAppenderSettings();
+            settings.Name = "";
+            settings.AssemblyName = assemblyName;
+            settings.AppendToFile = true;
+            settings.ExclusiveLock = true;
+            settings.BasePath = "D:/log/";
+            settings.FileName = assemblyName;
+            settings.Rolling = LoggerAppenderSettings.RollingType.Hourly;
+            settings.SizeBackupRotation = true;
+            settings.MaxFileSizeMB = 10;
+            settings.MaxSizeRollBackups = 5;
+            settings.UseMdcFilter = false;
+            settings.Key = "";
+            settings.Value = "";
+            settings.Level = Logger.LogLevel.Info;
+            </code>
+            </para>
+            </remarks>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings.DEFAULT_FILE_APPENDER_NAME">
+            <summary>ログファイル出力用アペンダ名</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings.DEFAULT_PATTERN_LAYOUT_HEAD">
+            <summary>ログファイル出力用パターンレイアウト</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings.DEFAULT_LEVEL">
+            <summary>ログファイル出力用ログレベル</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings.MDC_KEY_TARGETDB">
+            <summary>MDCキー:対象DB</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings.MDC_KEY_SESSIONID">
+            <summary>MDCキー:対象セッションID</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings.MDC_KEY_INSTRUMENT">
+            <summary>MDCキー:対象設備</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings._appenderName">
+            <summary>ログファイル出力用アペンダ名</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings._assemblyName">
+            <summary>アセンブリ名</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings._appendToFile">
+            <summary>追記</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings._exclusiveLock">
+            <summary>排他</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings._basePath">
+            <summary>ログ出力先パス</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings._fileName">
+            <summary>ログファイル名(指定時は拡張子不要)</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings._rolling">
+            <summary>ログローテーション周期</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings._sizeBackupRotation">
+            <summary>サイズローテーション有無(true:MaxSizeRollBackupsでバックアップ数を指定する false:ローテーションしない=無限にバックアップ)</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings._maxFileSize">
+            <summary>サイズローテーション最大ファイルサイズ(Byte)</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings._maxSizeRollBackups">
+            <summary>サイズローテーション最大バックアップ数</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings._keepDays">
+            <summary>ログ保存日数</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings._useDb">
+            <summary>DB使用有無(パターンレイアウト用)</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings._isWeb">
+            <summary>WEBアプリフラグ(パターンレイアウト用)</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings._isFa">
+            <summary>FAアプリフラグ(パターンレイアウト用)</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings._patternLayout">
+            <summary>ログファイル出力用パターンレイアウト</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings._level">
+            <summary>ログファイル出力用ログレベル</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings._useMdcFilter">
+            <summary>MDCフィルタリング</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings._mdcAcceptOnMatch">
+            <summary>MDCキー判定(true:一致で拾う false:不一致で拾う)</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings._mdcKey">
+            <summary>MDCキー</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings._mdcValue">
+            <summary>MDC条件文字列</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.Name">
+            <summary>ログファイル出力用アペンダ名</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.AssemblyName">
+            <summary>アセンブリ名</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.AppendToFile">
+            <summary>追記</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.ExclusiveLock">
+            <summary>排他</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.BasePath">
+            <summary>ログ出力先パス</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.FilePath">
+            <summary>ログ出力先パス</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.FileName">
+            <summary>ログファイル名(指定時は拡張子不要)</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.RollingStr">
+            <summary>ログローテーション周期</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.Rolling">
+            <summary>ログローテーション周期</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.DatePattern">
+            <summary>日付パターン文字列</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.SizeBackupRotation">
+            <summary>サイズローテーション有無(true:MaxSizeRollBackupsでバックアップ数を指定する false:ローテーションしない=無限にバックアップ)</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.MaxFileSizeMB">
+            <summary>サイズローテーション最大ファイルサイズ(MByte)</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.MaxFileSize">
+            <summary>サイズローテーション最大ファイルサイズ(Byte)</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.MaxSizeRollBackups">
+            <summary>サイズローテーション最大バックアップ数</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.KeepDays">
+            <summary>ログ保存日数</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.UseDb">
+            <summary>DB使用有無(パターンレイアウト用)</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.IsWeb">
+            <summary>WEBアプリフラグ(パターンレイアウト用)</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.IsFa">
+            <summary>FAアプリフラグ(パターンレイアウト用)</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.PatternLayout">
+            <summary>ログファイル出力用パターンレイアウト</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.LevelStr">
+            <summary>ログファイル出力用ログレベル</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.Level">
+            <summary>ログファイル出力用ログレベル</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.MinLevel">
+            <summary>ログファイル出力用ログレベル</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.UseMdcFilter">
+            <summary>MDCフィルタリング</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.MdcAcceptOnMatch">
+            <summary>MDCキー判定(true:一致で拾う false:不一致で拾う)</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.MdcKey">
+            <summary>MDCキー</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerAppenderSettings.MdcValue">
+            <summary>MDC条件文字列</summary>
+        </member>
+        <member name="T:KTFramework.Common.LoggerAppenderSettings.RollingType">
+            <summary>
+            ログローテーション周期
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings.RollingType.Yearly">
+            <summary>年次</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings.RollingType.Monthly">
+            <summary>月次</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings.RollingType.Daily">
+            <summary>日次</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings.RollingType.Hourly">
+            <summary>時間</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerAppenderSettings.RollingType.None">
+            <summary>ローテーションなし</summary>
+        </member>
+        <member name="T:KTFramework.Common.LoggerManager">
+            <summary>
+            ロガー管理クラス
+              ・ロガーの初期化
+              ・アペンダの追加
+              ・MDCの設定
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerManager.DEFAULT_LOGGER_NAME">
+            <summary>デフォルトロガー名</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerManager.DEBUGOUT_APPENDER_NAME">
+            <summary>デバッグ出力用アペンダ名</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerManager.CONSOLE_APPENDER_NAME">
+            <summary>標準出力用アペンダ名</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerManager.EVENTLOG_APPENDER_NAME">
+            <summary>イベントログ出力用アペンダ名</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerManager._defaultSettings">
+            <summary>標準ログファイル用デフォルトアペンダ設定</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerManager.LEVEL_FOR_DEBUGOUT">
+            <summary>デバッグ出力用ログレベル</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerManager._levelForDebugOut">
+            <summary>デバッグ出力用ログレベル</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerManager.LEVEL_FOR_CONSOLE">
+            <summary>標準出力用ログレベル</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerManager._levelForConsole">
+            <summary>標準出力用ログレベル</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerManager.LEVEL_FOR_EVENTLOG">
+            <summary>イベントログ出力用ログレベル</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerManager._levelForEventLog">
+            <summary>イベントログ出力用ログレベル</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerManager._assemblyName">
+            <summary>アセンブリ名</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerManager._useDb">
+            <summary>DB使用有無(true:パターンレイアウトにDBモードとターゲットを出力)</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerManager._isWeb">
+            <summary>WEBアプリフラグ(true:パターンレイアウトにセッションIDを出力)</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerManager._isFa">
+            <summary>FAアプリフラグ(true:パターンレイアウトに対象設備を出力)</summary>
+        </member>
+        <member name="F:KTFramework.Common.LoggerManager._instance">
+            <summary>インスタンス</summary>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.GetInstance">
+            <summary>
+            インスタンスの取得
+            </summary>
+            <returns>インスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.#ctor(System.String,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="assemblyName">アセンブリ名</param>
+            <param name="useDb">DB使用有無(true:パターンレイアウトにDBモードとターゲットを出力)</param>
+            <param name="isWeb">WEBアプリフラグ(true:パターンレイアウトにセッションIDを出力)</param>
+            <param name="isFa">FAアプリフラグ(true:パターンレイアウトに対象設備を出力)</param>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.Initialize">
+            <summary>
+            ロガーを作成する
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.CreateDefaultAppenders">
+            <summary>
+            デフォルトアペンダを作成する
+            　・標準出力用アペンダ
+            　・イベントログ出力用アペンダ
+            　・ログファイル用アペンダ
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.CreateDefaultAppenderSettings">
+            <summary>
+            標準ログファイル用アペンダを作成する
+            </summary>
+            <returns>標準ログファイル用アペンダ</returns>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.CreateRollingFileAppender">
+            <summary>
+            ログファイル出力用アペンダを作成する
+            </summary>
+            <returns>ログファイル出力用アペンダ</returns>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.CreateRollingFileAppender(KTFramework.Common.LoggerAppenderSettings)">
+            <summary>
+            ログファイル出力用アペンダを作成する
+            </summary>
+            <param name="settings"></param>
+            <returns>ログファイル出力用アペンダ</returns>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.CreateDebugAppender">
+            <summary>
+            デバッグ出力用アペンダを作成する
+            </summary>
+            <returns>デバック出力用アペンダ</returns>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.CreateConsoleAppender">
+            <summary>
+            標準出力用アペンダを作成する
+            </summary>
+            <returns>標準出力用アペンダ</returns>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.CreateEventLogAppender">
+            <summary>
+            イベントログ出力用アペンダを作成する
+            </summary>
+            <returns>イベントログ出力用アペンダ</returns>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.GetAppenderSettingsTemplate(System.String)">
+            <summary>
+            アペンダ設定のテンプレートを取得する
+            標準ログファイル出力用設定からテンプレートを作成します
+            必要項目を変更してください
+            </summary>
+            <param name="appenderName">アペンダ名</param>
+            <returns>アペンダ設定テンプレート</returns>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.AddAppender(KTFramework.Common.LoggerAppenderSettings)">
+            <summary>
+            アペンダを追加する
+            </summary>
+            <param name="settings">アペンダ設定</param>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.DeleteOldLogs">
+            <summary>
+            古いログを削除する
+            設定値が0ならスキップ
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.SetMdcKey(System.String,System.String)">
+            <summary>
+            MDCキーをセットする
+            </summary>
+            <param name="key">MDCキー</param>
+            <param name="value">MDC設定値</param>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.SetMdcDb(System.String)">
+            <summary>
+            MDCキーをセットする(DB)
+            </summary>
+            <param name="targetDb">対象DB</param>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.SetMdcSid(System.String)">
+            <summary>
+            MDCキーをセットする(SID)
+            </summary>
+            <param name="sessionId">対象セッションID</param>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.SetMdcInst(System.String)">
+            <summary>
+            MDCキーをセットする(INST)
+            </summary>
+            <param name="instrumentName">対象設備名</param>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.RemoveMdcKey(System.String)">
+            <summary>
+            MDCキーを外す
+            </summary>
+            <param name="key">MDCキー</param>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.RemoveMdcDb">
+            <summary>
+            MDCキーを外す(DB)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.RemoveMdcSid">
+            <summary>
+            MDCキーを外す(SID)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.RemoveMdcInst">
+            <summary>
+            MDCキーを外す(INST)
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.ClearMdcKey">
+            <summary>
+            MDCキーをクリアする
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.LoggerManager.IsExistsAppender(System.String)">
+            <summary>
+            アペンダ存在チェック
+            </summary>
+            <param name="name">アペンダ名</param>
+            <returns>true:存在する false:存在しない</returns>
+        </member>
+        <member name="P:KTFramework.Common.LoggerManager.DefaultSettings">
+            <summary>標準ログファイル用デフォルトアペンダ設定</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerManager.LevelForDebugOut">
+            <summary>デバッグ出力用ログレベル</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerManager.LevelForConsole">
+            <summary>標準出力用ログレベル</summary>
+        </member>
+        <member name="P:KTFramework.Common.LoggerManager.LevelForEventLog">
+            <summary>イベントログ出力用ログレベル</summary>
+        </member>
+        <member name="T:KTFramework.Common.MailAddressData">
+            <summary>
+            電子メール情報管理クラス
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.MailAddressData._address">
+            <summary>電子メールアドレス</summary>
+        </member>
+        <member name="F:KTFramework.Common.MailAddressData._displayName">
+            <summary>表示名</summary>
+        </member>
+        <member name="M:KTFramework.Common.MailAddressData.#ctor(System.String,System.String)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="address">電子メールアドレス</param>
+            <param name="displayName">表示名</param>
+        </member>
+        <member name="P:KTFramework.Common.MailAddressData.Address">
+            <summary>電子メールアドレス</summary>
+        </member>
+        <member name="P:KTFramework.Common.MailAddressData.DisplayName">
+            <summary>表示名</summary>
+        </member>
+        <member name="T:KTFramework.Common.MailAttachmentData">
+            <summary>
+            電子メール添付データ管理クラス
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.MailAttachmentData._fileName">
+            <summary>ファイル名</summary>
+        </member>
+        <member name="F:KTFramework.Common.MailAttachmentData._binaryData">
+            <summary>バイナリデータ</summary>
+        </member>
+        <member name="M:KTFramework.Common.MailAttachmentData.#ctor(System.String,System.IO.Stream)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="fileName">ファイル名</param>
+            <param name="binaryData">バイナリデータ</param>
+        </member>
+        <member name="P:KTFramework.Common.MailAttachmentData.FileName">
+            <summary>ファイル名</summary>
+        </member>
+        <member name="P:KTFramework.Common.MailAttachmentData.BinaryData">
+            <summary>バイナリデータ</summary>
+        </member>
+        <member name="T:KTFramework.Common.MailData">
+            <summary>
+            電子メール送信情報管理クラス
+            </summary>
+        </member>
+        <member name="P:KTFramework.Common.MailData.ToAddrList">
+            <summary>送信先メールアドレス(メールアドレス,名前)</summary>
+        </member>
+        <member name="P:KTFramework.Common.MailData.CcAddrList">
+            <summary>CC送信先メールアドレス(メールアドレス,名前)</summary>
+        </member>
+        <member name="P:KTFramework.Common.MailData.BccAddrList">
+            <summary>BCC送信先メールアドレス(メールアドレス,名前)</summary>
+        </member>
+        <member name="P:KTFramework.Common.MailData.Subject">
+            <summary>件名</summary>
+        </member>
+        <member name="P:KTFramework.Common.MailData.BodyText">
+            <summary>本文</summary>
+        </member>
+        <member name="P:KTFramework.Common.MailData.AttachedFilePathList">
+            <summary>添付ファイルパス</summary>
+        </member>
+        <member name="P:KTFramework.Common.MailData.AttachedStreamList">
+            <summary>添付ファイル(ファイル名,バイナリデータ)</summary>
+        </member>
+        <member name="T:KTFramework.Common.MailHandler">
+            <summary>
+            電子メール送信クラス
+            </summary>
+            <remarks>
+            <para>
+            ホストおよび送信元情報は設定ファイル(app.configに定義)から取得します。<br />
+            送信情報はMailDataで指定します。<br />
+            </para>
+            </remarks>
+        </member>
+        <member name="F:KTFramework.Common.MailHandler.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="F:KTFramework.Common.MailHandler._commonSettingFilePath">
+            <summary>メール共通設定ファイル</summary>
+        </member>
+        <member name="F:KTFramework.Common.MailHandler._commonConfig">
+            <summary>メール共通設定情報</summary>
+        </member>
+        <member name="F:KTFramework.Common.MailHandler._assemblyName">
+            <summary>アセンブリ名</summary>
+        </member>
+        <member name="F:KTFramework.Common.MailHandler._indivisualSettingFilePath">
+            <summary>FTP個別設定ファイル</summary>
+        </member>
+        <member name="F:KTFramework.Common.MailHandler._indivisualConfig">
+            <summary>FTP共通設定情報</summary>
+        </member>
+        <member name="F:KTFramework.Common.MailHandler._addressListMap">
+            <summary>メール送信先アドレスリストマップ</summary>
+        </member>
+        <member name="M:KTFramework.Common.MailHandler.#ctor">
+            <summary>
+            コンストラクタ
+            </summary>
+            <remarks>
+            メール設定を初期化します
+            事前に設定ファイルの準備が必要です。
+            標準はD:\exe\conf\MailSettings.xmlです。
+            </remarks>
+        </member>
+        <member name="M:KTFramework.Common.MailHandler.LoadConfig">
+            <summary>
+            設定ファイルロード
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.MailHandler.GetAddressList(System.String)">
+            <summary>
+            アドレスリストを取得する
+            </summary>
+            <param name="mailSection">送信先定義セクション名</param>
+        </member>
+        <member name="M:KTFramework.Common.MailHandler.MapAddressList(System.Collections.Generic.Dictionary{System.String,KTFramework.Common.MailAddressData}@,System.Collections.Generic.List{System.String})">
+            <summary>
+            アドレスリストをマップに追加する
+            </summary>
+            <param name="srcAddrs">追加元アドレスリスト</param>
+            <param name="destAddrs">追加先アドレスリスト</param>
+        </member>
+        <member name="M:KTFramework.Common.MailHandler.SendMail(KTFramework.Common.MailData,System.Boolean)">
+            <summary>
+            メールを送信します
+            </summary>
+            <remarks>
+            <para>
+            下記項目はapp.configファイルのMailSettingに指定された設定ファイルから取得します<br />
+            ・ホスト名<br />
+            ・送信元メールアドレス<br />
+            ・送信元名<br />
+            <br />
+            下記項目は必須です<br />
+            ・送信先メールアドレス(To)<br />
+            <br />
+            下記項目は任意です<br />
+            ・送信先メールアドレス(Cc,Bcc)<br />
+            ・添付ファイルパス<br />
+            </para>
+            </remarks>
+            <param name="mailData">メール情報</param>
+            <param name="printCautionMessage">注意定型文挿入有無</param>
+        </member>
+        <member name="M:KTFramework.Common.MailHandler.CreateMailMessage(KTFramework.Common.MailData,System.Boolean)">
+            <summary>
+            メール送信情報(MailMessage)の作成
+            </summary>
+            <param name="mailData">メール情報</param>
+            <param name="printCautionMessage">注意定型文挿入有無</param>
+        </member>
+        <member name="M:KTFramework.Common.MailHandler.CreateSmtpClient">
+            <summary>
+            SMTPクライアントの作成
+            </summary>
+            <returns>SMTPクライアント</returns>
+        </member>
+        <member name="M:KTFramework.Common.MailHandler.IsSend(KTFramework.Common.MailHandler.MailMode)">
+            <summary>
+            メール送信設定を取得します
+            </summary>
+            <param name="mailMode"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.MailHandler.SendResultMail(KTFramework.Common.MailHandler.MailMode,System.String,System.Text.StringBuilder,System.Int32,KTFramework.Common.Msg)">
+            <summary>
+            結果通知メール送信
+            </summary>
+            <param name="mailMode">メールモード</param>
+            <param name="programName">プログラム名</param>
+            <param name="mailBody">メール本文</param>
+            <param name="resultCode">結果コード</param>
+            <param name="resultMessage">結果メッセージ</param>
+            <returns>送信結果(true:成功, false:失敗)</returns>
+        </member>
+        <member name="M:KTFramework.Common.MailHandler.SendExceptionMail(System.Exception)">
+            <summary>
+            例外通知メールを送信します
+            </summary>
+            <param name="exception">例外</param>
+            <returns>送信結果(true:成功, false:失敗)</returns>
+        </member>
+        <member name="M:KTFramework.Common.MailHandler.SendResultReportMail(System.String,System.Int32,KTFramework.Common.Msg,System.String,System.String,System.DateTime,System.DateTime,System.String,System.Text.StringBuilder,System.Collections.Generic.List{KTFramework.Common.MailAddressData})">
+            <summary>
+            ユーザ実行結果通知メール送信
+            </summary>
+            <param name="programName">プログラム名</param>
+            <param name="resultCode">結果コード</param>
+            <param name="resultMessage">結果メッセージ</param>
+            <param name="userId">実行ユーザID</param>
+            <param name="userName">実行ユーザ名</param>
+            <param name="startDate">開始日時</param>
+            <param name="finishDate">終了日時</param>
+            <param name="note">実行結果</param>
+            <param name="additionalMessage">追加メッセージ</param>
+            <param name="addressList">送信先メールアドレスリスト</param>
+            <returns>送信結果(true:成功, false:失敗)</returns>
+        </member>
+        <member name="M:KTFramework.Common.MailHandler.SetCautionMessage(System.Text.StringBuilder@)">
+            <summary>
+            注意文をセットします
+            </summary>
+            <returns>注意文</returns>
+        </member>
+        <member name="M:KTFramework.Common.MailHandler.SetTimestamp(System.Text.StringBuilder@)">
+            <summary>
+            タイムスタンプをセットします
+            </summary>
+            <param name="mailBody">本文</param>
+        </member>
+        <member name="M:KTFramework.Common.MailHandler.SetOpenStatement(System.Text.StringBuilder@)">
+            <summary>
+            開始文をセットします
+            </summary>
+            <param name="mailBody">本文</param>
+        </member>
+        <member name="M:KTFramework.Common.MailHandler.SetCloseStatement(System.Text.StringBuilder@)">
+            <summary>
+            終端文をセットします
+            </summary>
+            <param name="mailBody">本文</param>
+        </member>
+        <member name="M:KTFramework.Common.MailHandler.SetResultStatement(System.Text.StringBuilder@,System.Int32,KTFramework.Common.Msg)">
+            <summary>
+            結果定型文を作成します
+            </summary>
+            <param name="mailBody">本文</param>
+            <param name="resultCode">結果コード</param>
+            <param name="resultMessage">結果メッセージ</param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.MailHandler.SetProcReportStatement(System.Text.StringBuilder@,System.String,System.String,System.String,System.DateTime,System.DateTime,System.String)">
+            <summary>
+            ユーザ実行結果定型文を作成します
+            </summary>
+            <param name="mailBody">本文</param>
+            <param name="programName">プログラム名</param>
+            <param name="userId">実行ユーザID</param>
+            <param name="userName">実行ユーザ名</param>
+            <param name="startDate">開始日時</param>
+            <param name="finishDate">終了日時</param>
+            <param name="note">実行結果</param>
+        </member>
+        <member name="T:KTFramework.Common.MailHandler.MailMode">
+            <summary>メールモード</summary>
+        </member>
+        <member name="F:KTFramework.Common.MailHandler.MailMode.Success">
+            <summary>正常終了</summary>
+        </member>
+        <member name="F:KTFramework.Common.MailHandler.MailMode.Info">
+            <summary>実行報告</summary>
+        </member>
+        <member name="F:KTFramework.Common.MailHandler.MailMode.Warn">
+            <summary>警告終了</summary>
+        </member>
+        <member name="F:KTFramework.Common.MailHandler.MailMode.Error">
+            <summary>異常終了</summary>
+        </member>
+        <member name="F:KTFramework.Common.MailHandler.MailMode.Exception">
+            <summary>例外終了</summary>
+        </member>
+        <member name="F:KTFramework.Common.MailHandler.MailMode.Arbitrary">
+            <summary>任意送信</summary>
+        </member>
+        <member name="T:KTFramework.Common.MsgDef">
+            <summary>
+            メッセージ定義クラス。
+            システムで利用するメッセージコードとメッセージを管理します。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.MsgDef.#ctor(System.String,System.String)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="code">メッセージコード</param>
+            <param name="message">メッセージ</param>
+        </member>
+        <member name="M:KTFramework.Common.MsgDef.ToString">
+            <summary>
+            メッセージを取得します
+            </summary>
+            <returns>メッセージ</returns>
+        </member>
+        <member name="M:KTFramework.Common.MsgDef.ToString(System.Object[])">
+            <summary>
+            メッセージを取得します
+            </summary>
+            <param name="parameter">メッセージ内書式項目を置換する値</param>
+            <returns>メッセージ</returns>
+        </member>
+        <member name="P:KTFramework.Common.MsgDef.Code">
+            <summary>メッセージコードを取得、設定します</summary>
+        </member>
+        <member name="P:KTFramework.Common.MsgDef.Message">
+            <summary>メッセージを取得、設定します</summary>
+        </member>
+        <member name="T:KTFramework.Common.MsgManagerBase">
+            <summary>
+            システムメッセージ管理基本クラス。
+            本クラスを継承したクラスでは、Defineメソッドを使用してシステムメッセージを生成して下さい。
+            定義例) public readonly static SysMessage フィールド名 = Define( メッセージコード, メッセージ );
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.MsgManagerBase.MESSAGE_OK">
+            <summary>正常(メッセージなし)</summary>
+        </member>
+        <member name="F:KTFramework.Common.MsgManagerBase.MESSAGE_NOTACCESS">
+            <summary>読取権限なし</summary>
+        </member>
+        <member name="F:KTFramework.Common.MsgManagerBase.MESSAGE_SYSERR">
+            <summary>システムエラー</summary>
+        </member>
+        <member name="F:KTFramework.Common.MsgManagerBase.MESSAGE_INF_10000">
+            <summary>処理が正常終了しました。</summary>
+        </member>
+        <member name="F:KTFramework.Common.MsgManagerBase.MESSAGE_INF_10010">
+            <summary>起動抑止時間帯のため、処理の実行をスキップしました。</summary>
+        </member>
+        <member name="F:KTFramework.Common.MsgManagerBase.MESSAGE_WRN_20000">
+            <summary>処理は正常に終了しましたが、警告が発生しています。</summary>
+        </member>
+        <member name="F:KTFramework.Common.MsgManagerBase.MESSAGE_ERR_30000">
+            <summary>処理中に異常が発生しています。</summary>
+        </member>
+        <member name="F:KTFramework.Common.MsgManagerBase.MESSAGE_ERR_30110">
+            <summary>引数が指定されていません。</summary>
+        </member>
+        <member name="F:KTFramework.Common.MsgManagerBase.MESSAGE_ERR_30120">
+            <summary>引数の指定が不適切です。</summary>
+        </member>
+        <member name="F:KTFramework.Common.MsgManagerBase.MESSAGE_ERR_40000">
+            <summary>処理中に例外が発生しています。</summary>
+        </member>
+        <member name="M:KTFramework.Common.MsgManagerBase.Define(KTFramework.Common.MsgManagerBase.MessageType,KTFramework.Common.MsgManagerBase.AppKind,System.String,System.String)">
+            <summary>
+            システムメッセージを定義します
+            </summary>
+            <param name="type">メッセージ種別</param>
+            <param name="kind">アプリケーション種別</param>
+            <param name="id">メッセージID(メッセージコードの末尾5桁)</param>
+            <param name="message">メッセージ</param>
+            <returns>メッセージクラスインスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Common.MsgManagerBase.Define(System.String,KTFramework.Common.MsgManagerBase.MessageType,KTFramework.Common.MsgManagerBase.AppKind,System.String,System.String)">
+            <summary>
+            システムメッセージを定義します
+            </summary>
+            <param name="projectName">プロジェクト名(5桁以内)</param>
+            <param name="type">メッセージ種別</param>
+            <param name="appKind">アプリケーション種別</param>
+            <param name="id">メッセージID(メッセージコードの末尾5桁)</param>
+            <param name="message">メッセージ</param>
+            <returns>メッセージクラスインスタンス</returns>
+        </member>
+        <member name="T:KTFramework.Common.MsgManagerBase.MessageType">
+            <summary>
+            メッセージ種別
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.MsgManagerBase.MessageType.Ok">
+            <summary>正常</summary>
+        </member>
+        <member name="F:KTFramework.Common.MsgManagerBase.MessageType.Info">
+            <summary>情報メッセージ</summary>
+        </member>
+        <member name="F:KTFramework.Common.MsgManagerBase.MessageType.Warn">
+            <summary>警告メッセージ</summary>
+        </member>
+        <member name="F:KTFramework.Common.MsgManagerBase.MessageType.Error">
+            <summary>エラーメッセージ</summary>
+        </member>
+        <member name="F:KTFramework.Common.MsgManagerBase.MessageType.Conf">
+            <summary>確認メッセージ</summary>
+        </member>
+        <member name="T:KTFramework.Common.MsgManagerBase.AppKind">
+            <summary>
+            アプリケーション種別
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.MsgManagerBase.AppKind.SERVICE">
+            <summary>Webサービス</summary>
+        </member>
+        <member name="F:KTFramework.Common.MsgManagerBase.AppKind.NATIVE">
+            <summary>ネイティブ</summary>
+        </member>
+        <member name="F:KTFramework.Common.MsgManagerBase.AppKind.WEBVIEW">
+            <summary>Web画面</summary>
+        </member>
+        <member name="F:KTFramework.Common.MsgManagerBase.AppKind.LIBRARY">
+            <summary>ライブラリ</summary>
+        </member>
+        <member name="F:KTFramework.Common.MsgManagerBase.AppKind.BATCH">
+            <summary>バッチ</summary>
+        </member>
+        <member name="F:KTFramework.Common.MsgManagerBase.AppKind.SCRIPT">
+            <summary>スクリプト</summary>
+        </member>
+        <member name="T:KTFramework.Common.NumericUtils">
+            <summary>
+            数値型データ操作クラス
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.NumericUtils.IsInt(System.Object)">
+            <summary>
+            int型かチェックします。
+            </summary>
+            <param name="target">評価する値</param>
+            <returns>true:int型 false:int型以外</returns>
+        </member>
+        <member name="M:KTFramework.Common.NumericUtils.IsLong(System.Object)">
+            <summary>
+            long型かチェックします。
+            </summary>
+            <param name="target">評価する値</param>
+            <returns>true:long型 false:long型以外</returns>
+        </member>
+        <member name="M:KTFramework.Common.NumericUtils.IsDecimal(System.Object)">
+            <summary>
+            decimal型かチェックします。
+            </summary>
+            <param name="target">評価する値</param>
+            <returns>true:decimal型 false:decimal型以外</returns>
+        </member>
+        <member name="M:KTFramework.Common.NumericUtils.IsEven(System.Int32)">
+            <summary>
+            指定された値が偶数かチェックする
+            </summary>
+            <param name="target">数値</param>
+            <returns>判定結果 true:偶数 false:奇数</returns>
+        </member>
+        <member name="M:KTFramework.Common.NumericUtils.IsOdd(System.Int32)">
+            <summary>
+            指定された値が奇数かチェックする
+            </summary>
+            <param name="target">数値</param>
+            <returns>判定結果 true:奇数 false:偶数</returns>
+        </member>
+        <member name="M:KTFramework.Common.NumericUtils.Nvl(System.Object)">
+            <summary>
+            値がnullの場合に、decimal型の0を返します
+            </summary>
+            <param name="value">評価する値</param>
+            <returns>値がnullの場合には空文字("")、値がnullでない場合には評価した値を文字列へ置換して返します</returns>
+        </member>
+        <member name="M:KTFramework.Common.NumericUtils.Nvl(System.Object,System.Decimal)">
+            <summary>
+            値がnullの場合に、指定された数値を返します
+            </summary>
+            <param name="value">評価する値</param>
+            <param name="replaceValue">評価する値がnullの場合に置換する文字</param>
+            <returns>値がnullの場合にはreplaceValue、値がnullでない場合には評価した値を文字列へ置換して返します</returns>
+        </member>
+        <member name="M:KTFramework.Common.NumericUtils.ToInt(System.Object)">
+            <summary>
+            int型へ変換します。
+            変換できない場合にはint.MinValueを返します。
+            </summary>
+            <param name="target">変換する値</param>
+            <returns>変換された値</returns>
+        </member>
+        <member name="M:KTFramework.Common.NumericUtils.ToInt(System.Object,System.Int32)">
+            <summary>
+            int型へ変換します。
+            変換できない場合にはdefaultValueを返します。
+            </summary>
+            <param name="target">変換する値</param>
+            <param name="defaultValue">変換できなかった際の返値</param>
+            <returns>変換された値</returns>
+        </member>
+        <member name="M:KTFramework.Common.NumericUtils.ToLong(System.Object)">
+            <summary>
+            long型へ変換します。
+            変換できない場合にはlong.MinValueを返します。
+            </summary>
+            <param name="target">変換する値</param>
+            <returns>変換された値</returns>
+        </member>
+        <member name="M:KTFramework.Common.NumericUtils.ToLong(System.Object,System.Int64)">
+            <summary>
+            long型へ変換します。
+            変換できない場合にはdefaultValueを返します。
+            </summary>
+            <param name="target">変換する値</param>
+            <param name="defaultValue">変換できなかった際の返値</param>
+            <returns>変換された値</returns>
+        </member>
+        <member name="M:KTFramework.Common.NumericUtils.ToDecimal(System.Object)">
+            <summary>
+            decimal型へ変換します。
+            変換できない場合にはdecimal.MinValueを返します。
+            </summary>
+            <param name="target">変換する値</param>
+            <returns>変換された値</returns>
+        </member>
+        <member name="M:KTFramework.Common.NumericUtils.ToDecimal(System.Object,System.Decimal)">
+            <summary>
+            decimal型へ変換します。
+            変換できない場合にはdefaultValueを返します。
+            </summary>
+            <param name="target">変換する値</param>
+            <param name="defaultValue">変換できなかった際の返値</param>
+            <returns>変換された値</returns>
+        </member>
+        <member name="M:KTFramework.Common.NumericUtils.ToString(System.Object,System.Int32)">
+            <summary>
+            指定した値を文字列に変換します
+            その際に整数部に指定桁数でパディングします
+            </summary>
+            <param name="value">値</param>
+            <param name="digit">整数部桁数</param>
+            <returns>パディング後文字列</returns>
+        </member>
+        <member name="M:KTFramework.Common.NumericUtils.ToString(System.Object,System.Int32,System.Int32)">
+            <summary>
+            指定した値を文字列に変換します
+            その際に整数部と小数部にそれぞれ指定桁数でパディングします
+            また、小数部は指定された桁以下は切り捨てます
+            </summary>
+            <param name="value">値</param>
+            <param name="digit">整数部桁数</param>
+            <param name="scale">小数部桁数</param>
+            <returns>パディング後文字列</returns>
+        </member>
+        <member name="T:KTFramework.Common.QueueManager">
+            <summary>
+            Queue管理クラス
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.QueueManager.RETRY_MAX_SPAN">
+            <summary>リトライ限界(1分)</summary>
+        </member>
+        <member name="F:KTFramework.Common.QueueManager._instance">
+            <summary>Queue管理クラスインスタンス</summary>
+        </member>
+        <member name="F:KTFramework.Common.QueueManager._path">
+            <summary>ファイルパス</summary>
+        </member>
+        <member name="F:KTFramework.Common.QueueManager._append">
+            <summary>追記モード</summary>
+        </member>
+        <member name="F:KTFramework.Common.QueueManager._access">
+            <summary>ファイルアクセスモード</summary>
+        </member>
+        <member name="F:KTFramework.Common.QueueManager._share">
+            <summary>ファイルアクセス種類</summary>
+        </member>
+        <member name="F:KTFramework.Common.QueueManager._syncQueue">
+            <summary>スレッドセーフキュー</summary>
+        </member>
+        <member name="F:KTFramework.Common.QueueManager._running">
+            <summary>スレッド実行状態</summary>
+        </member>
+        <member name="F:KTFramework.Common.QueueManager._prevRandom">
+            <summary>前回乱数</summary>
+        </member>
+        <member name="F:KTFramework.Common.QueueManager._retryTime">
+            <summary>リトライ日時</summary>
+        </member>
+        <member name="M:KTFramework.Common.QueueManager.GetInstance(System.String,System.Boolean,System.IO.FileAccess,System.IO.FileShare)">
+            <summary>
+            Queue管理クラスインスタンス作成
+            </summary>
+            <param name="path">ファイルパス</param>
+            <param name="append">追記 true:追記する false:しない</param>
+            <param name="access">ファイルアクセスモード(FileAccess)</param>
+            <param name="share">ファイルアクセス種類(FileShare)</param>
+            <returns>インスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Common.QueueManager.#ctor(System.String,System.Boolean,System.IO.FileAccess,System.IO.FileShare)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="path">ファイルパス</param>
+            <param name="append">追記 true:追記する false:しない</param>
+            <param name="access">ファイルアクセスモード(FileAccess)</param>
+            <param name="share">ファイルアクセス種類(FileShare)</param>
+        </member>
+        <member name="M:KTFramework.Common.QueueManager.Enqueue(KTFramework.Common.QueueCachedEntry)">
+            <summary>
+            キュー登録
+            </summary>
+            <param name="entry"></param>
+        </member>
+        <member name="M:KTFramework.Common.QueueManager.Dequeue">
+            <summary>
+            キュー取り出し
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.QueueManager.Write(KTFramework.Common.QueueCachedEntry,System.IO.FileStream)">
+            <summary>
+            ファイル書き込み
+            </summary>
+            <param name="entry">キューエントリ</param>
+            <param name="fs">ファイルストリーム</param>
+        </member>
+        <member name="T:KTFramework.Common.RemoteLoginErrorException">
+            <summary>
+            リモートログインエラー例外
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.RemoteLoginErrorException.#ctor">
+            <summary>
+            リモートログインエラー例外
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.RemoteLoginErrorException.#ctor(System.Int32)">
+            <summary>
+            リモートログインエラー例外
+            </summary>
+            <param name="code"></param>
+        </member>
+        <member name="M:KTFramework.Common.RemoteLoginErrorException.#ctor(System.String)">
+            <summary>
+            リモートログインエラー例外
+            </summary>
+            <param name="message">メッセージ</param>
+        </member>
+        <member name="T:KTFramework.Common.ServerUtils">
+            <summary>
+            サーバ関連ユーティリティ
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.ServerUtils.WNetCancelConnection2(System.String,System.Int32,System.Boolean)">
+            <summary>
+            接続切断するWin32 API を宣言
+            </summary>
+            <param name="lpName"></param>
+            <param name="dwFlags"></param>
+            <param name="fForce"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.ServerUtils.WNetAddConnection2(KTFramework.Common.ServerUtils.NETRESOURCE@,System.String,System.String,System.Int32)">
+            <summary>
+            認証情報を使って接続するWin32 API宣言
+            </summary>
+            <param name="lpNetResource"></param>
+            <param name="lpPassword"></param>
+            <param name="lpUsername"></param>
+            <param name="dwFlags"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.ServerUtils.SetRemoteLoginInfo(System.String)">
+            <summary>
+            接続情報を設定
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.ServerUtils.LoginToRemoteServer(System.String,System.String,System.String)">
+            <summary>
+            リモートサーバに接続
+            エラーコード：http://ir9.jp/prog/ayu/win32err.htm
+            </summary>
+            <param name="serverPath"></param>
+            <param name="userId"></param>
+            <param name="password"></param>
+        </member>
+        <member name="T:KTFramework.Common.ServerUtils.NETRESOURCE">
+            <summary>WNetAddConnection2に渡す接続の詳細情報の構造体</summary>
+        </member>
+        <member name="T:KTFramework.Common.StreamReaderEx">
+            <summary>
+            StreamReader拡張クラス
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.StreamReaderEx.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="F:KTFramework.Common.StreamReaderEx._separator">
+            <summary>セパレータ</summary>
+        </member>
+        <member name="M:KTFramework.Common.StreamReaderEx.#ctor(System.IO.Stream,System.Text.Encoding,System.Char)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="stream">ストリーム</param>
+            <param name="encoding">エンコード</param>
+            <param name="separator">区切り文字</param>
+        </member>
+        <member name="M:KTFramework.Common.StreamReaderEx.Read(KTFramework.Common.FileLayout@)">
+            <summary>
+            レイアウト分のデータを取得し、レイアウトにマッピングします
+            </summary>
+            <param name="layout">レイアウト定義</param>
+            <returns>true:取得成功 false:ファイル終端</returns>
+        </member>
+        <member name="M:KTFramework.Common.StreamReaderEx.ReadLine(KTFramework.Common.FileLayout@)">
+            <summary>
+            1行取得し、レイアウトにマッピングします
+            </summary>
+            <param name="layout">レイアウト定義</param>
+            <returns>true:取得成功 false:ファイル終端</returns>
+        </member>
+        <member name="M:KTFramework.Common.StreamReaderEx.ReadCSV">
+            <summary>
+            1行取得し、セパレータで分割した文字列リストを返します
+            </summary>
+            <returns>読込データ(1行分)</returns>
+        </member>
+        <member name="M:KTFramework.Common.StreamReaderEx.ReadAllCSV">
+            <summary>
+            全行取得し、セパレータで分割した文字列リストのリストを返します
+            取得後にファイルをクローズします
+            </summary>
+            <returns>読込データ(全行)</returns>
+        </member>
+        <member name="T:KTFramework.Common.StreamWriterEx">
+            <summary>
+            StreamWriter拡張クラス
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.StreamWriterEx.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="F:KTFramework.Common.StreamWriterEx._separator">
+            <summary>セパレータ</summary>
+        </member>
+        <member name="M:KTFramework.Common.StreamWriterEx.#ctor(System.IO.Stream,System.Text.Encoding,System.Char)">
+            <summary>
+            書込ストリームを初期化します
+            </summary>
+            <param name="stream">ストリーム</param>
+            <param name="encoding">エンコード</param>
+            <param name="separator">区切り文字</param>
+        </member>
+        <member name="M:KTFramework.Common.StreamWriterEx.WriteFromFile(System.String)">
+            <summary>
+            指定したファイルの内容をそのまま書き込みます
+            </summary>
+            <param name="filePath"></param>
+        </member>
+        <member name="M:KTFramework.Common.StreamWriterEx.WriteToStream(System.IO.Stream)">
+            <summary>
+            BaseStreamにストリームを書き込みます
+            </summary>
+            <param name="stream">ストリーム</param>
+        </member>
+        <member name="M:KTFramework.Common.StreamWriterEx.WriteToStream(System.String)">
+            <summary>
+            BaseStreamに文字列を書き込みます
+            </summary>
+            <param name="inData">文字列</param>
+        </member>
+        <member name="M:KTFramework.Common.StreamWriterEx.WriteToStream(System.Decimal,System.Int32,System.Int32)">
+            <summary>
+            BaseStreamに数値をパックBCDで書き込みます
+            </summary>
+            <param name="inData">数値</param>
+            <param name="digit">整数部桁数</param>
+            <param name="scale">小数部桁数</param>
+        </member>
+        <member name="M:KTFramework.Common.StreamWriterEx.WriteToStream(System.Byte[])">
+            <summary>
+            BaseStreamにバイト配列を書き込みます
+            </summary>
+            <param name="byteArray">バイト配列</param>
+        </member>
+        <member name="M:KTFramework.Common.StreamWriterEx.WriteToStream(KTFramework.Common.FileLayout)">
+            <summary>
+            BaseStreamにファイルレイアウトを書き込みます
+            </summary>
+            <param name="layout">ファイルレイアウト</param>
+        </member>
+        <member name="M:KTFramework.Common.StreamWriterEx.WriteLineToStream">
+            <summary>
+            BaseStreamに改行コードを書き込みます
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.StreamWriterEx.WriteLineToStream(System.IO.Stream)">
+            <summary>
+            BaseStreamにストリームを書き込みます
+            末尾に改行コードを付加します
+            </summary>
+            <param name="stream">ストリーム</param>
+        </member>
+        <member name="M:KTFramework.Common.StreamWriterEx.WriteLineToStream(System.String)">
+            <summary>
+            BaseStreamに文字列を書き込みます
+            末尾に改行コードを付加します
+            </summary>
+            <param name="inData">文字列</param>
+        </member>
+        <member name="M:KTFramework.Common.StreamWriterEx.WriteLineToStream(System.Decimal,System.Int32,System.Int32)">
+            <summary>
+            BaseStreamに数値をパックBCDで書き込みます
+            末尾に改行コードを付加します
+            </summary>
+            <param name="inData">数値</param>
+            <param name="digit">整数部桁数</param>
+            <param name="scale">小数部桁数</param>
+        </member>
+        <member name="M:KTFramework.Common.StreamWriterEx.WriteLineToStream(System.Byte[])">
+            <summary>
+            BaseStreamにバイト配列を書き込みます
+            末尾に改行コードを付加します
+            </summary>
+            <param name="byteArray">バイト配列</param>
+        </member>
+        <member name="M:KTFramework.Common.StreamWriterEx.WriteLineToStream(KTFramework.Common.FileLayout)">
+            <summary>
+            BaseStreamにファイルレイアウトを書き込みます
+            末尾に改行コードを付加します
+            </summary>
+            <param name="layout">ファイルレイアウト</param>
+        </member>
+        <member name="M:KTFramework.Common.StreamWriterEx.WriteCSV(System.String[])">
+            <summary>
+            文字列の配列をセパレータで結合して1行分のデータとして出力します
+            </summary>
+            <param name="inStrArray">出力データ</param>
+        </member>
+        <member name="M:KTFramework.Common.StreamWriterEx.WriteCSV(System.String[],System.String)">
+            <summary>
+            文字列の配列をセパレータで結合して1行分のデータとして出力します
+            </summary>
+            <param name="inStrArray">出力データ</param>
+            <param name="nullValue">データがnullだった場合の表示文字</param>
+        </member>
+        <member name="M:KTFramework.Common.StreamWriterEx.WriteCSV``1(``0)">
+            <summary>
+            全フィールド又はプロパティをセパレータで結合して1行分のデータとして出力します
+            </summary>
+            <typeparam name="T">出力データのEntityクラス</typeparam>
+            <param name="entity">出力データ(Entityクラスオブジェクト)</param>
+        </member>
+        <member name="M:KTFramework.Common.StreamWriterEx.WriteCSV``1(``0,``0)">
+            <summary>
+            全フィールド又はプロパティをセパレータで結合して1行分のデータとして出力します
+            </summary>
+            <typeparam name="T">出力データのEntityクラス</typeparam>
+            <param name="entity">出力データ(Entityクラスオブジェクト)</param>
+            <param name="nullValues">データがnullだった場合の表示文字</param>
+        </member>
+        <member name="T:KTFramework.Common.StringUtils">
+            <summary>
+            文字列型データ操作クラス
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.Nvl(System.Object)">
+            <summary>
+            値がnullの場合に、空文字を返します
+            </summary>
+            <param name="value">評価する値</param>
+            <returns>値がnullの場合には空文字("")、値がnullでない場合には評価した値を文字列へ置換して返します</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.Nvl(System.Object,System.String)">
+            <summary>
+            値がnullの場合に、指定された文字を返します
+            </summary>
+            <param name="value">評価する値</param>
+            <param name="replaceValue">評価する値がnullの場合に置換する文字</param>
+            <returns>値がnullの場合にはreplaceValue、値がnullでない場合には評価した値を文字列へ置換して返します</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.IsEmpty(System.String)">
+            <summary>
+            対象の文字列が設定されているかチェックを行います。
+            nullまたはLength=0の場合にはtrueを返します。
+            </summary>
+            <param name="target">評価する値</param>
+            <returns>>true:nullまたはLength=0 false:null以外</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.IsNotEmpty(System.String)">
+            <summary>
+            対象の文字列が設定されているかチェックを行います。
+            nullまたはLength=0の場合にはfalseを返します。
+            </summary>
+            <param name="target">評価する値</param>
+            <returns>>true:null以外 false:nullまたはLength=0</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.IsEmpty(System.Text.StringBuilder)">
+            <summary>
+            対象の文字列が設定されているかチェックを行います。
+            nullまたはLength=0の場合にはtrueを返します。
+            </summary>
+            <param name="target">評価する値</param>
+            <returns>>true:nullまたはLength=0 false:null以外</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.IsNotEmpty(System.Text.StringBuilder)">
+            <summary>
+            対象の文字列が設定されているかチェックを行います。
+            nullまたはLength=0の場合にはfalseを返します。
+            </summary>
+            <param name="target">評価する値</param>
+            <returns>>true:null以外 false:nullまたはLength=0</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.IsBlank(System.String)">
+            <summary>
+            対象の文字列がオールスペースかチェックを行います。
+            nullまたはLength=0またはオールスペースの場合にはtrueを返します。
+            全角スペースもスペースとみなします。
+            </summary>
+            <param name="target">評価する値</param>
+            <returns>>true:nullまたはLength=0またはオールスペース false:null以外</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.IsNotBlank(System.String)">
+            <summary>
+            対象の文字列がオールスペースかチェックを行います。
+            nullまたはLength=0またはオールスペースの場合にはtrueを返します。
+            全角スペースもスペースとみなします。
+            </summary>
+            <param name="target">評価する値</param>
+            <returns>>true:nullまたはLength=0またはオールスペース false:null以外</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.IsBlank(System.Text.StringBuilder)">
+            <summary>
+            対象の文字列がオールスペースかチェックを行います。
+            nullまたはLength=0またはオールスペースの場合にはtrueを返します。
+            全角スペースもスペースとみなします。
+            </summary>
+            <param name="target">評価する値</param>
+            <returns>>true:nullまたはLength=0またはオールスペース false:null以外</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.IsNotBlank(System.Text.StringBuilder)">
+            <summary>
+            対象の文字列がオールスペースかチェックを行います。
+            nullまたはLength=0またはオールスペースの場合にはtrueを返します。
+            全角スペースもスペースとみなします。
+            </summary>
+            <param name="target">評価する値</param>
+            <returns>>true:nullまたはLength=0またはオールスペース false:null以外</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.ToString(System.Object)">
+            <summary>
+            文字列型へ変換します。
+            変換できない場合には空文字("")を返します。
+            </summary>
+            <param name="target">変換する値</param>
+            <returns>変換された値</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.ToString(System.Object,System.String)">
+            <summary>
+            指定した書式の文字列型へ変換します。
+            変換できない場合には空文字("")を返します。
+            </summary>
+            <param name="target">変換する値</param>
+            <param name="format">書式指定文字列</param>
+            <returns>変換された値</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.ToString(System.Object,System.String,System.String)">
+            <summary>
+            指定した書式の文字列型へ変換します。
+            変換できない場合にはdefaultValueを返します。
+            </summary>
+            <param name="target">変換する値</param>
+            <param name="format">書式指定文字列</param>
+            <param name="defaultValue">変換失敗時に返却する値</param>
+            <returns>変換された値</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.CutString(System.String@,System.String)">
+            <summary>
+            文字列を検索文字まで切除します。
+            </summary>
+            <param name="inStr">切除対象文字列(実行後に切除されて残った文字列がセットされます)</param>
+            <param name="searchStr">検索文字列</param>
+            <returns>切除文字列</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.CutString(System.String@,System.String,System.Int32)">
+            <summary>
+            文字列を指定位置から検索し検索文字まで切除します。
+            </summary>
+            <param name="inStr">カット対象文字列(実行後に切除されて残った文字列がセットされます)</param>
+            <param name="searchStr">検索文字列</param>
+            <param name="startIndex">検索開始位置</param>
+            <returns>切除文字列</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.CutString(System.String,System.Int32)">
+            <summary>
+            文字列を指定長(バイト長)で切除した文字列を返します。
+            ただし、対象文字列が指定長(バイト長)に満たない場合は指定文字列が返されます。
+            また、切除後の最終文字がマルチバイトだった場合は、
+            </summary>
+            <param name="inStr">カット対象文字列</param>
+            <param name="length">指定文字数</param>
+            <returns>切除後の文字列</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.PaddingLeft(System.Object,System.Int32)">
+            <summary>
+            左側に指定バイトでスペースパディングします
+            エンコードはShift-JISを使用します
+            </summary>
+            <param name="value">データ</param>
+            <param name="length">パディング後の長さ</param>
+            <returns>パディング後文字列</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.PaddingLeft(System.Object,System.Int32,System.Text.Encoding)">
+            <summary>
+            左側に指定バイトでスペースパディングします
+            </summary>
+            <param name="value">データ</param>
+            <param name="length">パディング後の長さ</param>
+            <param name="encode">エンコード</param>
+            <returns>パディング後文字列</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.PaddingLeft(System.Object,System.Int32,System.Char)">
+            <summary>
+            左側に指定バイトでパディングします
+            エンコードはShift-JISを使用します
+            </summary>
+            <param name="value">データ</param>
+            <param name="length">パディング後の長さ</param>
+            <param name="paddingChar">パディング文字</param>
+            <returns>パディング後文字列</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.PaddingLeft(System.Object,System.Int32,System.Char,System.Text.Encoding)">
+            <summary>
+            左側に指定バイトでパディングします
+            </summary>
+            <param name="value">データ</param>
+            <param name="length">パディング後の長さ</param>
+            <param name="paddingChar">パディング文字</param>
+            <param name="encode">エンコード</param>
+            <returns>パディング後文字列</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.PaddingRight(System.Object,System.Int32)">
+            <summary>
+            右側に指定バイトでスペースパディングします
+            エンコードはShift-JISを使用します
+            </summary>
+            <param name="value">データ</param>
+            <param name="length">パディング後の長さ</param>
+            <returns>パディング後文字列</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.PaddingRight(System.Object,System.Int32,System.Text.Encoding)">
+            <summary>
+            右側に指定バイトでスペースパディングします
+            </summary>
+            <param name="value">データ</param>
+            <param name="length">パディング後の長さ</param>
+            <param name="encode">エンコード</param>
+            <returns>パディング後文字列</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.PaddingRight(System.Object,System.Int32,System.Char)">
+            <summary>
+            右側に指定バイトでパディングします
+            エンコードはShift-JISを使用します
+            </summary>
+            <param name="value">データ</param>
+            <param name="length">パディング後の長さ</param>
+            <param name="paddingChar">パディング文字</param>
+            <returns>パディング後文字列</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.PaddingRight(System.Object,System.Int32,System.Char,System.Text.Encoding)">
+            <summary>
+            右側に指定バイトでパディングします
+            </summary>
+            <param name="value">データ</param>
+            <param name="length">パディング後の長さ</param>
+            <param name="paddingChar">パディング文字</param>
+            <param name="encode">エンコード</param>
+            <returns>パディング後文字列</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.Space(System.Int32)">
+            <summary>
+            指定長さのスペース文字列を取得する
+            </summary>
+            <param name="length">長さ</param>
+            <returns>スペース文字列</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.ToKatakana(System.String)">
+            <summary>
+            ひらがなをカタカナに変換します
+            </summary>
+            <param name="value">変換前文字列</param>
+            <returns>変換後文字列</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.ToHiragana(System.String)">
+            <summary>
+            カタカナをひらがなに変換します
+            </summary>
+            <param name="value">変換前文字列</param>
+            <returns>変換後文字列</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.ToZenkaku(System.String)">
+            <summary>
+            半角を全角に変換します
+            </summary>
+            <param name="value">変換前文字列</param>
+            <returns>変換後文字列</returns>
+        </member>
+        <member name="M:KTFramework.Common.StringUtils.ToHankaku(System.String)">
+            <summary>
+            全角を半角に変換します
+            全角ひらがなは半角カタカナに変換されます
+            </summary>
+            <param name="value">変換前文字列</param>
+            <returns>変換後文字列</returns>
+        </member>
+        <member name="T:KTFramework.Common.Utils">
+            <summary>
+            汎用メソッド格納クラス
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.Utils.SHGFI_ICON">
+            <summary>SHGetFileInfo関数で使用するフラグ</summary>
+        </member>
+        <member name="F:KTFramework.Common.Utils.PARAMETER_KEY_PREFIX">
+            <summary>コマンドライン引数：定義識別子</summary>
+        </member>
+        <member name="F:KTFramework.Common.Utils.PARAMETER_VALUE_NOP">
+            <summary>コマンドライン引数：未設定値</summary>
+        </member>
+        <member name="M:KTFramework.Common.Utils.GetAssemblyName(System.Reflection.Assembly)">
+            <summary>
+            指定したアセンブリ情報からアセンブリ名を返します。
+            ここで返されるアセンブリ名にはバージョン情報は付加されません。また、ドット(.)は
+            アンダースコア(_)にエスケープされます。
+            </summary>
+            <param name="assembly">アセンブリ情報</param>
+            <returns>アセンブリ名</returns>
+        </member>
+        <member name="M:KTFramework.Common.Utils.GetIpAddress">
+            <summary>
+            端末のIPv4アドレスを取得します
+            </summary>
+            <returns>IPv4アドレス</returns>
+        </member>
+        <member name="M:KTFramework.Common.Utils.SHGetFileInfo(System.String,System.UInt32,KTFramework.Common.Utils.SHFILEINFO@,System.UInt32,System.UInt32)">
+            <summary>
+            シェルファイル情報ハンドラ取得(shell32.dll)
+            </summary>
+            <param name="pszPath"></param>
+            <param name="dwFileAttributes"></param>
+            <param name="psfi"></param>
+            <param name="cbSizeFileInfo"></param>
+            <param name="uFlags"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Common.Utils.GetApplicationIcon(System.String)">
+            <summary>
+            アプリケーションアイコンを取得します
+            </summary>
+            <param name="executablePath">実行ファイルパス</param>
+            <returns>アプリケーションアイコン</returns>
+        </member>
+        <member name="M:KTFramework.Common.Utils.AnalyzeCommandLineParameters(System.String[])">
+            <summary>
+            引数を解析しDICTIONARYにマッピングする
+            ただし、引数は "/command" または "/command value" の形式で記述されていること
+            </summary>
+            <param name="args"></param>
+        </member>
+        <member name="M:KTFramework.Common.Utils.SetArgsToMap(System.Collections.Generic.Dictionary{System.String,System.String},System.String,System.String)">
+            <summary>
+            引数をマッピングする(登録済みなら上書き)
+            </summary>
+            <param name="map"></param>
+            <param name="key"></param>
+            <param name="value"></param>
+        </member>
+        <member name="T:KTFramework.Common.Utils.SHFILEINFO">
+            <summary> SHGetFileInfo関数で使用する構造体</summary>
+        </member>
+        <member name="T:KTFramework.Common.ConfigXmlCategory">
+            <summary>
+            Config.xmlのカテゴリ情報(セクション集合)を管理します。
+            CATEGORYタグの子ノードとして設定されているSECTIONタグを管理します。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXmlCategory.#ctor(KTFramework.Common.ConfigXml,System.String,System.String)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="xml">設定XMLファイル</param>
+            <param name="configName">Configタグname属性値(通常はアセンブリ名)</param>
+            <param name="categoryName">Categoryタグname属性値</param>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXmlCategory.Add(System.String)">
+            <summary>
+            セクション情報追加処理。
+            </summary>
+            <param name="sectionName">キー(セクション名)</param>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXmlCategory.Add(System.String,KTFramework.Common.ConfigXmlSection)">
+            <summary>
+            セクション情報追加処理。
+            </summary>
+            <param name="sectionName">キー(セクション名)</param>
+            <param name="section">値(セクション情報)</param>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXmlCategory.Remove(System.String)">
+            <summary>
+            セクション情報削除処理。
+            </summary>
+            <param name="sectionName">キー(セクション名)</param>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXmlCategory.RemoveAll">
+            <summary>
+            全セクション情報削除処理。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXmlCategory.ContainsSection(System.String)">
+            <summary>
+            セクションが含まれているかチェックします
+            </summary>
+            <param name="sectionName">チェックするセクション名</param>
+            <returns>true:含まれている false:含まれていない</returns>
+        </member>
+        <member name="P:KTFramework.Common.ConfigXmlCategory.Item(System.String)">
+            <summary>
+            Valueインデクサ。
+            指定されたセクション情報を取得、設定します。
+            </summary>
+            <param name="sectionName">セクション名</param>
+            <returns>セクション情報</returns>
+        </member>
+        <member name="P:KTFramework.Common.ConfigXmlCategory.SectionNames">
+            <summary>
+            セクション名の一覧を取得します
+            </summary>
+        </member>
+        <member name="P:KTFramework.Common.ConfigXmlCategory.Length">
+            <summary>
+            セクション数を取得します
+            </summary>
+        </member>
+        <member name="T:KTFramework.Common.Msg">
+            <summary>
+            メッセージクラス。
+            システムで利用するメッセージコードとメッセージを管理します。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.Msg.#ctor(KTFramework.Common.MsgDef,System.Object[])">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="messageDef">メッセージ定義クラス</param>
+            <param name="parameter">メッセージ内書式項目を置換する値</param>
+        </member>
+        <member name="M:KTFramework.Common.Msg.#ctor(System.String,System.String)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="code">メッセージコード</param>
+            <param name="message">メッセージ</param>
+        </member>
+        <member name="M:KTFramework.Common.Msg.ToString">
+            <summary>
+            メッセージを取得します
+            </summary>
+            <returns>メッセージ</returns>
+        </member>
+        <member name="P:KTFramework.Common.Msg.Code">
+            <summary>メッセージコードを取得します</summary>
+        </member>
+        <member name="P:KTFramework.Common.Msg.Sentence">
+            <summary>メッセージ文を取得します</summary>
+        </member>
+        <member name="P:KTFramework.Common.Msg.IsOK">
+            <summary>
+            メッセージ種別が正常の場合にはtrueを返します
+            </summary>
+        </member>
+        <member name="P:KTFramework.Common.Msg.IsError">
+            <summary>
+            メッセージ種別が異常の場合にはtrueを返します
+            </summary>
+        </member>
+        <member name="P:KTFramework.Common.Msg.IsInfo">
+            <summary>
+            メッセージ種別が情報の場合にはtrueを返します
+            </summary>
+        </member>
+        <member name="P:KTFramework.Common.Msg.IsWarn">
+            <summary>
+            メッセージ種別が警告の場合にはtrueを返します
+            </summary>
+        </member>
+        <member name="P:KTFramework.Common.Msg.IsConfirm">
+            <summary>
+            メッセージ種別が確認の場合にはtrueを返します
+            </summary>
+        </member>
+        <member name="T:KTFramework.Common.DateUtils">
+            <summary>
+            日付型データ操作クラス
+            </summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.DATE_FORMAT_MILLISECOND">
+            <summary>Format:yyyy/MM/dd HH:mm:ss.fff</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.DATE_FORMAT_MILLISECOND_NOSEP">
+            <summary>Format:yyyyMMddHHmmssfff</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.DATE_FORMAT_SECOND">
+            <summary>Format:yyyy/MM/dd HH:mm:ss</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.DATE_FORMAT_SECOND_NOSEP">
+            <summary>Format:yyyyMMddHHmmss</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.DATE_FORMAT_SECOND_MIG">
+            <summary>Format:yyMMddHHmmss</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.DATE_FORMAT_MINITE">
+            <summary>Format:yyyy/MM/dd HH:mm</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.DATE_FORMAT_MINITE_NOSEP">
+            <summary>Format:yyyyMMddHHmm</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.DATE_FORMAT_HOUR">
+            <summary>Format:yyyy/MM/dd HH</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.DATE_FORMAT_HOUR_NOSEP">
+            <summary>Format:yyyyMMddHH</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.DATE_FORMAT_DAY">
+            <summary>Format:yyyy/MM/dd</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.DATE_FORMAT_DAY_NOSEP">
+            <summary>Format:yyyyMMdd</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.DATE_FORMAT_DAY_MIG">
+            <summary>Format:yyMMdd</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.DATE_FORMAT_MONTH">
+            <summary>Format:yyyy/MM</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.DATE_FORMAT_MONTH_NOSEP">
+            <summary>Format:yyyyMM</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.DATE_FORMAT_YEAR">
+            <summary>Format:yyyy</summary>
+        </member>
+        <member name="M:KTFramework.Common.DateUtils.GetFormat(KTFramework.Common.DateUtils.FormatType)">
+            <summary>
+            日付書式タイプに対応するフォーマット文字列を返します。
+            </summary>
+            <param name="type">日付書式タイプ</param>
+            <returns>フォーマット</returns>
+        </member>
+        <member name="M:KTFramework.Common.DateUtils.ToDate(System.Object)">
+            <summary>
+            日付型へ変換します。
+            変換できない場合にはDateTime.MinValueを返します。
+            </summary>
+            <param name="target">変換する値</param>
+            <returns>変換された値</returns>
+        </member>
+        <member name="M:KTFramework.Common.DateUtils.ToDate(System.Object,System.String)">
+            <summary>
+            指定した書式の日付型へ変換します。
+            変換できない場合にはDateTime.MinValueを返します。
+            </summary>
+            <param name="target">変換する値</param>
+            <param name="format">書式指定文字列</param>
+            <returns>変換された値</returns>
+        </member>
+        <member name="M:KTFramework.Common.DateUtils.ToDate(System.Object,KTFramework.Common.DateUtils.FormatType)">
+            <summary>
+            指定した書式の日付型へ変換します。
+            変換できない場合にはDateTime.MinValueを返します。
+            </summary>
+            <param name="target">変換する値</param>
+            <param name="type">日付書式タイプ</param>
+            <returns>変換された値</returns>
+        </member>
+        <member name="M:KTFramework.Common.DateUtils.ToDate(System.Object,KTFramework.Common.DateUtils.FormatType,System.DateTime)">
+            <summary>
+            指定した書式の日付型へ変換します。
+            変換できない場合にはdefaultValueを返します。
+            </summary>
+            <param name="target">変換する値</param>
+            <param name="type">日付書式タイプ</param>
+            <param name="defaultValue">変換できなかった際の返値</param>
+            <returns>変換された値</returns>
+        </member>
+        <member name="M:KTFramework.Common.DateUtils.ToDate(System.Object,System.String,System.DateTime)">
+            <summary>
+            指定した書式の日付型へ変換します。
+            変換できない場合にはdefaultValueを返します。
+            </summary>
+            <param name="target">変換する値</param>
+            <param name="format">書式指定文字列</param>
+            <param name="defaultValue">変換できなかった際の返値</param>
+            <returns>変換された値</returns>
+        </member>
+        <member name="M:KTFramework.Common.DateUtils.ToDateNullable(System.Object,KTFramework.Common.DateUtils.FormatType)">
+            <summary>
+            指定した書式の日付型へ変換します。
+            変換できない場合にはNULLを返します。
+            </summary>
+            <param name="target">変換する値</param>
+            <param name="type">日付書式タイプ</param>
+            <returns>変換された値</returns>
+        </member>
+        <member name="M:KTFramework.Common.DateUtils.ToDateNullable(System.Object,System.String)">
+            <summary>
+            指定した書式の日付型へ変換します。
+            変換できない場合にはNULLを返します。
+            </summary>
+            <param name="target">変換する値</param>
+            <param name="format">書式指定文字列</param>
+            <returns>変換された値</returns>
+        </member>
+        <member name="M:KTFramework.Common.DateUtils.ToString(System.Object,KTFramework.Common.DateUtils.FormatType)">
+            <summary>
+            指定した書式の文字列型へ変換します。
+            </summary>
+            <param name="target">変換する値</param>
+            <param name="type">日付書式タイプ</param>
+            <returns>変換された値</returns>
+        </member>
+        <member name="M:KTFramework.Common.DateUtils.ToString(System.Object,System.String)">
+            <summary>
+            指定した書式の文字列型へ変換します。
+            </summary>
+            <param name="target">変換する値</param>
+            <param name="format">書式指定文字列</param>
+            <returns>変換された値</returns>
+        </member>
+        <member name="M:KTFramework.Common.DateUtils.MigYmConvert(System.String)">
+            <summary>
+            MIG日付形式の日付(YYMMDD)又は月度(YYMM)を4桁西暦形式の月度(YYYYMM)に変換します
+            </summary>
+            <param name="migYmd">MIG月度形式(YYMM)</param>
+            <returns>YYが50未満:20YYMM YYが50以上:19YYMM</returns>
+        </member>
+        <member name="M:KTFramework.Common.DateUtils.MigYmConvert(System.String,System.String)">
+            <summary>
+            MIG日付形式の日付(YYMMDD)又は月度(YYMM)を4桁西暦形式の月度(YYYYMM)に変換します
+            </summary>
+            <param name="migY">MIG日付形式(YY)</param>
+            <param name="migM">MIG日付形式(MM)</param>
+            <returns>YYが50未満:20YYMM YYが50以上:19YYMM</returns>
+        </member>
+        <member name="M:KTFramework.Common.DateUtils.MigYmdConvert(System.String)">
+            <summary>
+            MIG日付形式(YYMMDD)を4桁西暦形式(YYYYMMDD)に変換します
+            </summary>
+            <param name="migYmd">MIG日付形式(YYMMDD)</param>
+            <returns>YYが50未満:20YYMMDD YYが50以上:19YYMMDD</returns>
+        </member>
+        <member name="M:KTFramework.Common.DateUtils.MigYmdConvert(System.String,System.String,System.String)">
+            <summary>
+            MIG日付形式(YYMMDD)を4桁西暦形式(YYYYMMDD)に変換します
+            </summary>
+            <param name="migY">MIG日付形式(YY)</param>
+            <param name="migM">MIG日付形式(MM)</param>
+            <param name="migD">MIG日付形式(DD)</param>
+            <returns>YYが50未満:20YYMMDD YYが50以上:19YYMMDD</returns>
+        </member>
+        <member name="M:KTFramework.Common.DateUtils.BetweenTime(System.DateTime,System.DateTime)">
+            <summary>
+            現在時刻が開始時刻から終了時刻までの時間帯に含まれているかチェックします
+            </summary>
+            <param name="start">開始時刻</param>
+            <param name="end">終了時刻</param>
+            <returns>true:時間内 false:時間外</returns>
+        </member>
+        <member name="M:KTFramework.Common.DateUtils.BetweenTime(System.DateTime,System.DateTime,System.DateTime)">
+            <summary>
+            対象時刻が開始時刻から終了時刻までの時間帯に含まれているかチェックします
+            </summary>
+            <param name="target">チェック対象時刻</param>
+            <param name="start">開始時刻</param>
+            <param name="end">終了時刻</param>
+            <returns>true:時間内 false:時間外</returns>
+        </member>
+        <member name="T:KTFramework.Common.DateUtils.FormatType">
+            <summary>書式タイプ</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.FormatType.MilliSecond">
+            <summary>Format:yyyy/MM/dd HH:mm:ss.fff</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.FormatType.MilliSecondNoSep">
+            <summary>Format:yyyyMMddHHmmssfff</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.FormatType.Second">
+            <summary>Format:yyyy/MM/dd HH:mm:ss</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.FormatType.SecondNoSep">
+            <summary>Format:yyyyMMddHHmmss</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.FormatType.SecondMig">
+            <summary>Format:yyMMddHHmmss</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.FormatType.Minite">
+            <summary>Format:yyyy/MM/dd HH:mm</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.FormatType.MiniteNoSep">
+            <summary>Format:yyyyMMddHHmm</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.FormatType.Hour">
+            <summary>Format:yyyy/MM/dd HH</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.FormatType.HourNoSep">
+            <summary>Format:yyyyMMddHH</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.FormatType.Day">
+            <summary>Format:yyyy/MM/dd</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.FormatType.DayNoSep">
+            <summary>Format:yyyyMMdd</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.FormatType.DayMig">
+            <summary>Format:yyMMdd</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.FormatType.Month">
+            <summary>Format:yyyy/MM</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.FormatType.MonthNoSep">
+            <summary>Format:yyyyMM</summary>
+        </member>
+        <member name="F:KTFramework.Common.DateUtils.FormatType.Year">
+            <summary>Format:yyyy</summary>
+        </member>
+        <member name="T:KTFramework.Common.ConfigXmlTag">
+            <summary>
+            汎用XML用タグ定義
+            </summary>
+        </member>
+        <member name="M:KTFramework.Common.ConfigXmlTag.#ctor(System.String,System.String,System.String)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="id">タグID</param>
+            <param name="name">タグNAME</param>
+            <param name="group">タグGROUP</param>
+        </member>
+        <member name="P:KTFramework.Common.ConfigXmlTag.Id">
+            <summary>タグIDを取得します</summary>
+        </member>
+        <member name="P:KTFramework.Common.ConfigXmlTag.Name">
+            <summary>タグNAMEを取得します</summary>
+        </member>
+        <member name="P:KTFramework.Common.ConfigXmlTag.Group">
+            <summary>タグGROUPを取得します</summary>
+        </member>
+    </members>
+</doc>

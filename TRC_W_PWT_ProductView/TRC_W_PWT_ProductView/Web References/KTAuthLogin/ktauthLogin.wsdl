@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns2="http://gia.dto.ibatis.ktutil4.tsukuba.kubota.co.jp/xsd" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:ns0="http://dto.svccom.tsukuba.kubota.co.jp/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:ns1="http://webmethod.svccom.tsukuba.kubota.co.jp" targetNamespace="http://webmethod.svccom.tsukuba.kubota.co.jp" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <xs:schema xmlns:ax22="http://dto.svccom.tsukuba.kubota.co.jp/xsd" xmlns:ax24="http://gia.dto.ibatis.ktutil4.tsukuba.kubota.co.jp/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://dto.svccom.tsukuba.kubota.co.jp/xsd">
+      <xs:import namespace="http://gia.dto.ibatis.ktutil4.tsukuba.kubota.co.jp/xsd" />
+      <xs:complexType name="WSChangePwdDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="resultCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultMessage" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="WSUserInfoDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="accessToken" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="apAuth" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="apDisplayName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="apId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="apInfo" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="apName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="apPrivilegeMasterList" nillable="true" type="ax24:ApPrivilegeMasterDto" />
+          <xs:element minOccurs="0" name="apRemarks" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="authDate" type="xs:long" />
+          <xs:element minOccurs="0" name="authMethod" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="authResultCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="authResultMessage" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="birthDay" type="xs:long" />
+          <xs:element minOccurs="0" name="buCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="bumonCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="bumonName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="companyCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="companyName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="companyName2" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="companyNameKana" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="companyNameKana2" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="expiredDays" nillable="true" type="xs:int" />
+          <xs:element minOccurs="0" name="expiredSign" nillable="true" type="xs:int" />
+          <xs:element minOccurs="0" name="idYukoEndDate" type="xs:long" />
+          <xs:element minOccurs="0" name="idYukoStartDate" type="xs:long" />
+          <xs:element minOccurs="0" name="ipAddress" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ipAddress1" nillable="true" type="xs:int" />
+          <xs:element minOccurs="0" name="ipAddress2" nillable="true" type="xs:int" />
+          <xs:element minOccurs="0" name="ipAddress3" nillable="true" type="xs:int" />
+          <xs:element minOccurs="0" name="ipAddress4" nillable="true" type="xs:int" />
+          <xs:element minOccurs="0" name="jiginouKubun" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="kikiKubunName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="kumiaiKubun" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="lineCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="lineName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="lineRyakugo" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="loginDate" type="xs:long" />
+          <xs:element minOccurs="0" name="mailAddress" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="nyuusyaDate" type="xs:long" />
+          <xs:element minOccurs="0" name="resultCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="resultMessage" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="sagyochoName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="seibetsu" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="syainID" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="syainKubun" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="syainNameKana" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="syainNameKanji" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="syokuchoName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="syozokuKubun" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="taisyaDate" type="xs:long" />
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="taskList" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="tekiyoFromDate" type="xs:long" />
+          <xs:element minOccurs="0" name="tekiyoToDate" type="xs:long" />
+          <xs:element minOccurs="0" name="termKaCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="termKaName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="termLineCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="termLineName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="termLineShortName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="terminalCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="terminalName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="tyokukanKubun" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="userId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="userName" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+    <xs:schema xmlns:ns="http://webmethod.svccom.tsukuba.kubota.co.jp" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://webmethod.svccom.tsukuba.kubota.co.jp">
+      <xs:complexType name="Exception">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Exception" nillable="true" type="xs:anyType" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="Exception">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="Exception" nillable="true" type="ns:Exception" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="changePassword">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="accessToken" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="userId" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="oldPassword" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="newPassword" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="uncryptedOption" type="xs:boolean" />
+            <xs:element minOccurs="0" name="clientIPAddress" nillable="true" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="changePasswordResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns0:WSChangePwdDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="authByActiveDirectory">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="logonConfirmKey" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="useGuestUserOption" type="xs:boolean" />
+            <xs:element minOccurs="0" name="clientIPAddress" nillable="true" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="authByActiveDirectoryResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns0:WSUserInfoDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="authByIDPassword">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="apName" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="userId" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="password" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="uncryptedOption" type="xs:boolean" />
+            <xs:element minOccurs="0" name="useGuestUserOption" type="xs:boolean" />
+            <xs:element minOccurs="0" name="clientIPAddress" nillable="true" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="authByIDPasswordResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns0:WSUserInfoDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="authGiaMigByIDPassword">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="apName" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="userId" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="password" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="uncryptedOption" type="xs:boolean" />
+            <xs:element minOccurs="0" name="useGuestUserOption" type="xs:boolean" />
+            <xs:element minOccurs="0" name="clientIPAddress" nillable="true" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="authGiaMigByIDPasswordResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns0:WSUserInfoDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="authGiaMigByIPAddress">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="apName" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="clientIPAddress" nillable="true" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="authGiaMigByIPAddressResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns0:WSUserInfoDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="authMigByIDPassword">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="apName" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="userId" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="password" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="uncryptedOption" type="xs:boolean" />
+            <xs:element minOccurs="0" name="useGuestUserOption" type="xs:boolean" />
+            <xs:element minOccurs="0" name="clientIPAddress" nillable="true" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="authMigByIDPasswordResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="return" nillable="true" type="ns0:WSUserInfoDto" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="logout">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="accessToken" nillable="true" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:schema>
+    <xs:schema xmlns:ax23="http://gia.dto.ibatis.ktutil4.tsukuba.kubota.co.jp/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://gia.dto.ibatis.ktutil4.tsukuba.kubota.co.jp/xsd">
+      <xs:complexType name="ApPrivilegeMasterDto">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="apAuth" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="apId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="index" type="xs:int" />
+          <xs:element minOccurs="0" name="taskId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="userId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="userInfo1" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="userInfo10" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="userInfo2" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="userInfo3" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="userInfo4" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="userInfo5" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="userInfo6" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="userInfo7" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="userInfo8" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="userInfo9" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+  </wsdl:types>
+  <wsdl:message name="authByActiveDirectoryRequest">
+    <wsdl:part name="parameters" element="ns1:authByActiveDirectory" />
+  </wsdl:message>
+  <wsdl:message name="authByActiveDirectoryResponse">
+    <wsdl:part name="parameters" element="ns1:authByActiveDirectoryResponse" />
+  </wsdl:message>
+  <wsdl:message name="Exception">
+    <wsdl:part name="parameters" element="ns1:Exception" />
+  </wsdl:message>
+  <wsdl:message name="logoutRequest">
+    <wsdl:part name="parameters" element="ns1:logout" />
+  </wsdl:message>
+  <wsdl:message name="authGiaMigByIDPasswordRequest">
+    <wsdl:part name="parameters" element="ns1:authGiaMigByIDPassword" />
+  </wsdl:message>
+  <wsdl:message name="authGiaMigByIDPasswordResponse">
+    <wsdl:part name="parameters" element="ns1:authGiaMigByIDPasswordResponse" />
+  </wsdl:message>
+  <wsdl:message name="authMigByIDPasswordRequest">
+    <wsdl:part name="parameters" element="ns1:authMigByIDPassword" />
+  </wsdl:message>
+  <wsdl:message name="authMigByIDPasswordResponse">
+    <wsdl:part name="parameters" element="ns1:authMigByIDPasswordResponse" />
+  </wsdl:message>
+  <wsdl:message name="authByIDPasswordRequest">
+    <wsdl:part name="parameters" element="ns1:authByIDPassword" />
+  </wsdl:message>
+  <wsdl:message name="authByIDPasswordResponse">
+    <wsdl:part name="parameters" element="ns1:authByIDPasswordResponse" />
+  </wsdl:message>
+  <wsdl:message name="changePasswordRequest">
+    <wsdl:part name="parameters" element="ns1:changePassword" />
+  </wsdl:message>
+  <wsdl:message name="changePasswordResponse">
+    <wsdl:part name="parameters" element="ns1:changePasswordResponse" />
+  </wsdl:message>
+  <wsdl:message name="authGiaMigByIPAddressRequest">
+    <wsdl:part name="parameters" element="ns1:authGiaMigByIPAddress" />
+  </wsdl:message>
+  <wsdl:message name="authGiaMigByIPAddressResponse">
+    <wsdl:part name="parameters" element="ns1:authGiaMigByIPAddressResponse" />
+  </wsdl:message>
+  <wsdl:portType name="ktauthLoginPortType">
+    <wsdl:operation name="authByActiveDirectory">
+      <wsdl:input wsaw:Action="urn:authByActiveDirectory" message="ns1:authByActiveDirectoryRequest" />
+      <wsdl:output wsaw:Action="urn:authByActiveDirectoryResponse" message="ns1:authByActiveDirectoryResponse" />
+      <wsdl:fault wsaw:Action="urn:authByActiveDirectoryException" name="Exception" message="ns1:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="logout">
+      <wsdl:input wsaw:Action="urn:logout" message="ns1:logoutRequest" />
+    </wsdl:operation>
+    <wsdl:operation name="authGiaMigByIDPassword">
+      <wsdl:input wsaw:Action="urn:authGiaMigByIDPassword" message="ns1:authGiaMigByIDPasswordRequest" />
+      <wsdl:output wsaw:Action="urn:authGiaMigByIDPasswordResponse" message="ns1:authGiaMigByIDPasswordResponse" />
+      <wsdl:fault wsaw:Action="urn:authGiaMigByIDPasswordException" name="Exception" message="ns1:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="authMigByIDPassword">
+      <wsdl:input wsaw:Action="urn:authMigByIDPassword" message="ns1:authMigByIDPasswordRequest" />
+      <wsdl:output wsaw:Action="urn:authMigByIDPasswordResponse" message="ns1:authMigByIDPasswordResponse" />
+      <wsdl:fault wsaw:Action="urn:authMigByIDPasswordException" name="Exception" message="ns1:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="authByIDPassword">
+      <wsdl:input wsaw:Action="urn:authByIDPassword" message="ns1:authByIDPasswordRequest" />
+      <wsdl:output wsaw:Action="urn:authByIDPasswordResponse" message="ns1:authByIDPasswordResponse" />
+      <wsdl:fault wsaw:Action="urn:authByIDPasswordException" name="Exception" message="ns1:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="changePassword">
+      <wsdl:input wsaw:Action="urn:changePassword" message="ns1:changePasswordRequest" />
+      <wsdl:output wsaw:Action="urn:changePasswordResponse" message="ns1:changePasswordResponse" />
+      <wsdl:fault wsaw:Action="urn:changePasswordException" name="Exception" message="ns1:Exception" />
+    </wsdl:operation>
+    <wsdl:operation name="authGiaMigByIPAddress">
+      <wsdl:input wsaw:Action="urn:authGiaMigByIPAddress" message="ns1:authGiaMigByIPAddressRequest" />
+      <wsdl:output wsaw:Action="urn:authGiaMigByIPAddressResponse" message="ns1:authGiaMigByIPAddressResponse" />
+      <wsdl:fault wsaw:Action="urn:authGiaMigByIPAddressException" name="Exception" message="ns1:Exception" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="ktauthLoginSOAP11Binding" type="ns1:ktauthLoginPortType">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="authByActiveDirectory">
+      <soap:operation soapAction="urn:authByActiveDirectory" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="logout">
+      <soap:operation soapAction="urn:logout" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+    </wsdl:operation>
+    <wsdl:operation name="authGiaMigByIDPassword">
+      <soap:operation soapAction="urn:authGiaMigByIDPassword" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="authMigByIDPassword">
+      <soap:operation soapAction="urn:authMigByIDPassword" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="authByIDPassword">
+      <soap:operation soapAction="urn:authByIDPassword" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="changePassword">
+      <soap:operation soapAction="urn:changePassword" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="authGiaMigByIPAddress">
+      <soap:operation soapAction="urn:authGiaMigByIPAddress" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="ktauthLoginSOAP12Binding" type="ns1:ktauthLoginPortType">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="authByActiveDirectory">
+      <soap12:operation soapAction="urn:authByActiveDirectory" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="logout">
+      <soap12:operation soapAction="urn:logout" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+    </wsdl:operation>
+    <wsdl:operation name="authGiaMigByIDPassword">
+      <soap12:operation soapAction="urn:authGiaMigByIDPassword" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="authMigByIDPassword">
+      <soap12:operation soapAction="urn:authMigByIDPassword" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="authByIDPassword">
+      <soap12:operation soapAction="urn:authByIDPassword" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="changePassword">
+      <soap12:operation soapAction="urn:changePassword" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="authGiaMigByIPAddress">
+      <soap12:operation soapAction="urn:authGiaMigByIPAddress" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="Exception">
+        <soap12:fault use="literal" name="Exception" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="ktauthLoginHttpBinding" type="ns1:ktauthLoginPortType">
+    <http:binding verb="POST" />
+    <wsdl:operation name="authByActiveDirectory">
+      <http:operation location="ktauthLogin/authByActiveDirectory" />
+      <wsdl:input>
+        <mime:content part="authByActiveDirectory" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="authByActiveDirectory" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="logout">
+      <http:operation location="ktauthLogin/logout" />
+      <wsdl:input>
+        <mime:content part="logout" type="text/xml" />
+      </wsdl:input>
+    </wsdl:operation>
+    <wsdl:operation name="authGiaMigByIDPassword">
+      <http:operation location="ktauthLogin/authGiaMigByIDPassword" />
+      <wsdl:input>
+        <mime:content part="authGiaMigByIDPassword" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="authGiaMigByIDPassword" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="authMigByIDPassword">
+      <http:operation location="ktauthLogin/authMigByIDPassword" />
+      <wsdl:input>
+        <mime:content part="authMigByIDPassword" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="authMigByIDPassword" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="authByIDPassword">
+      <http:operation location="ktauthLogin/authByIDPassword" />
+      <wsdl:input>
+        <mime:content part="authByIDPassword" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="authByIDPassword" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="changePassword">
+      <http:operation location="ktauthLogin/changePassword" />
+      <wsdl:input>
+        <mime:content part="changePassword" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="changePassword" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="authGiaMigByIPAddress">
+      <http:operation location="ktauthLogin/authGiaMigByIPAddress" />
+      <wsdl:input>
+        <mime:content part="authGiaMigByIPAddress" type="text/xml" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="authGiaMigByIPAddress" type="text/xml" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="ktauthLogin">
+    <wsdl:port name="ktauthLoginSOAP11port_http" binding="ns1:ktauthLoginSOAP11Binding">
+      <soap:address location="http://133.253.80.5:8080/KTService2/services/ktauthLogin" />
+    </wsdl:port>
+    <wsdl:port name="ktauthLoginSOAP12port_http" binding="ns1:ktauthLoginSOAP12Binding">
+      <soap12:address location="http://133.253.80.5:8080/KTService2/services/ktauthLogin" />
+    </wsdl:port>
+    <wsdl:port name="ktauthLoginHttpport" binding="ns1:ktauthLoginHttpBinding">
+      <http:address location="http://133.253.80.5:8080/KTService2/services/ktauthLogin" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

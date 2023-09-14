@@ -1,0 +1,1254 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="AiImageCheck"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<statements>
+		<!-- ************************************************************************************** -->
+		<!-- 不良タイプリスト検索処理                                                                           -->
+		<!-- ************************************************************************************** -->
+		<statement id="SelectNgTypeList">
+			SELECT PULLDOWN_ITEM_CD  AS VALUE ,
+			PULLDOWN_ITEM_NM AS TEXT
+			FROM TM_SQ_IMG_PULLDOWN_ITEM
+			WHERE PULLDOWN_TYPE  = #ngFlag#
+			ORDER BY PULLDOWN_ITEM_CD
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 是正タイプリスト検索処理                                                                           -->
+		<!-- ************************************************************************************** -->
+		<statement id="SelectCorrectiveTypeList">
+			SELECT PULLDOWN_ITEM_CD  AS VALUE ,
+			PULLDOWN_ITEM_NM || '|' || FREE_ITEM_01  AS TEXT
+			FROM TM_SQ_IMG_PULLDOWN_ITEM
+			WHERE PULLDOWN_TYPE  = #correctiveFlag#
+			ORDER BY PULLDOWN_ITEM_CD
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 是正結果リスト検索処理                                                                           -->
+		<!-- ************************************************************************************** -->
+		<statement id="SelectCorrectiveResultList">
+			SELECT PULLDOWN_ITEM_CD  AS VALUE ,
+			FREE_ITEM_01 AS TEXT
+			FROM TM_SQ_IMG_PULLDOWN_ITEM
+			WHERE PULLDOWN_TYPE  = #correctiveFlag#
+			ORDER BY PULLDOWN_ITEM_CD
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- ステーションリスト取得                                                                            -->
+		<!-- ************************************************************************************** -->
+		<statement id="SelectStationList">
+			SELECT DISTINCT STATION AS VALUE ,
+			STATION || ':' || STATION_NM AS TEXT
+			FROM TM_PC_IMAGE_ARCHIVE_MANAGE
+			ORDER BY STATION
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- ラインリスト取得                                                                            -->
+		<!-- ************************************************************************************** -->
+		<statement id="SelectLineList">
+			SELECT DISTINCT A.MS_LINE AS VALUE,
+			A.MS_LINE || ':' || B.LINE_NM AS TEXT
+			FROM MS_STATION A
+			LEFT JOIN (SELECT DISTINCT LINE_CD, LINE_NM FROM TM_CC_LINE) B
+			ON A.MS_LINE = B.LINE_CD
+			INNER JOIN
+			TM_PC_IMAGE_ARCHIVE_MANAGE C
+			ON A.MS_STATION = C.STATION
+			ORDER BY A.MS_LINE
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 入力STATIONに従ってラインリスト取得                                                                           -->
+		<!-- ************************************************************************************** -->
+		<statement id="SelectLineListByStation">
+			SELECT DISTINCT A.MS_LINE AS VALUE,
+			A.MS_LINE || ':' || B.LINE_NM AS TEXT
+			FROM MS_STATION A
+			LEFT JOIN (SELECT DISTINCT LINE_CD, LINE_NM FROM TM_CC_LINE) B
+			ON A.MS_LINE = B.LINE_CD
+			INNER JOIN
+			TM_PC_IMAGE_ARCHIVE_MANAGE C
+			ON A.MS_STATION = C.STATION
+			<dynamic prepend="WHERE">
+				<isNotEmpty property="station" prepend="AND">
+					TRIM(A.MS_STATION) = #station#
+				</isNotEmpty>
+			</dynamic>
+			ORDER BY A.MS_LINE
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 入力LINEに従ってステーションリスト取得                                                                           -->
+		<!-- ************************************************************************************** -->
+		<statement id="SelectStationListByLine">
+			SELECT DISTINCT A.STATION AS VALUE ,
+			A.STATION || ':' || A.STATION_NM AS TEXT
+			FROM TM_PC_IMAGE_ARCHIVE_MANAGE A
+			INNER JOIN MS_STATION B
+			ON A.STATION = B.MS_STATION
+			<dynamic prepend="WHERE">
+				<isNotEmpty property="linecd" prepend="AND">
+					TRIM(B.MS_LINE) = #linecd#
+				</isNotEmpty>
+			</dynamic>
+			ORDER BY A.STATION
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 入力LINEとSTATIONに従って設備リスト取得                                                                          -->
+		<!-- ************************************************************************************** -->
+		<statement id="SelectSetubiByLineStation">
+			SELECT
+			DISTINCT ST.MS_SETUBI   "Value",
+			ST.MS_SETUBI   "Text"
+			FROM
+			MS_SETUBI_TEIGI ST
+			INNER JOIN TM_PC_IMAGE_ARCHIVE_MANAGE AM
+			ON AM.STATION = ST.MS_STATION
+			<dynamic prepend="WHERE">
+				<isNotEmpty property="linecd" prepend="AND">
+					TRIM(ST.MS_LINE) = #linecd#
+				</isNotEmpty>
+				<isNotEmpty property="station" prepend="AND">
+					TRIM(ST.MS_STATION) = #station#
+				</isNotEmpty>
+			</dynamic>
+			ORDER BY ST.MS_SETUBI
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 是正処置入力製品検索画面検索取得                                                                       -->
+		<!-- ************************************************************************************** -->
+		<statement id="SelectSearchResultList">
+			SELECT TRIM(LINE_NM) "LineNm",
+			TRIM(STATION_NM) "StationNm",
+			TRIM(MODEL_CD) "ModelCd"            ,
+			TRIM(PRODUCT_MODEL_NM) "ModelNm"    ,
+			TRIM(SERIAL)  "Kiban"        ,
+			TRIM(IDNO) "Idno",
+			TRIM(MONTHLY_SEQUENCE_NUMBER) "MonthlySeqNum",
+			TRIM(RECORD_NO) "RecordNo" ,
+			CASE WHEN ANL_RESULT > 0 THEN  'NG' ELSE 'OK' END  "AnlReuslt",
+			ANL_DATE "AnlDate"
+			FROM (
+			SELECT A.LINE_CD||':'||B.LINE_NM                  AS LINE_NM ,
+			A.LINE_CD ,
+			A.STATION||':'||C.STATION_NM               AS STATION_NM ,
+			A.STATION,
+			A.MODEL_CD            ,
+			E.PRODUCT_MODEL_NM    ,
+			A.SERIAL          ,
+			A.IDNO,
+			A.MONTHLY_SEQUENCE_NUMBER,
+			A.RECORD_NO          ,
+			SUM(CASE WHEN A.ANL_RUSULT =   '2' THEN 1
+			WHEN A.ANL_RUSULT =   '1' THEN 0  ELSE 0 END) AS ANL_RESULT,
+			MAX(A.ANL_DATE) AS ANL_DATE
+			FROM TT_SQ_IMG_ANL_RESULT A
+			INNER JOIN (SELECT DISTINCT LINE_CD, LINE_NM FROM TM_CC_LINE) B
+			ON TRIM(A.LINE_CD) = TRIM(B.LINE_CD)
+			INNER JOIN TM_PC_IMAGE_ARCHIVE_MANAGE  C
+			ON TRIM(A.STATION) = TRIM(C.STATION)
+			INNER JOIN VM_CC_PRODUCT_MODEL E
+			ON TRIM(A.MODEL_CD) = TRIM(E.PRODUCT_MODEL_CD)
+			WHERE A.ANL_RUSULT <![CDATA[<>]]>  '0'
+			GROUP BY A.LINE_CD ,
+			B.LINE_NM,
+			A.STATION ,
+			C.STATION_NM,
+			A.MODEL_CD            ,
+			E.PRODUCT_MODEL_NM    ,
+			A.SERIAL          ,
+			A.IDNO,
+			A.MONTHLY_SEQUENCE_NUMBER,
+			A.RECORD_NO
+			)
+			<dynamic prepend="WHERE">
+				<isNotEmpty property="lineCd" prepend="AND">
+					TRIM(LINE_CD) = #lineCd#
+				</isNotEmpty>
+				<isNotEmpty property="station" prepend="AND">
+					TRIM(STATION) = #station#
+				</isNotEmpty>
+				<isNotEmpty property="modelCd" prepend="AND">
+					TRIM(MODEL_CD) like #modelCd#|| '%'
+				</isNotEmpty>
+				<isNotEmpty property="modelNm" prepend="AND">
+					TRIM(PRODUCT_MODEL_NM) like '%'　||#modelNm#|| '%'
+				</isNotEmpty>
+				<isNotEmpty property="idno" prepend="AND">
+					TRIM(IDNO) = #idno#
+				</isNotEmpty>
+				<isNotEmpty property="monthlySeqNum" prepend="AND">
+					TRIM(MONTHLY_SEQUENCE_NUMBER) = #monthlySeqNum#
+				</isNotEmpty>
+				<isNotEmpty property="kiban" prepend="AND">
+					TRIM(SERIAL) = #kiban#
+				</isNotEmpty>
+				<isNotEmpty property="anlResult" prepend="AND">
+					CASE WHEN ANL_RESULT > 0 THEN  'NG' ELSE 'OK' END = #anlResult#
+				</isNotEmpty>
+				<isNotEmpty property="cldStart" prepend="AND">
+					ANL_DATE <![CDATA[>=]]> to_date(#cldStart#)
+				</isNotEmpty>
+				<isNotEmpty property="cldEnd" prepend="AND">
+					ANL_DATE <![CDATA[<=]]> to_date(#cldEnd#)
+				</isNotEmpty>
+			</dynamic>
+			ORDER BY
+			LINE_NM, STATION_NM, MODEL_CD, PRODUCT_MODEL_NM, SERIAL, IDNO, MONTHLY_SEQUENCE_NUMBER, RECORD_NO, ANL_DATE
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 検査画像ファイルパス取得処理                                                                          -->
+		<!-- ************************************************************************************** -->
+		<statement id="SelectSearchImagePath">
+			SELECT PREVIEW_PATH "previewPath"
+			FROM TT_PC_IMAGE_STRAGE_BY_WORK
+			WHERE STATION  = #ddlStation#
+			AND IDNO = #txtIdno#
+			AND MONTHLY_SEQUENCE_NUMBER = #txtMonthlySeqNum#
+			AND RECORD_NO = #txtRecordNo#
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 更新画像解析結果                                                                         -->
+		<!-- ************************************************************************************** -->
+		<statement id="UpdateAnlResult">
+			UPDATE TT_SQ_IMG_ANL_RESULT
+			SET CORRECTIVE_RESULT = #correctiveResult#,
+			ANL_RUSULT = #anlResult#,
+			NG_TYPE_CD = #ngTypeCd#,
+			CORRECTIVE_TYPE_CD = #correctiveTypeCd#,
+			CORRECTIVE_COMMENT = #correctiveComment#,
+			UPDATE_BY = #updateBy#,
+			UPDATE_DT = SYSDATE,
+			UPDATE_PG = #updateSys#
+			WHERE LINE_CD  = #ddlLineCd#
+			AND STATION  = #ddlStation#
+			AND IDNO     = #txtIdno#
+			AND MONTHLY_SEQUENCE_NUMBER   = #txtMonthlySeqNum#
+			AND RECORD_NO     =  #txtRecordNo#
+			AND IMG_ANL_ITEM_CD =  #txtImgAnlItemCd#
+			AND REVISION_NO =  #txtRevisionNo#
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 検査結果検索処理                                                                          -->
+		<!-- ************************************************************************************** -->
+		<statement id="SelectSearchAnlResultList">
+			SELECT (CASE WHEN A.ANL_RUSULT =   '0' THEN  'スキップ'
+			WHEN A.ANL_RUSULT =   '1' THEN 'OK'
+			WHEN A.ANL_RUSULT =   '2' THEN 'NG' END)     "AnlResult",
+			C.DISPLAY_ORDER "DisplayOrder",
+			B.IMG_ANL_ITEM_NM "ImgAnlItemNm",
+			(CASE WHEN A.CORRECTIVE_RESULT =   '1' THEN 'OK'
+			WHEN A.CORRECTIVE_RESULT =   '2' THEN 'NG' ELSE '-' END)  "CorrectiveResult",
+			D.PULLDOWN_ITEM_NM    "NgTypeNm",
+			E.PULLDOWN_ITEM_NM    "CorrectiveTypeNm",
+			A.CORRECTIVE_COMMENT "CorrectiveComment",
+			CASE WHEN F.USER_NM IS NOT NULL THEN TO_NCHAR(F.USER_NM) ELSE A.UPDATE_BY END "UpdateBy",
+			A.IMG_ANL_ITEM_CD "ImgAnlItemCd",
+			A.REVISION_NO "RevisionNo",
+			A.NG_TYPE_CD "NgTypeCd",
+			A.CORRECTIVE_TYPE_CD "CorrectiveTypeCd"
+			FROM TT_SQ_IMG_ANL_RESULT A
+			INNER JOIN TM_SQ_IMG_ANL_ITEM B
+			ON A.IMG_ANL_ITEM_CD = B.IMG_ANL_ITEM_CD
+			AND A.REVISION_NO = B.REVISION_NO
+			AND A.line_cd = B.line_cd
+			AND A.station = B.station
+			INNER JOIN TM_SQ_IMG_ANL_ASY C
+			ON A.IMG_ANL_ITEM_CD = C.IMG_ANL_ITEM_CD
+			AND A.IMG_ANL_GROUP_CD = C.IMG_ANL_GROUP_CD
+			LEFT JOIN TM_SQ_IMG_PULLDOWN_ITEM D
+			ON A.NG_TYPE_CD = D.PULLDOWN_ITEM_CD
+			AND D.PULLDOWN_TYPE  = #ngFlag#
+			LEFT JOIN TM_SQ_IMG_PULLDOWN_ITEM E
+			ON A.CORRECTIVE_TYPE_CD =E.PULLDOWN_ITEM_CD
+			AND E.PULLDOWN_TYPE  = #correctiveFlag#
+			LEFT JOIN TM_CC_AUTH_USER F
+			ON A.UPDATE_BY = F.USER_ID
+			WHERE A.LINE_CD  = #ddlLineCd#
+			AND A.STATION  = #ddlStation#
+			AND A.IDNO     = #txtIdno#
+			AND A.MONTHLY_SEQUENCE_NUMBER   = #txtMonthlySeqNum#
+			AND A.RECORD_NO     =  #txtRecordNo#
+			ORDER BY A.ANL_RUSULT DESC,
+			C.DISPLAY_ORDER
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 利用ツールリスト検索処理                                                                           -->
+		<!-- ************************************************************************************** -->
+		<statement id="SelectUsingToolList">
+			SELECT PULLDOWN_ITEM_CD  AS VALUE ,
+			PULLDOWN_ITEM_NM || '|' || FREE_ITEM_01 || '|' || FREE_ITEM_02 || '|' | |FREE_ITEM_03  AS TEXT
+			FROM TM_SQ_IMG_PULLDOWN_ITEM
+			WHERE PULLDOWN_TYPE  = #pullldownType#
+			ORDER BY PULLDOWN_ITEM_CD
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 検査項目マスタ検索画面検索データ取得                                                                       -->
+		<!-- ************************************************************************************** -->
+		<statement id="SelectItemSearchList">
+			SELECT
+			TRIM(AI.IMG_ANL_ITEM_CD)   "ItemCd",
+			TRIM(AI.IMG_ANL_ITEM_NM)   "ItemNm",
+			TRIM(AI.LINE_CD)   "LineCode",
+			TRIM(CL.LINE_CD || ':' || CL.LINE_NM)   "LineNm",
+			TRIM(AI.STATION)   "StationCode",
+			TRIM(AM.STATION || ':' || AM.STATION_NM)   "StationNm",
+			TRIM(AI.REVISION_NO)   "RevisionNo",
+			TRIM(AI.USING_TOOL)   "UsingToolCd",
+			TRIM(PI.PULLDOWN_ITEM_NM)   "UsingTool",
+			TRIM(AI.USING_MODEL)   "UsingModel",
+			TRIM(AI.STREAM)   "Stream",
+			TRIM(AI.EXPECT_RESULT)   "ExpectResult"
+			FROM
+			TM_SQ_IMG_ANL_ITEM　AI
+			INNER JOIN TM_SQ_IMG_PULLDOWN_ITEM PI ON (PI.PULLDOWN_ITEM_CD = AI.USING_TOOL AND PI.PULLDOWN_TYPE = #pulldownType#)
+			INNER JOIN (SELECT DISTINCT LINE_CD, LINE_NM FROM TM_CC_LINE) CL ON (AI.LINE_CD = CL.LINE_CD)
+			INNER JOIN TM_PC_IMAGE_ARCHIVE_MANAGE AM ON (AM.STATION = AI.STATION)
+
+			<dynamic prepend="WHERE">
+				<isNotEmpty property="lineCd" prepend="AND">
+					TRIM(AI.LINE_CD) = #lineCd#
+				</isNotEmpty>
+				<isNotEmpty property="station" prepend="AND">
+					TRIM(AI.STATION) = #station#
+				</isNotEmpty>
+				<isNotEmpty property="itemCd" prepend="AND">
+					TRIM(AI.IMG_ANL_ITEM_CD) LIKE '%' || #itemCd#
+				</isNotEmpty>
+				<isNotEmpty property="itemNm" prepend="AND">
+					TRIM(AI.IMG_ANL_ITEM_NM) LIKE '%' || #itemNm# || '%'
+				</isNotEmpty>
+				<isNotEmpty property="usingTool" prepend="AND">
+					TRIM(AI.USING_TOOL) = #usingTool#
+				</isNotEmpty>
+				AND NOT EXISTS(
+				SELECT 1
+				FROM
+				TM_SQ_IMG_ANL_ITEM SUB
+				WHERE
+				AI.IMG_ANL_ITEM_CD = SUB.IMG_ANL_ITEM_CD
+				AND AI.REVISION_NO <![CDATA[<]]> SUB.REVISION_NO)
+			</dynamic>
+			ORDER BY
+			"ItemCd"
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 検査項目マスタ登録                                                                     -->
+		<!-- ************************************************************************************** -->
+		<statement id="InsertAnlItemData">
+			INSERT INTO TM_SQ_IMG_ANL_ITEM (
+			IMG_ANL_ITEM_CD,
+			REVISION_NO,
+			IMG_ANL_ITEM_NM,
+			USING_TOOL,
+			USING_MODEL,
+			LINE_CD,
+			CREATE_DT,
+			CREATE_BY,
+			CREATE_PG,
+			UPDATE_DT,
+			UPDATE_BY,
+			UPDATE_PG,
+			STREAM,
+			EXPECT_RESULT,
+			STATION
+			) VALUES (
+			#txtItemCd#   ,
+			#txtRevisionNo#   ,
+			#txtItemNm#   ,
+			#ddlUsingTool#   ,
+			#txtUsingModel#   ,
+			#ddlLineCd#   ,
+			SYSDATE   ,
+			#updateBy#   ,
+			#updatePg#   ,
+			SYSDATE   ,
+			#updateBy#   ,
+			#updatePg#   ,
+			#txtStream#   ,
+			#txtExpectResult#   ,
+			#ddlStation#
+			)
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 検査項目マスタ採番処理                                                                           -->
+		<!-- ************************************************************************************** -->
+		<statement id="SelectNextItemCode">
+			SELECT SEQ_SQ_ANL_ITEMCODE.NEXTVAL FROM DUAL
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- グループマスタ採番処理                                                                           -->
+		<!-- ************************************************************************************** -->
+		<statement id="SelectNextGroupCode">
+			SELECT SEQ_SQ_ANL_GROUPCODE.NEXTVAL FROM DUAL
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 画像解析グループ検索処理                                                                           -->
+		<!-- ************************************************************************************** -->
+		<statement id="SelectGroupList">
+			SELECT
+			CL.LINE_CD || ':' || CL.LINE_NM   "LineNm",
+			AM.STATION || ':' || AM.STATION_NM   "StationNm",
+			ST.MS_SETUBI   "Setubi",
+			AG.IMG_ANL_GROUP_CD   "GroupCd",
+			AG.IMG_ANL_GROUP_NM   "GroupNm",
+			AG.LINE_CD   "LineCd",
+			AG.MS_STATION   "StationCd",
+			ST.MS_SETUBI_MEI   "SetubiNm",
+			ST.MS_KOMOKU_1   "Title1",
+			ST.MS_YUKO_1   "Enable1",
+			ST.MS_KOMOKU_2   "Title2",
+			ST.MS_YUKO_2   "Enable2",
+			ST.MS_KOMOKU_3   "Title3",
+			ST.MS_YUKO_3   "Enable3",
+			ST.MS_KOMOKU_4   "Title4",
+			ST.MS_YUKO_4   "Enable4",
+			ST.MS_KOMOKU_5   "Title5",
+			ST.MS_YUKO_5   "Enable5",
+			ST.MS_KOMOKU_6   "Title6",
+			ST.MS_YUKO_6   "Enable6",
+			ST.MS_KOMOKU_7   "Title7",
+			ST.MS_YUKO_7   "Enable7",
+			ST.MS_KOMOKU_8   "Title8",
+			ST.MS_YUKO_8   "Enable8",
+			ST.MS_KOMOKU_9   "Title9",
+			ST.MS_YUKO_9   "Enable9",
+			ST.MS_KOMOKU_10   "Title10",
+			ST.MS_YUKO_10   "Enable10",
+			ST.MS_KOMOKU_11   "Title11",
+			ST.MS_YUKO_11   "Enable11",
+			ST.MS_KOMOKU_12   "Title12",
+			ST.MS_YUKO_12   "Enable12",
+			ST.MS_KOMOKU_13   "Title13",
+			ST.MS_YUKO_13   "Enable13",
+			ST.MS_KOMOKU_14   "Title14",
+			ST.MS_YUKO_14   "Enable14",
+			ST.MS_KOMOKU_15   "Title15",
+			ST.MS_YUKO_15   "Enable15",
+			ST.MS_KOMOKU_16   "Title16",
+			ST.MS_YUKO_16   "Enable16",
+			ST.MS_KOMOKU_17   "Title17",
+			ST.MS_YUKO_17   "Enable17",
+			ST.MS_KOMOKU_18   "Title18",
+			ST.MS_YUKO_18   "Enable18",
+			ST.MS_KOMOKU_19   "Title19",
+			ST.MS_YUKO_19   "Enable19",
+			ST.MS_KOMOKU_20   "Title20",
+			ST.MS_YUKO_20   "Enable20",
+			ST.MS_KOMOKU_21   "Title21",
+			ST.MS_YUKO_21   "Enable21",
+			ST.MS_KOMOKU_22   "Title22",
+			ST.MS_YUKO_22   "Enable22",
+			ST.MS_KOMOKU_23   "Title23",
+			ST.MS_YUKO_23   "Enable23",
+			ST.MS_KOMOKU_24   "Title24",
+			ST.MS_YUKO_24   "Enable24",
+			ST.MS_KOMOKU_25   "Title25",
+			ST.MS_YUKO_25   "Enable25",
+			ST.MS_KOMOKU_26   "Title26",
+			ST.MS_YUKO_26   "Enable26",
+			ST.MS_KOMOKU_27   "Title27",
+			ST.MS_YUKO_27   "Enable27",
+			ST.MS_KOMOKU_28   "Title28",
+			ST.MS_YUKO_28   "Enable28",
+			ST.MS_KOMOKU_29   "Title29",
+			ST.MS_YUKO_29   "Enable29",
+			AG.MS_JYOHO_1   "Jyoho1",
+			AG.MS_JYOHO_2   "Jyoho2",
+			AG.MS_JYOHO_3   "Jyoho3",
+			AG.MS_JYOHO_4   "Jyoho4",
+			AG.MS_JYOHO_5   "Jyoho5",
+			AG.MS_JYOHO_6   "Jyoho6",
+			AG.MS_JYOHO_7   "Jyoho7",
+			AG.MS_JYOHO_8   "Jyoho8",
+			AG.MS_JYOHO_9   "Jyoho9",
+			AG.MS_JYOHO_10   "Jyoho10",
+			AG.MS_JYOHO_11   "Jyoho11",
+			AG.MS_JYOHO_12   "Jyoho12",
+			AG.MS_JYOHO_13   "Jyoho13",
+			AG.MS_JYOHO_14   "Jyoho14",
+			AG.MS_JYOHO_15   "Jyoho15",
+			AG.MS_JYOHO_16   "Jyoho16",
+			AG.MS_JYOHO_17   "Jyoho17",
+			AG.MS_JYOHO_18   "Jyoho18",
+			AG.MS_JYOHO_19   "Jyoho19",
+			AG.MS_JYOHO_20   "Jyoho20",
+			AG.MS_JYOHO_21  "Jyoho21",
+			AG.MS_JYOHO_22  "Jyoho22",
+			AG.MS_JYOHO_23  "Jyoho23",
+			AG.MS_JYOHO_24   "Jyoho24",
+			AG.MS_JYOHO_25   "Jyoho25",
+			AG.MS_JYOHO_26  "Jyoho26",
+			AG.MS_JYOHO_27  "Jyoho27",
+			AG.MS_JYOHO_28  "Jyoho28",
+			AG.MS_JYOHO_29  "Jyoho29"
+			FROM
+			TM_SQ_IMG_ANL_GROUP　AG
+			INNER JOIN MS_SETUBI_TEIGI ST
+			ON AG.MS_SETUBI = ST.MS_SETUBI
+			INNER JOIN (SELECT DISTINCT LINE_CD, LINE_NM FROM TM_CC_LINE) CL
+			ON  AG.LINE_CD = CL.LINE_CD
+			INNER JOIN TM_PC_IMAGE_ARCHIVE_MANAGE AM
+			ON AM.STATION = AG.MS_STATION
+			<dynamic prepend="WHERE">
+				<isNotEmpty property="station" prepend="AND">
+					TRIM(AG.MS_STATION) = #station#
+				</isNotEmpty>
+				<isNotEmpty property="lineCd" prepend="AND">
+					TRIM(AG.LINE_CD) = #lineCd#
+				</isNotEmpty>
+				<isNotEmpty property="setubi" prepend="AND">
+					TRIM(AG.MS_SETUBI) = #setubi#
+				</isNotEmpty>
+				<isNotEmpty property="imgAnlGroupCd" prepend="AND">
+					TRIM(AG.IMG_ANL_GROUP_CD) like '%'　||#imgAnlGroupCd#
+				</isNotEmpty>
+				<isNotEmpty property="imgAnlGroupNm" prepend="AND">
+					TRIM(AG.IMG_ANL_GROUP_NM) like '%'　||#imgAnlGroupNm#|| '%'
+				</isNotEmpty>
+			</dynamic>
+			ORDER BY
+			AG.IMG_ANL_GROUP_CD
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 画像解析グループ入力検索処理                                                                           -->
+		<!-- ************************************************************************************** -->
+		<statement id="SelectGroupInputList">
+			SELECT
+			TEI.MS_KOMOKU_1 KOMOKU_1
+			, DECODE(TEI.MS_YUKO_1, 1, '有効', 2, '無効') YUKO_1
+			, DECODE(TEI.MS_SYUBETU_1, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_1
+			, TEI.MS_MEASURE_1 MEASURE_1
+			, TEI.MS_ZENKETA_1 ZENKETA_1
+			, TEI.MS_SYOSU_1 SYOSU_1
+			, DECODE(TEI.MS_HISSU_1, 1, '必須') HISSU_1
+			, TEI.MS_KAGEN_1 KAGEN_1
+			, TEI.MS_JYOGEN_1 JYOGEN_1
+			, AG.MS_JYOHO_1
+			, TEI.MS_KOMOKU_2 KOMOKU_2
+			, DECODE(TEI.MS_YUKO_2, 1, '有効', 2, '無効') YUKO_2
+			, DECODE(TEI.MS_SYUBETU_2, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_2
+			, TEI.MS_MEASURE_2 MEASURE_2
+			, TEI.MS_ZENKETA_2 ZENKETA_2
+			, TEI.MS_SYOSU_2 SYOSU_2
+			, DECODE(TEI.MS_HISSU_2, 1, '必須') HISSU_2
+			, TEI.MS_KAGEN_2 KAGEN_2
+			, TEI.MS_JYOGEN_2 JYOGEN_2
+			, AG.MS_JYOHO_2
+			, TEI.MS_KOMOKU_3 KOMOKU_3
+			, DECODE(TEI.MS_YUKO_3, 1, '有効', 2, '無効') YUKO_3
+			, DECODE(TEI.MS_SYUBETU_3, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_3
+			, TEI.MS_MEASURE_3 MEASURE_3
+			, TEI.MS_ZENKETA_3 ZENKETA_3
+			, TEI.MS_SYOSU_3 SYOSU_3
+			, DECODE(TEI.MS_HISSU_3, 1, '必須') HISSU_3
+			, TEI.MS_KAGEN_3 KAGEN_3
+			, TEI.MS_JYOGEN_3 JYOGEN_3
+			, AG.MS_JYOHO_3
+			, TEI.MS_KOMOKU_4 KOMOKU_4
+			, DECODE(TEI.MS_YUKO_4, 1, '有効', 2, '無効') YUKO_4
+			, DECODE(TEI.MS_SYUBETU_4, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_4
+			, TEI.MS_MEASURE_4 MEASURE_4
+			, TEI.MS_ZENKETA_4 ZENKETA_4
+			, TEI.MS_SYOSU_4 SYOSU_4
+			, DECODE(TEI.MS_HISSU_4, 1, '必須') HISSU_4
+			, TEI.MS_KAGEN_4 KAGEN_4
+			, TEI.MS_JYOGEN_4 JYOGEN_4
+			, AG.MS_JYOHO_4
+			, TEI.MS_KOMOKU_5 KOMOKU_5
+			, DECODE(TEI.MS_YUKO_5, 1, '有効', 2, '無効') YUKO_5
+			, DECODE(TEI.MS_SYUBETU_5, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_5
+			, TEI.MS_MEASURE_5 MEASURE_5
+			, TEI.MS_ZENKETA_5 ZENKETA_5
+			, TEI.MS_SYOSU_5 SYOSU_5
+			, DECODE(TEI.MS_HISSU_5, 1, '必須') HISSU_5
+			, TEI.MS_KAGEN_5 KAGEN_5
+			, TEI.MS_JYOGEN_5 JYOGEN_5
+			, AG.MS_JYOHO_5
+			, TEI.MS_KOMOKU_6 KOMOKU_6
+			, DECODE(TEI.MS_YUKO_6, 1, '有効', 2, '無効') YUKO_6
+			, DECODE(TEI.MS_SYUBETU_6, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_6
+			, TEI.MS_MEASURE_6 MEASURE_6
+			, TEI.MS_ZENKETA_6 ZENKETA_6
+			, TEI.MS_SYOSU_6 SYOSU_6
+			, DECODE(TEI.MS_HISSU_6, 1, '必須') HISSU_6
+			, TEI.MS_KAGEN_6 KAGEN_6
+			, TEI.MS_JYOGEN_6 JYOGEN_6
+			, AG.MS_JYOHO_6   ,TEI.MS_KOMOKU_7 KOMOKU_7
+			, DECODE(TEI.MS_YUKO_7, 1, '有効', 2, '無効') YUKO_7
+			, DECODE(TEI.MS_SYUBETU_7, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_7
+			, TEI.MS_MEASURE_7 MEASURE_7
+			, TEI.MS_ZENKETA_7 ZENKETA_7
+			, TEI.MS_SYOSU_7 SYOSU_7
+			, DECODE(TEI.MS_HISSU_7, 1, '必須') HISSU_7
+			, TEI.MS_KAGEN_7 KAGEN_7
+			, TEI.MS_JYOGEN_7 JYOGEN_7
+			, AG.MS_JYOHO_7   ,TEI.MS_KOMOKU_8 KOMOKU_8
+			, DECODE(TEI.MS_YUKO_8, 1, '有効', 2, '無効') YUKO_8
+			, DECODE(TEI.MS_SYUBETU_8, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_8
+			, TEI.MS_MEASURE_8 MEASURE_8
+			, TEI.MS_ZENKETA_8 ZENKETA_8
+			, TEI.MS_SYOSU_8 SYOSU_8
+			, DECODE(TEI.MS_HISSU_8, 1, '必須') HISSU_8
+			, TEI.MS_KAGEN_8 KAGEN_8
+			, TEI.MS_JYOGEN_8 JYOGEN_8
+			, AG.MS_JYOHO_8   ,TEI.MS_KOMOKU_9 KOMOKU_9
+			, DECODE(TEI.MS_YUKO_9, 1, '有効', 2, '無効') YUKO_9
+			, DECODE(TEI.MS_SYUBETU_9, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_9
+			, TEI.MS_MEASURE_9 MEASURE_9
+			, TEI.MS_ZENKETA_9 ZENKETA_9
+			, TEI.MS_SYOSU_9 SYOSU_9
+			, DECODE(TEI.MS_HISSU_9, 1, '必須') HISSU_9
+			, TEI.MS_KAGEN_9 KAGEN_9
+			, TEI.MS_JYOGEN_9 JYOGEN_9
+			, AG.MS_JYOHO_9   ,TEI.MS_KOMOKU_10 KOMOKU_10
+			, DECODE(TEI.MS_YUKO_10, 1, '有効', 2, '無効') YUKO_10
+			, DECODE(TEI.MS_SYUBETU_10, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_10
+			, TEI.MS_MEASURE_10 MEASURE_10
+			, TEI.MS_ZENKETA_10 ZENKETA_10
+			, TEI.MS_SYOSU_10 SYOSU_10
+			, DECODE(TEI.MS_HISSU_10, 1, '必須') HISSU_10
+			, TEI.MS_KAGEN_10 KAGEN_10
+			, TEI.MS_JYOGEN_10 JYOGEN_10
+			, AG.MS_JYOHO_10   ,TEI.MS_KOMOKU_11 KOMOKU_11
+			, DECODE(TEI.MS_YUKO_11, 1, '有効', 2, '無効') YUKO_11
+			, DECODE(TEI.MS_SYUBETU_11, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_11
+			,TEI.MS_MEASURE_11 MEASURE_11
+			, TEI.MS_ZENKETA_11 ZENKETA_11
+			, TEI.MS_SYOSU_11 SYOSU_11
+			, DECODE(TEI.MS_HISSU_11, 1, '必須') HISSU_11
+			, TEI.MS_KAGEN_11 KAGEN_11
+			, TEI.MS_JYOGEN_11 JYOGEN_11
+			, AG.MS_JYOHO_11   ,TEI.MS_KOMOKU_12 KOMOKU_12
+			, DECODE(TEI.MS_YUKO_12, 1, '有効', 2, '無効') YUKO_12
+			, DECODE(TEI.MS_SYUBETU_12, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_12
+			, TEI.MS_MEASURE_12 MEASURE_12
+			, TEI.MS_ZENKETA_12 ZENKETA_12
+			, TEI.MS_SYOSU_12 SYOSU_12
+			, DECODE(TEI.MS_HISSU_12, 1, '必須') HISSU_12
+			, TEI.MS_KAGEN_12 KAGEN_12
+			, TEI.MS_JYOGEN_12 JYOGEN_12
+			, AG.MS_JYOHO_12   ,TEI.MS_KOMOKU_13 KOMOKU_13
+			, DECODE(TEI.MS_YUKO_13, 1, '有効', 2, '無効') YUKO_13
+			, DECODE(TEI.MS_SYUBETU_13, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_13
+			, TEI.MS_MEASURE_13 MEASURE_13
+			, TEI.MS_ZENKETA_13 ZENKETA_13
+			, TEI.MS_SYOSU_13 SYOSU_13
+			, DECODE(TEI.MS_HISSU_13, 1, '必須') HISSU_13
+			, TEI.MS_KAGEN_13 KAGEN_13
+			, TEI.MS_JYOGEN_13 JYOGEN_13
+			, AG.MS_JYOHO_13   ,TEI.MS_KOMOKU_14 KOMOKU_14
+			, DECODE(TEI.MS_YUKO_14, 1, '有効', 2, '無効') YUKO_14
+			, DECODE(TEI.MS_SYUBETU_14, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_14
+			, TEI.MS_MEASURE_14 MEASURE_14
+			, TEI.MS_ZENKETA_14 ZENKETA_14
+			, TEI.MS_SYOSU_14 SYOSU_14
+			, DECODE(TEI.MS_HISSU_14, 1, '必須') HISSU_14
+			, TEI.MS_KAGEN_14 KAGEN_14
+			, TEI.MS_JYOGEN_14 JYOGEN_14
+			, AG.MS_JYOHO_14   ,TEI.MS_KOMOKU_15 KOMOKU_15
+			, DECODE(TEI.MS_YUKO_15, 1, '有効', 2, '無効') YUKO_15
+			, DECODE(TEI.MS_SYUBETU_15, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_15
+			, TEI.MS_MEASURE_15 MEASURE_15
+			, TEI.MS_ZENKETA_15 ZENKETA_15
+			, TEI.MS_SYOSU_15 SYOSU_15
+			, DECODE(TEI.MS_HISSU_15, 1, '必須') HISSU_15
+			, TEI.MS_KAGEN_15 KAGEN_15
+			, TEI.MS_JYOGEN_15 JYOGEN_15
+			, AG.MS_JYOHO_15   ,TEI.MS_KOMOKU_16 KOMOKU_16
+			, DECODE(TEI.MS_YUKO_16, 1, '有効', 2, '無効') YUKO_16
+			, DECODE(TEI.MS_SYUBETU_16, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_16
+			, TEI.MS_MEASURE_16 MEASURE_16
+			, TEI.MS_ZENKETA_16 ZENKETA_16
+			, TEI.MS_SYOSU_16 SYOSU_16
+			, DECODE(TEI.MS_HISSU_16, 1, '必須') HISSU_16
+			, TEI.MS_KAGEN_16 KAGEN_16
+			, TEI.MS_JYOGEN_16 JYOGEN_16
+			, AG.MS_JYOHO_16   ,TEI.MS_KOMOKU_17 KOMOKU_17
+			, DECODE(TEI.MS_YUKO_17, 1, '有効', 2, '無効') YUKO_17
+			, DECODE(TEI.MS_SYUBETU_17, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_17
+			, TEI.MS_MEASURE_17 MEASURE_17
+			, TEI.MS_ZENKETA_17 ZENKETA_17
+			, TEI.MS_SYOSU_17 SYOSU_17
+			, DECODE(TEI.MS_HISSU_17, 1, '必須') HISSU_17
+			, TEI.MS_KAGEN_17 KAGEN_17
+			, TEI.MS_JYOGEN_17 JYOGEN_17
+			, AG.MS_JYOHO_17   ,TEI.MS_KOMOKU_18 KOMOKU_18
+			, DECODE(TEI.MS_YUKO_18, 1, '有効', 2, '無効') YUKO_18
+			, DECODE(TEI.MS_SYUBETU_18, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_18
+			, TEI.MS_MEASURE_18 MEASURE_18
+			, TEI.MS_ZENKETA_18 ZENKETA_18
+			, TEI.MS_SYOSU_18 SYOSU_18
+			, DECODE(TEI.MS_HISSU_18, 1, '必須') HISSU_18
+			, TEI.MS_KAGEN_18 KAGEN_18
+			, TEI.MS_JYOGEN_18 JYOGEN_18
+			, AG.MS_JYOHO_18   ,TEI.MS_KOMOKU_19 KOMOKU_19
+			, DECODE(TEI.MS_YUKO_19, 1, '有効', 2, '無効') YUKO_19
+			, DECODE(TEI.MS_SYUBETU_19, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_19
+			, TEI.MS_MEASURE_19 MEASURE_19
+			, TEI.MS_ZENKETA_19 ZENKETA_19
+			, TEI.MS_SYOSU_19 SYOSU_19
+			, DECODE(TEI.MS_HISSU_19, 1, '必須') HISSU_19
+			, TEI.MS_KAGEN_19 KAGEN_19
+			, TEI.MS_JYOGEN_19 JYOGEN_19
+			, AG.MS_JYOHO_19   ,TEI.MS_KOMOKU_20 KOMOKU_20
+			, DECODE(TEI.MS_YUKO_20, 1, '有効', 2, '無効') YUKO_20
+			, DECODE(TEI.MS_SYUBETU_20, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_20
+			, TEI.MS_MEASURE_20 MEASURE_20
+			, TEI.MS_ZENKETA_20 ZENKETA_20
+			, TEI.MS_SYOSU_20 SYOSU_20
+			, DECODE(TEI.MS_HISSU_20, 1, '必須') HISSU_20
+			, TEI.MS_KAGEN_20 KAGEN_20
+			, TEI.MS_JYOGEN_20 JYOGEN_20
+			, AG.MS_JYOHO_20   ,TEI.MS_KOMOKU_21 KOMOKU_21
+			, DECODE(TEI.MS_YUKO_21, 1, '有効', 2, '無効') YUKO_21
+			, DECODE(TEI.MS_SYUBETU_21, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_21
+			, TEI.MS_MEASURE_21 MEASURE_21
+			, TEI.MS_ZENKETA_21 ZENKETA_21
+			, TEI.MS_SYOSU_21 SYOSU_21
+			, DECODE(TEI.MS_HISSU_21, 1, '必須') HISSU_21
+			, TEI.MS_KAGEN_21 KAGEN_21
+			, TEI.MS_JYOGEN_21 JYOGEN_21
+			, AG.MS_JYOHO_21   ,TEI.MS_KOMOKU_22 KOMOKU_22
+			, DECODE(TEI.MS_YUKO_22, 1, '有効', 2, '無効') YUKO_22
+			, DECODE(TEI.MS_SYUBETU_22, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_22
+			, TEI.MS_MEASURE_22 MEASURE_22
+			, TEI.MS_ZENKETA_22 ZENKETA_22
+			, TEI.MS_SYOSU_22 SYOSU_22
+			, DECODE(TEI.MS_HISSU_22, 1, '必須') HISSU_22
+			, TEI.MS_KAGEN_22 KAGEN_22
+			, TEI.MS_JYOGEN_22 JYOGEN_22
+			, AG.MS_JYOHO_22   ,TEI.MS_KOMOKU_23 KOMOKU_23
+			, DECODE(TEI.MS_YUKO_23, 1, '有効', 2, '無効') YUKO_23
+			, DECODE(TEI.MS_SYUBETU_23, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_23
+			, TEI.MS_MEASURE_23 MEASURE_23
+			, TEI.MS_ZENKETA_23 ZENKETA_23
+			, TEI.MS_SYOSU_23 SYOSU_23
+			, DECODE(TEI.MS_HISSU_23, 1, '必須') HISSU_23
+			, TEI.MS_KAGEN_23 KAGEN_23
+			, TEI.MS_JYOGEN_23 JYOGEN_23
+			, AG.MS_JYOHO_23   ,TEI.MS_KOMOKU_24 KOMOKU_24
+			, DECODE(TEI.MS_YUKO_24, 1, '有効', 2, '無効') YUKO_24
+			, DECODE(TEI.MS_SYUBETU_24, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_24
+			, TEI.MS_MEASURE_24 MEASURE_24
+			, TEI.MS_ZENKETA_24 ZENKETA_24
+			, TEI.MS_SYOSU_24 SYOSU_24
+			, DECODE(TEI.MS_HISSU_24, 1, '必須') HISSU_24
+			, TEI.MS_KAGEN_24 KAGEN_24
+			, TEI.MS_JYOGEN_24 JYOGEN_24
+			, AG.MS_JYOHO_24   ,TEI.MS_KOMOKU_25 KOMOKU_25
+			, DECODE(TEI.MS_YUKO_25, 1, '有効', 2, '無効') YUKO_25
+			, DECODE(TEI.MS_SYUBETU_25, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_25
+			, TEI.MS_MEASURE_25 MEASURE_25
+			, TEI.MS_ZENKETA_25 ZENKETA_25
+			, TEI.MS_SYOSU_25 SYOSU_25
+			, DECODE(TEI.MS_HISSU_25, 1, '必須') HISSU_25
+			, TEI.MS_KAGEN_25 KAGEN_25
+			, TEI.MS_JYOGEN_25 JYOGEN_25
+			, AG.MS_JYOHO_25   ,TEI.MS_KOMOKU_26 KOMOKU_26
+			, DECODE(TEI.MS_YUKO_26, 1, '有効', 2, '無効') YUKO_26
+			, DECODE(TEI.MS_SYUBETU_26, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_26
+			, TEI.MS_MEASURE_26 MEASURE_26
+			, TEI.MS_ZENKETA_26 ZENKETA_26
+			, TEI.MS_SYOSU_26 SYOSU_26
+			, DECODE(TEI.MS_HISSU_26, 1, '必須') HISSU_26
+			, TEI.MS_KAGEN_26 KAGEN_26
+			, TEI.MS_JYOGEN_26 JYOGEN_26
+			, AG.MS_JYOHO_26   ,TEI.MS_KOMOKU_27 KOMOKU_27
+			, DECODE(TEI.MS_YUKO_27, 1, '有効', 2, '無効') YUKO_27
+			, DECODE(TEI.MS_SYUBETU_27, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_27
+			, TEI.MS_MEASURE_27 MEASURE_27
+			, TEI.MS_ZENKETA_27 ZENKETA_27
+			, TEI.MS_SYOSU_27 SYOSU_27
+			, DECODE(TEI.MS_HISSU_27, 1, '必須') HISSU_27
+			, TEI.MS_KAGEN_27 KAGEN_27
+			, TEI.MS_JYOGEN_27 JYOGEN_27
+			, AG.MS_JYOHO_27   ,TEI.MS_KOMOKU_28 KOMOKU_28
+			, DECODE(TEI.MS_YUKO_28, 1, '有効', 2, '無効') YUKO_28
+			, DECODE(TEI.MS_SYUBETU_28, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_28
+			, TEI.MS_MEASURE_28 MEASURE_28
+			, TEI.MS_ZENKETA_28 ZENKETA_28
+			, TEI.MS_SYOSU_28 SYOSU_28
+			, DECODE(TEI.MS_HISSU_28, 1, '必須') HISSU_28
+			, TEI.MS_KAGEN_28 KAGEN_28
+			, TEI.MS_JYOGEN_28 JYOGEN_28
+			, AG.MS_JYOHO_28   ,TEI.MS_KOMOKU_29 KOMOKU_29
+			, DECODE(TEI.MS_YUKO_29, 1, '有効', 2, '無効') YUKO_29
+			, DECODE(TEI.MS_SYUBETU_29, 1, '英数字', 2, '数値', 3, '漢字') SHUBETU_29
+			, TEI.MS_MEASURE_29 MEASURE_29
+			, TEI.MS_ZENKETA_29 ZENKETA_29
+			, TEI.MS_SYOSU_29 SYOSU_29
+			, DECODE(TEI.MS_HISSU_29, 1, '必須') HISSU_29
+			, TEI.MS_KAGEN_29 KAGEN_29
+			, TEI.MS_JYOGEN_29 JYOGEN_29
+			, AG.MS_JYOHO_29
+			FROM MS_SETUBI_TEIGI TEI
+			LEFT JOIN  TM_SQ_IMG_ANL_GROUP AG
+			ON TEI.MS_LINE = AG.LINE_CD
+			AND TEI.MS_STATION = AG.MS_STATION
+			AND TEI.MS_SETUBI = AG.MS_SETUBI
+			<isNotEmpty property="imgAnlGroupCd" prepend="AND">
+				TRIM(AG.IMG_ANL_GROUP_CD) = #imgAnlGroupCd#
+			</isNotEmpty>
+			<dynamic prepend="WHERE">
+				<isNotEmpty property="lineCd" prepend="AND">
+					TRIM(TEI.MS_LINE) = #lineCd#
+				</isNotEmpty>
+				<isNotEmpty property="station" prepend="AND">
+					TRIM(TEI.MS_STATION) = #station#
+				</isNotEmpty>
+				<isNotEmpty property="setubi" prepend="AND">
+					TRIM(TEI.MS_SETUBI) = #setubi#
+				</isNotEmpty>
+			</dynamic>
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 画像解析グループ入力結果更新                                                                   -->
+		<!-- ************************************************************************************** -->
+		<statement id="UpdateGroupInput">
+			UPDATE TM_SQ_IMG_ANL_GROUP
+			SET
+			IMG_ANL_GROUP_NM           =  #txtGroupNm#
+			, MS_JYOHO_1                 =  #txtJyoho1#
+			, MS_JYOHO_2                 =  #txtJyoho2#
+			, MS_JYOHO_3                 =  #txtJyoho3#
+			, MS_JYOHO_4                 =  #txtJyoho4#
+			, MS_JYOHO_5                 =  #txtJyoho5#
+			, MS_JYOHO_6                 =  #txtJyoho6#
+			, MS_JYOHO_7                 =  #txtJyoho7#
+			, MS_JYOHO_8                 =  #txtJyoho8#
+			, MS_JYOHO_9                 =  #txtJyoho9#
+			, MS_JYOHO_10                =  #txtJyoho10#
+			, MS_JYOHO_11                =  #txtJyoho11#
+			, MS_JYOHO_12                =  #txtJyoho12#
+			, MS_JYOHO_13                =  #txtJyoho13#
+			, MS_JYOHO_14                =  #txtJyoho14#
+			, MS_JYOHO_15                =  #txtJyoho15#
+			, MS_JYOHO_16                =  #txtJyoho16#
+			, MS_JYOHO_17                =  #txtJyoho17#
+			, MS_JYOHO_18                =  #txtJyoho18#
+			, MS_JYOHO_19                =  #txtJyoho19#
+			, MS_JYOHO_20                =  #txtJyoho20#
+			, MS_JYOHO_21                =  #txtJyoho21#
+			, MS_JYOHO_22                =  #txtJyoho22#
+			, MS_JYOHO_23                =  #txtJyoho23#
+			, MS_JYOHO_24                =  #txtJyoho24#
+			, MS_JYOHO_25                =  #txtJyoho25#
+			, MS_JYOHO_26                =  #txtJyoho26#
+			, MS_JYOHO_27                =  #txtJyoho27#
+			, MS_JYOHO_28                =  #txtJyoho28#
+			, MS_JYOHO_29                =  #txtJyoho29#
+			, UPDATE_BY                  =  #updateBy#
+			, UPDATE_DT                  =  SYSDATE
+			, UPDATE_PG                  =  #updatePg#
+			WHERE IMG_ANL_GROUP_CD =  #txtGroupCd#
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 画像解析グループ入力結果登録                                                                   -->
+		<!-- ************************************************************************************** -->
+		<statement id="InsertGroupInput">
+			INSERT INTO TM_SQ_IMG_ANL_GROUP (
+			IMG_ANL_GROUP_CD
+			, IMG_ANL_GROUP_NM
+			, LINE_CD
+			, MS_STATION
+			, MS_SETUBI
+			, MS_JYOHO_1
+			,MS_JYOHO_2
+			,MS_JYOHO_3
+			,MS_JYOHO_4
+			,MS_JYOHO_5
+			,MS_JYOHO_6
+			,MS_JYOHO_7
+			,MS_JYOHO_8
+			,MS_JYOHO_9
+			,MS_JYOHO_10
+			,MS_JYOHO_11
+			,MS_JYOHO_12
+			,MS_JYOHO_13
+			,MS_JYOHO_14
+			,MS_JYOHO_15
+			,MS_JYOHO_16
+			,MS_JYOHO_17
+			,MS_JYOHO_18
+			,MS_JYOHO_19
+			,MS_JYOHO_20
+			,MS_JYOHO_21
+			,MS_JYOHO_22
+			,MS_JYOHO_23
+			,MS_JYOHO_24
+			,MS_JYOHO_25
+			,MS_JYOHO_26
+			,MS_JYOHO_27
+			,MS_JYOHO_28
+			,MS_JYOHO_29
+			,MS_JYOHO_30
+			,CREATE_BY
+			,CREATE_DT
+			,CREATE_PG
+			,UPDATE_BY
+			,UPDATE_DT
+			,UPDATE_PG )
+			VALUES(
+			#txtGroupCd#
+			,#txtGroupNm#
+			,#txtLineCd#
+			,#txtStationCd#
+			,#txtSetubi#
+			,#txtJyoho1#
+			,#txtJyoho2#
+			,#txtJyoho3#
+			,#txtJyoho4#
+			,#txtJyoho5#
+			,#txtJyoho6#
+			,#txtJyoho7#
+			,#txtJyoho8#
+			,#txtJyoho9#
+			,#txtJyoho10#
+			,#txtJyoho11#
+			,#txtJyoho12#
+			,#txtJyoho13#
+			,#txtJyoho14#
+			,#txtJyoho15#
+			,#txtJyoho16#
+			,#txtJyoho17#
+			,#txtJyoho18#
+			,#txtJyoho19#
+			,#txtJyoho20#
+			,#txtJyoho21#
+			,#txtJyoho22#
+			,#txtJyoho23#
+			,#txtJyoho24#
+			,#txtJyoho25#
+			,#txtJyoho26#
+			,#txtJyoho27#
+			,#txtJyoho28#
+			,#txtJyoho29#
+			,#txtGroupCd#
+			,#updateBy#
+			,SYSDATE
+			,#updatePg#
+			,#updateBy#
+			,SYSDATE
+			,#updatePg#    )
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 型式紐づけ一覧検索処理                                                                           -->
+		<!-- ************************************************************************************** -->
+		<statement id="SelectSetubiJyohoList">
+			SELECT
+			SJ.MS_B_KATA_C   "ModelCd",
+			PM.PRODUCT_MODEL_NM   "ModelNm",
+			SJ.MS_B_KUNI_C   "CountryCd",
+			SJ.MS_LINE "LineCd",
+			SJ.MS_STATION "StationCd",
+			'false' "check"
+			FROM
+			MS_SETUBI_JYOHO SJ
+			INNER JOIN VM_CC_PRODUCT_MODEL PM ON (TRIM(SJ.MS_B_KATA_C) = TRIM(PM.PRODUCT_MODEL_CD))
+			WHERE
+			TRIM(SJ.MS_JYOHO_30) = #imgAnlGroupCd#  AND
+			TRIM(SJ.MS_LINE) = #lineCd#  AND
+			TRIM(SJ.MS_STATION) = #station# AND
+			TRIM(SJ.MS_SETUBI) = #setubi#
+			ORDER BY
+			SJ.MS_B_KATA_C
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 型式一覧検索処理                                                                           -->
+		<!-- ************************************************************************************** -->
+		<statement id="SelectModelList">
+			SELECT
+			PM.PRODUCT_MODEL_CD   "ModelCode",
+			PM.PRODUCT_MODEL_NM   "ModelName",
+			MC.COUNTRY_CD   "CountryCode",
+			AG.IMG_ANL_GROUP_CD   "GroupCode",
+			AG.IMG_ANL_GROUP_NM   "GroupName"
+			FROM
+			VM_CC_PRODUCT_MODEL PM
+			INNER JOIN TM_CC_MODEL_COUNTRY MC ON (MC.MODEL_CD = PM.PRODUCT_MODEL_CD)
+			LEFT JOIN MS_SETUBI_JYOHO SJ ON (SJ.MS_B_KATA_C = PM.PRODUCT_MODEL_CD AND SJ.MS_B_KUNI_C = MC.COUNTRY_CD AND SJ.MS_STATION = #txtStation#
+			)
+			LEFT JOIN TM_SQ_IMG_ANL_GROUP AG ON (AG.IMG_ANL_GROUP_CD = SJ.MS_JYOHO_30)
+			<dynamic prepend="WHERE">
+				<isNotEmpty property="txtGroupCd" prepend="AND">
+					AG.IMG_ANL_GROUP_CD LIKE '%' || #txtGroupCd#
+				</isNotEmpty>
+				<isNotEmpty property="txtGroupNm" prepend="AND">
+					AG.IMG_ANL_GROUP_NM LIKE '%' || #txtGroupNm# || '%'
+				</isNotEmpty>
+				<isNotEmpty property="txtModelCd" prepend="AND">
+					PM.PRODUCT_MODEL_CD LIKE  #txtModelCd# || '%'
+				</isNotEmpty>
+				<isNotEmpty property="txtModelNm" prepend="AND">
+					PM.PRODUCT_MODEL_NM LIKE '%' || #txtModelNm# || '%'
+				</isNotEmpty>
+				<isNotEmpty property="check" prepend="AND">
+					SJ.MS_B_KATA_C IS NULL
+				</isNotEmpty>
+				<isNotEmpty property="txtGroupCdNotExists" prepend="AND">
+					(AG.IMG_ANL_GROUP_CD <![CDATA[<>]]>  #txtGroupCdNotExists#  OR AG.IMG_ANL_GROUP_CD IS NULL)
+				</isNotEmpty>
+			</dynamic>
+			ORDER BY
+			"ModelCode"
+
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- MS_SETUBI_JYOHO更新処理                                                                           -->
+		<!-- ************************************************************************************** -->
+		<statement id="UpdateSetubiJyoho">
+			UPDATE MS_SETUBI_JYOHO SET
+			(MS_JYOHO_1,MS_JYOHO_2,MS_JYOHO_3,MS_JYOHO_4,MS_JYOHO_5,MS_JYOHO_6,MS_JYOHO_7,MS_JYOHO_8,MS_JYOHO_9,MS_JYOHO_10,
+			MS_JYOHO_11,MS_JYOHO_12,MS_JYOHO_13,MS_JYOHO_14,MS_JYOHO_15,MS_JYOHO_16,MS_JYOHO_17,MS_JYOHO_18,MS_JYOHO_19,MS_JYOHO_20,
+			MS_JYOHO_21,MS_JYOHO_22,MS_JYOHO_23,MS_JYOHO_24,MS_JYOHO_25,MS_JYOHO_26,MS_JYOHO_27,MS_JYOHO_28,MS_JYOHO_29,MS_JYOHO_30,MS_UPD_YMD) =
+			(SELECT MS_JYOHO_1,MS_JYOHO_2,MS_JYOHO_3,MS_JYOHO_4,MS_JYOHO_5,MS_JYOHO_6,MS_JYOHO_7,MS_JYOHO_8,MS_JYOHO_9,MS_JYOHO_10,
+			MS_JYOHO_11,MS_JYOHO_12,MS_JYOHO_13,MS_JYOHO_14,MS_JYOHO_15,MS_JYOHO_16,MS_JYOHO_17,MS_JYOHO_18,MS_JYOHO_19,MS_JYOHO_20,
+			MS_JYOHO_21,MS_JYOHO_22,MS_JYOHO_23,MS_JYOHO_24,MS_JYOHO_25,MS_JYOHO_26,MS_JYOHO_27,MS_JYOHO_28,MS_JYOHO_29,MS_JYOHO_30,SYSDATE FROM TM_SQ_IMG_ANL_GROUP
+			WHERE IMG_ANL_GROUP_CD = #paramGroupCd#)
+			WHERE MS_B_KATA_C = #paramModelCd# AND
+			MS_B_KUNI_C = #paramCountryCd# AND
+			MS_SETUBI = #paramSetubi#
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- MS_SETUBI_JYOHO追加処理                                                                           -->
+		<!-- ************************************************************************************** -->
+		<statement id="InsertSetubiJyoho">
+			INSERT INTO  MS_SETUBI_JYOHO (MS_B_KATA_C,MS_B_KUNI_C,MS_SETUBI,MS_LINE,MS_STATION,
+			MS_JYOHO_1,MS_JYOHO_2,MS_JYOHO_3,MS_JYOHO_4,MS_JYOHO_5,MS_JYOHO_6,MS_JYOHO_7,MS_JYOHO_8,MS_JYOHO_9,MS_JYOHO_10,
+			MS_JYOHO_11,MS_JYOHO_12,MS_JYOHO_13,MS_JYOHO_14,MS_JYOHO_15,MS_JYOHO_16,MS_JYOHO_17,MS_JYOHO_18,MS_JYOHO_19,MS_JYOHO_20,
+			MS_JYOHO_21,MS_JYOHO_22,MS_JYOHO_23,MS_JYOHO_24,MS_JYOHO_25,MS_JYOHO_26,MS_JYOHO_27,MS_JYOHO_28,MS_JYOHO_29,MS_JYOHO_30,MS_USER,MS_INS_YMD,MS_UPD_YMD)
+			SELECT  #paramModelCd#,#paramCountryCd#, #paramSetubi#,LINE_CD,MS_STATION,
+			MS_JYOHO_1,MS_JYOHO_2,MS_JYOHO_3,MS_JYOHO_4,MS_JYOHO_5,MS_JYOHO_6,MS_JYOHO_7,MS_JYOHO_8,MS_JYOHO_9,MS_JYOHO_10,
+			MS_JYOHO_11,MS_JYOHO_12,MS_JYOHO_13,MS_JYOHO_14,MS_JYOHO_15,MS_JYOHO_16,MS_JYOHO_17,MS_JYOHO_18,MS_JYOHO_19,MS_JYOHO_20,
+			MS_JYOHO_21,MS_JYOHO_22,MS_JYOHO_23,MS_JYOHO_24,MS_JYOHO_25,MS_JYOHO_26,MS_JYOHO_27,MS_JYOHO_28,MS_JYOHO_29,MS_JYOHO_30,#paramupdBy#,SYSDATE,SYSDATE FROM TM_SQ_IMG_ANL_GROUP
+			WHERE IMG_ANL_GROUP_CD = #paramGroupCd#
+
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- MS_SETUBI_JYOHO削除処理                                                                           -->
+		<!-- ************************************************************************************** -->
+		<statement id="DeleteSetubiJyoho">
+			DELETE FROM MS_SETUBI_JYOHO WHERE MS_B_KATA_C = #paramModelCd# AND
+			MS_B_KUNI_C = #paramCountryCd# AND
+			MS_SETUBI = #paramSetubi#
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 画像解析項目構成一覧検索処理                                                                          -->
+		<!-- ************************************************************************************** -->
+		<statement id="SelectGroupAsyList">
+			SELECT IAA.IMG_ANL_GROUP_CD   "GroupCd",
+			IAA.IMG_ANL_ITEM_CD    "ItemCd",
+			AI.IMG_ANL_ITEM_NM     "ItemNm",
+			IAA.INDEX_NO           "IndexNo",
+			PI.FREE_ITEM_04        "IndexNoEnable",
+			IAA.COORDINATION_FLG   "CFlag",
+			PI.FREE_ITEM_05        "CFlagEnable",
+			IAA.SUPPLEMENTARY_INFO_FLG   "SFlag",
+			PI.FREE_ITEM_06   "SFlagEnable",
+			IAA.DISPLAY_ORDER "DisplayOrder",
+			'false' "check"
+			FROM TM_SQ_IMG_ANL_ASY IAA
+			INNER JOIN TM_SQ_IMG_ANL_ITEM AI
+			ON IAA.IMG_ANL_ITEM_CD = AI.IMG_ANL_ITEM_CD
+			INNER JOIN TM_SQ_IMG_PULLDOWN_ITEM PI
+			ON PI.PULLDOWN_ITEM_CD = AI.USING_TOOL
+			AND PI.PULLDOWN_TYPE = #pulldownType#
+			WHERE IAA.DELETE_FLG = '0'
+			AND NOT EXISTS(
+			SELECT 1
+			FROM
+			TM_SQ_IMG_ANL_ITEM SUB
+			WHERE
+			AI.IMG_ANL_ITEM_CD = SUB.IMG_ANL_ITEM_CD
+			AND AI.REVISION_NO <![CDATA[<]]> SUB.REVISION_NO )
+			AND IAA.IMG_ANL_GROUP_CD = #txtGroupCd#
+			ORDER BY IAA.DISPLAY_ORDER
+		</statement>
+
+
+		<!-- ************************************************************************************** -->
+		<!-- 画像解析構成管理マスタ削除処理1                                                                           -->
+		<!-- ************************************************************************************** -->
+		<statement id="DeleteGroupAsyJyoho1">
+			UPDATE TM_SQ_IMG_ANL_ASY
+			SET DELETE_FLG = '1',
+			UPDATE_DT = SYSDATE,
+			UPDATE_BY = #paramUpdateBy#,
+			UPDATE_PG = #paramUpdatePg#
+			WHERE IMG_ANL_GROUP_CD = #paramGroupCd#
+			AND IMG_ANL_ITEM_CD = #paramItemCd#
+			AND DELETE_FLG = '0'
+		</statement>
+		
+		<!-- ************************************************************************************** -->
+		<!-- 画像解析構成管理マスタ削除処理2                                                                           -->
+		<!-- ************************************************************************************** -->
+		<statement id="DeleteGroupAsyJyoho2">
+			UPDATE TM_SQ_IMG_ANL_ASY
+			SET DISPLAY_ORDER = DISPLAY_ORDER - 1,
+			UPDATE_DT = SYSDATE,
+			UPDATE_BY = #paramUpdateBy#,
+			UPDATE_PG = #paramUpdatePg#
+			WHERE IMG_ANL_GROUP_CD = #paramGroupCd#
+			AND DISPLAY_ORDER <![CDATA[>]]> (SELECT DISPLAY_ORDER FROM TM_SQ_IMG_ANL_ASY TEMP WHERE TEMP.IMG_ANL_GROUP_CD = #paramGroupCd# AND IMG_ANL_ITEM_CD = #paramItemCd# )
+			AND DELETE_FLG = '0'
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 画像解析構成管理マスタ更新処理                                                                         -->
+		<!-- ************************************************************************************** -->
+		<statement id="UpdateGroupAsyJyoho">
+			UPDATE TM_SQ_IMG_ANL_ASY
+			SET DISPLAY_ORDER = #paramDisplayOrder#,
+			INDEX_NO = #paramIndexNo#,
+			SUPPLEMENTARY_INFO_FLG = #paramSflag# ,
+			COORDINATION_FLG = #paramCflag# ,
+			UPDATE_DT = SYSDATE,
+			UPDATE_BY = #paramUpdateBy#,
+			UPDATE_PG = #paramUpdatePg#
+			WHERE IMG_ANL_GROUP_CD = #paramGroupCd#
+			AND IMG_ANL_ITEM_CD = #paramItemCd#
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 画像解析項目構成検索処理                                                                         -->
+		<!-- ************************************************************************************** -->
+		<statement id="SelectGroupAsyJyoho">
+			SELECT
+			AI.IMG_ANL_ITEM_CD   "ItemCd",
+			AI.IMG_ANL_ITEM_NM   "ItemNm"	,
+			''                   "IndexNo",
+			'0'                  "SFlag",
+			'0'                  "CFlag",
+			PI.FREE_ITEM_04      "IndexNoEnable",
+			PI.FREE_ITEM_05      "CFlagEnable",
+			PI.FREE_ITEM_06      "SFlagEnable",
+			PI.PULLDOWN_ITEM_NM  "UsingTool",
+			'false' "check"
+			FROM
+			TM_SQ_IMG_ANL_ITEM AI
+			INNER JOIN (
+			SELECT IMG_ANL_ITEM_CD ,
+			MAX(REVISION_NO)  REVISION_NO
+			FROM TM_SQ_IMG_ANL_ITEM
+			GROUP BY IMG_ANL_ITEM_CD  )  AAI
+			ON AI.IMG_ANL_ITEM_CD = AAI.IMG_ANL_ITEM_CD
+			AND AI.REVISION_NO = AAI.REVISION_NO
+			INNER JOIN TM_SQ_IMG_PULLDOWN_ITEM PI
+			ON PI.PULLDOWN_ITEM_CD = AI.USING_TOOL
+			AND PI.PULLDOWN_TYPE = #pulldownType#
+			WHERE NOT EXISTS(
+			SELECT 1
+			FROM
+			TM_SQ_IMG_ANL_ASY SUB2
+			WHERE
+			AI.IMG_ANL_ITEM_CD = SUB2.IMG_ANL_ITEM_CD
+			AND SUB2.IMG_ANL_GROUP_CD =  #txtGroupCd#
+			AND SUB2.DELETE_FLG = '0')
+			AND AI.LINE_CD = #txtLineCd#
+			AND AI.STATION = #txtStationCd#
+			<isNotEmpty property="txtItemCd" prepend="AND">
+					AI.IMG_ANL_ITEM_CD = #txtItemCd#
+				</isNotEmpty>
+				<isNotEmpty property="txtItemNm" prepend="AND">
+					AI.IMG_ANL_ITEM_NM   like '%'　||#txtItemNm#|| '%'
+				</isNotEmpty>
+				<isNotEmpty property="txtUsingTool" prepend="AND">
+					PI.PULLDOWN_ITEM_CD = #txtUsingTool#
+				</isNotEmpty>
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 画像解析構成管理マスタ追加1                                                                           -->
+		<!-- ************************************************************************************** -->
+		<statement id="InsertGroupAsyJyoho1">
+			UPDATE TM_SQ_IMG_ANL_ASY
+			SET DISPLAY_ORDER = (SELECT NVL(MAX(DISPLAY_ORDER),0) + 1 FROM TM_SQ_IMG_ANL_ASY WHERE IMG_ANL_GROUP_CD = #paramGroupCd# AND DELETE_FLG = '0'  ) ,
+			COORDINATION_FLG = #paramCflag#,
+			SUPPLEMENTARY_INFO_FLG = #paramSflag#,
+			INDEX_NO = #paramIndexNo#,
+			DELETE_FLG = '0',
+			UPDATE_DT = SYSDATE,
+			UPDATE_BY = #paramUpdateBy#,
+			UPDATE_PG = #paramUpdatePg#
+			WHERE IMG_ANL_GROUP_CD = #paramGroupCd#
+			AND IMG_ANL_ITEM_CD = #paramItemCd#
+		</statement>
+
+		<!-- ************************************************************************************** -->
+		<!-- 画像解析構成管理マスタ追加2                                                                           -->
+		<!-- ************************************************************************************** -->
+		<statement id="InsertGroupAsyJyoho2">
+			INSERT INTO TM_SQ_IMG_ANL_ASY
+			(   IMG_ANL_GROUP_CD
+			,IMG_ANL_ITEM_CD
+			,DISPLAY_ORDER
+			,CREATE_DT
+			,CREATE_BY
+			,CREATE_PG
+			,UPDATE_DT
+			,UPDATE_BY
+			,UPDATE_PG
+			,COORDINATION_FLG
+			,INDEX_NO
+			,SUPPLEMENTARY_INFO_FLG
+			,DELETE_FLG )
+			SELECT  #paramGroupCd#
+			,#paramItemCd#
+			,NVL(MAX(DISPLAY_ORDER),0) + 1
+			,SYSDATE
+			,#paramUpdateBy#
+			,#paramUpdatePg#
+			,SYSDATE
+			,#paramUpdateBy#
+			,#paramUpdatePg#
+			,#paramCflag#
+			,#paramIndexNo#
+			,#paramSflag#
+			,'0'
+			FROM TM_SQ_IMG_ANL_ASY
+			WHERE IMG_ANL_GROUP_CD = #paramGroupCd#
+			AND DELETE_FLG = '0'
+		</statement>
+		
+		<!-- ************************************************************************************** -->
+		<!-- UsingToolリスト取得                                                                           -->
+		<!-- ************************************************************************************** -->
+		<statement id="SelectAnlUsingToolList">
+			SELECT PULLDOWN_ITEM_CD AS VALUE,
+			PULLDOWN_ITEM_NM AS TEXT
+			FROM TM_SQ_IMG_PULLDOWN_ITEM
+			WHERE PULLDOWN_TYPE = '3'
+			<isNotEmpty property="usingToolCd" prepend="AND">
+				PULLDOWN_ITEM_CD = #usingToolCd#
+			</isNotEmpty>
+			ORDER BY PULLDOWN_ITEM_CD
+		</statement>
+		
+	</statements>
+</sqlMap>

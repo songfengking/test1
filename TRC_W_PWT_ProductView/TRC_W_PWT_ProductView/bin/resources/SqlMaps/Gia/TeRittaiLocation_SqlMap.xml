@@ -1,0 +1,494 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="TeRittaiLocation"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+
+    <sql id="tmpRittaiLocation">
+      TMP_立体倉庫ロケーションM AS (
+      SELECT
+      DECODE(LM.STOCK_KBN,'1',1,'2',1,'3',3,'4',2,'5',2) 立体倉庫,
+      LM.STOCK_KBN 号機,
+      LM.STOCK_REN 連,
+      LM.STOCK_DAN 段,
+      LM.STOCK_RETU 列,
+      LM.STOP_FLAG 禁止棚フラグ,
+      LM.LOC_FLAG ロケーションフラグ,
+      DECODE(LM.LOC_FLAG,0,'',LM.PRO_CODE) 型式コード,
+      DECODE(LM.LOC_FLAG,0,'',LM.COUNTRY) 国コード,
+      DECODE(LM.LOC_FLAG,0,'',PROD.PRODUCT_MODEL_NM) 型式名,
+      DECODE(LM.LOC_FLAG,0,'',TRIM(PROD.ASSEMBLY_PATTERN_CD || PROD.ASSEMBLY_PATTERN_SUB_CD)) パターンコード,
+      DECODE(LM.LOC_FLAG,0,'',DECODE(TRIM(PROD.ASSEMBLY_PATTERN_CD),'15',1,'19',1,'14',2,'18',2,0)) エンジン種別,
+      DECODE(LM.LOC_FLAG,0,'',DECODE(TRIM(PROD.ASSEMBLY_PATTERN_CD),'14',1,'15',1,'18',2,'19',2,0)) 搭載OEM,
+      DECODE(LM.LOC_FLAG,0,'',DECODE(SUBSTR(PKG_COM_E7.Get_Plant_Code(LM.PRO_CODE, LM.ENG_SNO)||LM.ENG_SNO,1,1),'2',1,0)) 内外作,
+      DECODE(LM.LOC_FLAG,0,'',LM.ID_NO) IDNO,
+      DECODE(LM.LOC_FLAG,0,'',SUBSTR(PKG_COM_E7.Get_Plant_Code(LM.PRO_CODE, LM.ENG_SNO)||LM.ENG_SNO,1,7)) 機番,
+      DECODE(LM.LOC_FLAG,0,'',DECODE(LM.GP,'ZZ',0,1)) 運転フラグ,
+      CASE WHEN LM.LOC_FLAG = 0 THEN null ELSE LM.INSTOCK_YMD END 入庫日時
+      FROM
+      TBL_TE立体倉庫ロケーションM LM
+      LEFT JOIN VM_CC_PRODUCT_MODEL PROD ON (LM.PRO_CODE = PROD.PRODUCT_MODEL_CD)
+      UNION ALL
+      SELECT
+      4 立体倉庫,
+      LM.STOCK_KBN 号機,
+      LM.STOCK_REN 連,
+      LM.STOCK_DAN 段,
+      LM.STOCK_RETU 列,
+      LM.STOP_FLAG 禁止棚フラグ,
+      LM.LOC_FLAG ロケーションフラグ,
+      DECODE(LM.LOC_FLAG,0,'',4,'',LM.PRO_CODE) 型式コード,
+      DECODE(LM.LOC_FLAG,0,'',4,'',LM.COUNTRY) 国コード,
+      DECODE(LM.LOC_FLAG,0,'',4,'',PROD.PRODUCT_MODEL_NM) 型式名,
+      DECODE(LM.LOC_FLAG,0,'',4,'',TRIM(PROD.ASSEMBLY_PATTERN_CD || PROD.ASSEMBLY_PATTERN_SUB_CD)) パターンコード,
+      DECODE(LM.LOC_FLAG,0,'',DECODE(TRIM(PROD.ASSEMBLY_PATTERN_CD),'15',1,'19',1,'14',2,'18',2,0)) エンジン種別,
+      DECODE(LM.LOC_FLAG,0,'',DECODE(TRIM(PROD.ASSEMBLY_PATTERN_CD),'14',1,'15',1,'18',2,'19',2,0)) 搭載OEM,
+      DECODE(LM.LOC_FLAG,0,'',4,'',DECODE(SUBSTR(PKG_COM_E7.Get_Plant_Code(LM.PRO_CODE, LM.ENG_SNO)||LM.ENG_SNO,1,1),'2',1,0)) 内外作,
+      DECODE(LM.LOC_FLAG,0,'',4,'',LM.ID_NO) IDNO,
+      DECODE(LM.LOC_FLAG,0,'',4,'',SUBSTR(PKG_COM_E7.Get_Plant_Code(LM.PRO_CODE, LM.ENG_SNO)||LM.ENG_SNO,1,7)) 機番,
+      DECODE(LM.LOC_FLAG,0,'',4,'',DECODE(LM.GP,'ZZ',0,1)) 運転フラグ,
+      CASE WHEN LM.LOC_FLAG = 0 THEN null ELSE LM.INSTOCK_YMD END 入庫日時
+      FROM
+      TBL_AP立体倉庫ロケーションM LM
+      LEFT JOIN VM_CC_PRODUCT_MODEL PROD ON (LM.PRO_CODE = PROD.PRODUCT_MODEL_CD)
+      ),
+      TMP_立体倉庫ロケーションM2 AS (
+      SELECT
+      立体倉庫,
+      号機,
+      連,
+      段,
+      列,
+      禁止棚フラグ,
+      ロケーションフラグ,
+      型式コード,
+      国コード,
+      型式名,
+      パターンコード,
+      エンジン種別,
+      搭載OEM,
+      内外作,
+      IDNO,
+      機番,
+      NVL(SG.MS_TOKKIJIKOU,SK.MS_TOKKIJIKOU) 特記事項,
+      運転フラグ,
+      入庫日時
+      FROM
+      TMP_立体倉庫ロケーションM
+      LEFT JOIN MS_SAGYO SG ON (SG.MS_IDNO = IDNO)
+      LEFT JOIN MS_SAGYO_KEEP SK ON (SK.MS_IDNO = IDNO)
+      )
+    </sql>
+
+    <sql id="whereForRittaiLocationSearch">
+      <isNotEmpty property="rittaiNum" prepend="AND">
+        立体倉庫 = #rittaiNum#
+      </isNotEmpty>
+      <isNotEmpty property="stopFlag" prepend="AND">
+        禁止棚フラグ = #stopFlag#
+      </isNotEmpty>
+      <isNotEmpty property="locationFlag" prepend="AND">
+        <isEqual property="locationFlag" compareValue="99">
+          ロケーションフラグ IN (1,2,3)
+        </isEqual>
+        <isNotEqual property="locationFlag" compareValue="99">
+          ロケーションフラグ = #locationFlag#
+        </isNotEqual>
+      </isNotEmpty>
+      <isNotEmpty property="engineSyubetsu" prepend="AND">
+        エンジン種別 = #engineSyubetsu#
+      </isNotEmpty>
+      <isNotEmpty property="tousaiOem" prepend="AND">
+        搭載OEM = #tousaiOem#
+      </isNotEmpty>
+      <isNotEmpty property="naigaisaku" prepend="AND">
+        内外作 = #naigaisaku#
+      </isNotEmpty>
+      <isNotEmpty property="untenFlag" prepend="AND">
+        運転フラグ = #untenFlag#
+      </isNotEmpty>
+      <isNotEmpty property="idno" prepend="AND">
+        IDNO = #idno#
+      </isNotEmpty>
+      <isNotEmpty property="kiban" prepend="AND">
+        機番 LIKE '%$kiban$%'
+      </isNotEmpty>
+      <isNotEmpty property="tokki" prepend="AND">
+        特記事項 LIKE '%$tokki$%'
+      </isNotEmpty>
+      <isNotEmpty property="katashikiCode" prepend="AND">
+        型式コード LIKE #katashikiCode# || '%'
+      </isNotEmpty>
+      <isNotEmpty property="katashikiName" prepend="AND">
+        型式名 LIKE #katashikiName# || '%'
+      </isNotEmpty>
+    </sql>
+
+    <statement id="SelectRittaiZaiko">
+      WITH
+      <include refid="tmpRittaiLocation" />
+      SELECT
+      立体倉庫,
+      COUNT(*) 台数
+      FROM
+      TMP_立体倉庫ロケーションM2
+      WHERE
+      ロケーションフラグ = 1 AND
+      運転フラグ = 1
+      GROUP BY
+      立体倉庫
+      ORDER BY
+      立体倉庫
+    </statement>
+    
+    <statement id="SelectSeisanSyubetsuZaiko">
+      WITH
+      <include refid="tmpRittaiLocation" />
+      SELECT
+      DECODE(内外作,1,5,DECODE(搭載OEM,1,DECODE(エンジン種別,1,1,2),DECODE(エンジン種別,1,3,4))) エンジン生産種別,
+      COUNT(*) 台数
+      FROM
+      TMP_立体倉庫ロケーションM2
+      WHERE
+      立体倉庫 != 4 AND
+      ロケーションフラグ = 1 AND
+      運転フラグ = 1
+      GROUP BY
+      エンジン種別,
+      搭載OEM,
+      内外作
+      ORDER BY
+      エンジン生産種別
+    </statement>
+    
+    <statement id="SelectKatashikiZaiko">
+      WITH
+      <include refid="tmpRittaiLocation" />
+      SELECT
+      型式コード,
+      国コード,
+      型式名,
+      パターンコード,
+      エンジン種別,
+      搭載OEM,
+      内外作,
+      COUNT(*) 台数
+      FROM
+      TMP_立体倉庫ロケーションM2
+      WHERE
+      TRIM(型式コード) IS NOT NULL
+      <include refid="whereForRittaiLocationSearch" />
+      GROUP BY
+      型式コード,
+      国コード,
+      型式名,
+      パターンコード,
+      エンジン種別,
+      搭載OEM,
+      内外作
+      ORDER BY
+      型式名,型式コード
+    </statement>
+    
+    <statement id="SelectRittaiZaikoAll">
+      WITH
+      <include refid="tmpRittaiLocation" />
+      SELECT
+      立体倉庫,
+      号機,
+      連,
+      段,
+      列,
+      禁止棚フラグ,
+      ロケーションフラグ,
+      型式コード,
+      国コード,
+      型式名,
+      パターンコード,
+      エンジン種別,
+      搭載OEM,
+      内外作,
+      IDNO,
+      機番,
+      特記事項,
+      運転フラグ,
+      入庫日時
+      FROM
+      TMP_立体倉庫ロケーションM2
+      <dynamic prepend="WHERE">
+        <include refid="whereForRittaiLocationSearch" />
+      </dynamic>
+      ORDER BY
+      <isEqual property="searchForKatashikiIdnoListFlag" compareValue="true">
+        型式コード,国コード,IDNO
+      </isEqual>
+      <isNotEqual property="searchForKatashikiIdnoListFlag" compareValue="true">
+        立体倉庫,号機,連,段,列
+      </isNotEqual>
+    </statement>
+
+    <statement id="SelectTousaiEngineList">
+      WITH
+        TMP_欧州向け AS (
+          SELECT
+             E.ENGINE_MODEL_CD 搭載型式コード
+            ,B1.PARAM_VALUE 設定値1
+            ,B2.PARAM_VALUE 設定値2
+           FROM
+             TM_CC_MODEL_PROD_INFO B1
+           INNER JOIN
+             TM_CC_MODEL_PROD_INFO B2 ON (
+                 B1.MODEL_PROD_INFO_KIND = B2.MODEL_PROD_INFO_KIND AND B1.PRODUCT_MODEL_CD = B2.PRODUCT_MODEL_CD AND 
+                 B1.COUNTRY_CD = B2.COUNTRY_CD AND B2.MODEL_PROD_INFO_ITEM_CD = '02'
+             )
+           INNER JOIN
+             VM_CC_PRODUCT_MODEL C ON (B1.PRODUCT_MODEL_CD = C.PRODUCT_MODEL_CD)
+           INNER JOIN
+             TM_CC_MODEL_COUNTRY D ON (C.ASSEMBLY_PATTERN_CD = '32' AND B1.PRODUCT_MODEL_CD = D.MODEL_CD AND B1.COUNTRY_CD = D.COUNTRY_CD)
+           INNER JOIN
+             TM_CC_INSTALLED_ENGINE E ON (C.PLANT_CD = E.PRODUCT_MODEL_PLANT_CD AND C.PRODUCT_MODEL_CD = E.PRODUCT_MODEL_CD)
+           WHERE
+             B1.MODEL_PROD_INFO_KIND = '10'
+             AND B1.MODEL_PROD_INFO_ITEM_CD = '01'
+           GROUP BY
+             E.ENGINE_MODEL_CD
+             ,B1.PARAM_VALUE
+             ,B2.PARAM_VALUE
+        ),
+        TMP_立体倉庫在庫 AS (
+          SELECT
+             STOCK_KBN ストック区分
+            ,PRO_CODE エンジン型式コード
+            ,NVL(設定値1,'0') 設定値1
+            ,SUM(
+               CASE
+                 WHEN K.設定値2 = '1' THEN (CASE WHEN A.ENG_SNO <![CDATA[<=]]> SUBSTR(K.設定値1,2,6) THEN 1 ELSE 0 END)
+                 WHEN K.設定値2 = '2' THEN (CASE WHEN A.ENG_SNO >= SUBSTR(K.設定値1,2,6) THEN 1 ELSE 0 END)
+                 ELSE 1
+               END
+            ) エンジン在庫数
+          FROM
+            TBL_TE立体倉庫ロケーションM A
+          LEFT JOIN
+            TMP_欧州向け K ON K.搭載型式コード = A.PRO_CODE
+          WHERE
+            LOC_FLAG = 1
+            AND STOP_FLAG = '0'
+            AND GP != 'ZZ'
+          GROUP BY
+             A.STOCK_KBN
+            ,A.PRO_CODE
+            ,設定値1
+        ),
+        TMP_対象一覧 AS (
+          SELECT
+             SG.MS_YYMM_NO 指示月度連番
+            ,SG.MS_IDNO IDNO
+            ,SG.MS_KAN_YYMMDD 完成予定日
+            ,SG.MS_B_KATA_C 型式コード
+            ,SG.MS_B_KUNI_C 国コード
+            ,SG.MS_B_KATA_N 型式名
+            ,SG.MS_KIBAN 機番
+            ,SG.MS_TOKKIJIKOU 特記事項
+            ,Z1.MS_JITU_YMD ミッション立体前実績
+            ,Z2.MS_JITU_YMD ミッション立体後実績
+            ,SG.MS_E_KATA_C エンジン型式コード
+            ,SG.MS_E_KATA_N エンジン型式名
+            ,NVL(PI.PARAM_VALUE,'0') 設定値1
+            ,ROW_NUMBER() OVER (PARTITION BY SG.MS_E_KATA_C, PI.PARAM_VALUE ORDER BY SG.MS_E_KATA_C, SG.MS_YYMM_NO) エンジン連番
+            ,PM.ASSEMBLY_PATTERN_CD APコード
+          FROM
+            MS_SAGYO SG
+          LEFT JOIN
+            MS_ZISEKI Z1 ON (Z1.MS_STATION = #jissekiStationPrev# AND Z1.MS_IDNO = SG.MS_IDNO)
+          LEFT JOIN
+            MS_ZISEKI Z2 ON (Z2.MS_STATION = #jissekiStationPost# AND Z2.MS_IDNO = SG.MS_IDNO)
+          LEFT JOIN
+            TM_CC_MODEL_PROD_INFO PI ON(PI.PRODUCT_MODEL_CD = SG.MS_B_KATA_C AND PI.COUNTRY_CD = SUBSTR(SG.MS_B_KUNI_C,1,3) AND PI.MODEL_PROD_INFO_KIND = '10' AND PI.MODEL_PROD_INFO_ITEM_CD = '01')
+          LEFT JOIN
+            VM_CC_PRODUCT_MODEL PM ON (SG.MS_E_KATA_C = PM.PRODUCT_MODEL_CD)
+          WHERE
+            SG.MS_SIJI_LVL = '1'
+            AND TO_CHAR(SG.MS_KAN_YYMMDD,'YYYY/MM/DD') <![CDATA[<=]]> #tractorKanseiYoteiYMD#
+            AND TO_CHAR(Z2.MS_JITU_YMD,'YYYY/MM/DD') <![CDATA[<]]> '2001/01/01'
+            AND NOT EXISTS (
+              SELECT
+                'X'
+              FROM
+                TM_CC_MODEL_PROD_INFO PI
+              WHERE
+                PI.MODEL_PROD_INFO_KIND = '04'
+                AND PI.MODEL_PROD_INFO_ITEM_CD = '01'
+                AND SG.MS_B_KATA_C = PI.PRODUCT_MODEL_CD
+                AND SUBSTR(SG.MS_B_KUNI_C,0,3) = PI.COUNTRY_CD
+            )
+        ),
+        TMP_エンジン必要数 AS (
+          SELECT
+             エンジン型式コード
+            ,設定値1
+            ,COUNT(エンジン型式コード) エンジン必要数
+          FROM
+            TMP_対象一覧
+          GROUP BY
+            エンジン型式コード,
+            設定値1
+        ),
+        TMP_引当完了一覧 AS (
+          SELECT
+            ROW_NUMBER() OVER (ORDER BY Z2.MS_JITU_YMD DESC) 連番
+            ,SG.MS_YYMM_NO 指示月度連番
+            ,SG.MS_IDNO IDNO
+            ,SG.MS_KAN_YYMMDD 完成予定日
+            ,SG.MS_B_KATA_C 型式コード
+            ,SG.MS_B_KUNI_C 国コード
+            ,SG.MS_B_KATA_N 型式名
+            ,SG.MS_KIBAN 機番
+            ,SG.MS_TOKKIJIKOU 特記事項
+            ,Z1.MS_JITU_YMD ミッション立体前実績
+            ,Z2.MS_JITU_YMD ミッション立体後実績
+            ,SG.MS_E_KATA_C エンジン型式コード
+            ,SG.MS_E_KATA_N エンジン型式名
+            ,SQ.ID_NO エンジンIDNO
+            ,SQ.BUF_KUBN 搬送区分
+            ,PM.ASSEMBLY_PATTERN_CD APコード
+          FROM
+            MS_SAGYO SG
+          LEFT JOIN
+            MS_ZISEKI Z1 ON (Z1.MS_STATION = #jissekiStationPrev# AND Z1.MS_IDNO = SG.MS_IDNO)
+          LEFT JOIN
+            MS_ZISEKI Z2 ON (Z2.MS_STATION = #jissekiStationPost# AND Z2.MS_IDNO = SG.MS_IDNO)
+          LEFT JOIN
+            TBL_TE出庫キュー SQ ON (SQ.TRK_ID = SG.MS_IDNO)
+          LEFT JOIN
+            VM_CC_PRODUCT_MODEL PM ON (SG.MS_E_KATA_C = PM.PRODUCT_MODEL_CD)
+          WHERE
+            SG.MS_SIJI_LVL = '1'
+            AND TO_CHAR(Z2.MS_JITU_YMD,'YYYY/MM/DD') >= '2001/01/01'
+        ),
+        TMP_表示一覧 AS (
+          SELECT
+            TL.指示月度連番
+            ,TL.IDNO
+            ,TL.完成予定日
+            ,TL.型式コード
+            ,TL.国コード
+            ,TL.型式名
+            ,TL.機番
+            ,TL.特記事項
+            ,TL.エンジン型式コード
+            ,TL.エンジン型式名
+            ,NVL(EN.エンジン必要数,0) エンジン必要数
+            ,NVL(EZ1.エンジン在庫数,0) + NVL(EZ2.エンジン在庫数,0) + NVL(EZ3.エンジン在庫数,0) エンジン在庫数
+            ,TL.エンジン連番
+            <isEmpty property="callEngineWarehouse">
+              ,CASE
+                WHEN NVL(EZ1.エンジン在庫数,0) + NVL(EZ2.エンジン在庫数,0) + NVL(EZ3.エンジン在庫数,0) <![CDATA[<]]> TL.エンジン連番 THEN 0
+                ELSE 1
+              END エンジン引当結果
+            </isEmpty>
+            <isNotEmpty property="callEngineWarehouse">
+              <isEqual property="callEngineWarehouse" compareValue="01">
+                ,CASE
+                  WHEN NVL(EZ1.エンジン在庫数,0) + NVL(EZ3.エンジン在庫数,0) <![CDATA[<]]> TL.エンジン連番 THEN 0
+                  ELSE 1
+                END エンジン引当結果
+              </isEqual>
+              <isEqual property="callEngineWarehouse" compareValue="02">
+                ,CASE
+                  WHEN NVL(EZ2.エンジン在庫数,0) + NVL(EZ3.エンジン在庫数,0) <![CDATA[<]]> TL.エンジン連番 THEN 0
+                  ELSE 1
+                END エンジン引当結果
+              </isEqual>
+            </isNotEmpty>
+            ,NVL(EZ1.エンジン在庫数,0) "1号機E在庫数"
+            ,NVL(EZ2.エンジン在庫数,0) "2号機E在庫数"
+            ,NULL エンジンIDNO
+            ,TL.ミッション立体前実績
+            ,TL.ミッション立体後実績
+            ,TL.APコード
+          FROM
+            TMP_対象一覧 TL
+          LEFT JOIN
+            TMP_エンジン必要数 EN ON (TL.エンジン型式コード = EN.エンジン型式コード AND TL.設定値1 = EN.設定値1)
+          LEFT JOIN
+            TMP_立体倉庫在庫 EZ1 ON (EZ1.ストック区分 = '1' AND TL.エンジン型式コード = EZ1.エンジン型式コード AND TL.設定値1 = EZ1.設定値1)
+          LEFT JOIN
+            TMP_立体倉庫在庫 EZ2 ON (EZ2.ストック区分 = '2' AND TL.エンジン型式コード = EZ2.エンジン型式コード AND TL.設定値1 = EZ2.設定値1)
+          LEFT JOIN
+            TMP_立体倉庫在庫 EZ3 ON (EZ3.ストック区分 = '3' AND TL.エンジン型式コード = EZ3.エンジン型式コード AND TL.設定値1 = EZ3.設定値1)
+          UNION
+          SELECT
+             指示月度連番
+            ,IDNO
+            ,完成予定日
+            ,型式コード
+            ,国コード
+            ,型式名
+            ,機番
+            ,特記事項
+            ,エンジン型式コード
+            ,エンジン型式名
+            ,0 エンジン必要数
+            ,0 エンジン在庫数
+            ,0 エンジン連番
+            ,CASE WHEN 搬送区分 = 9 THEN 3 ELSE 2 END エンジン引当結果
+            ,0 "1号機E在庫数"
+            ,0 "2号機E在庫数"
+            ,エンジンIDNO
+            ,ミッション立体前実績
+            ,ミッション立体後実績
+            ,APコード
+          FROM
+            TMP_引当完了一覧
+          WHERE
+            連番 <![CDATA[<=]]> #displayKanryoNum#
+        )
+      SELECT
+         指示月度連番
+        ,IDNO
+        ,完成予定日
+        ,型式コード
+        ,国コード
+        ,型式名
+        ,機番
+        ,特記事項
+        ,エンジン型式コード
+        ,エンジン型式名
+        ,エンジン必要数
+        ,エンジン在庫数
+        ,エンジン連番
+        ,エンジン引当結果
+        ,"1号機E在庫数"
+        ,"2号機E在庫数"
+        ,エンジンIDNO
+        ,ミッション立体前実績
+        ,ミッション立体後実績
+        ,APコード
+      FROM
+        TMP_表示一覧
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="tractorIdno" prepend="AND">
+        IDNO = '$tractorIdno$'
+        </isNotEmpty>
+        <isNotEmpty property="tractorKatashikiCode" prepend="AND">
+        型式コード LIKE '$tractorKatashikiCode$%'
+        </isNotEmpty>
+        <isNotEmpty property="tractorKatashikiName" prepend="AND">
+        型式名 LIKE '$tractorKatashikiName$%'
+        </isNotEmpty>
+        <isNotEmpty property="tractorTokki" prepend="AND">
+        特記事項 LIKE '%$tractorTokki$%'
+        </isNotEmpty>
+        <isNotEmpty property="katashikiCode" prepend="AND">
+        エンジン型式コード LIKE '$katashikiCode$%'
+        </isNotEmpty>
+        <isNotEmpty property="katashikiName" prepend="AND">
+        エンジン型式名 LIKE '$katashikiName$%'
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+        指示月度連番
+    </statement>
+</statements>
+</sqlMap>

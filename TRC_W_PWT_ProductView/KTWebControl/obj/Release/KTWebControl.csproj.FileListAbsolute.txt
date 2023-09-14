@@ -1,0 +1,12 @@
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebControl\bin\Release\KTWebControl.dll
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebControl\bin\Release\KTWebControl.pdb
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebControl\bin\Release\KTCommon.dll
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebControl\bin\Release\PdfSharp.dll
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebControl\bin\Release\log4net.dll
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebControl\bin\Release\KTCommon.pdb
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebControl\bin\Release\KTCommon.xml
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebControl\obj\Release\KTWebControl.csproj.AssemblyReference.cache
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebControl\obj\Release\KTWebControl.csproj.CoreCompileInputs.cache
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebControl\obj\Release\KTWebControl.csproj.CopyComplete
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebControl\obj\Release\KTWebControl.dll
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebControl\obj\Release\KTWebControl.pdb

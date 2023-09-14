@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="TractorParts"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ部品詳細:クレート機番]                                                        -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectTractorCrateDetail">
+      SELECT
+        CRT.IDNO                           idno,
+        CRT.型式コード                     productModelCd,
+        CRT.国コード                       countryCd,
+        CRT.型式名                         productModelNm,
+        CRT.クレート機番                   crateSerial,
+        CRT.作成日時                       installDt
+      FROM
+        TBL_WMSクレート機番 CRT
+      WHERE
+        CRT.IDNO = #idno# AND
+        CRT.型式コード = #productModelCd#
+      ORDER BY
+        CRT.作成日時
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ部品詳細:ロプス機番]                                                          -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectTractorRopsDetail">
+      SELECT
+        ROPS.トラクタＩＤＮＯ              idno,
+        ROPS.トラクタ型式コード            productModelCd,
+        ROPS.トラクタ国コード              countryCd,
+        ROPS.トラクタ型式名                productModelNm,
+        ROPS.ロプス機番                    ropsSerial,
+        ROPS.ロプス型式名                  ropsModelCd,
+        ROPS.作成年月日                    installDt
+      FROM
+        ロプス機番 ROPS
+      WHERE
+        ROPS.トラクタＩＤＮＯ = #idno# AND
+        ROPS.トラクタ型式コード = #productModelCd#
+      ORDER BY
+        ROPS.作成年月日
+    </statement>  
+  </statements>
+</sqlMap>

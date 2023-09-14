@@ -1,0 +1,204 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Reflection;
+using KTFramework.Common;
+using KTFramework.Dao;
+using KTWebInheritance.Common;
+using TRC_W_PWT_ProductView.Common;
+using TRC_W_PWT_ProductView.UI.Base;
+using TRC_W_PWT_ProductView.Session;
+using TRC_W_PWT_ProductView.Defines;
+using TRC_W_PWT_ProductView.Defines.TypeDefine;
+using KTFramework.Web.Client.SvcCore;
+using KTFramework.Web.Client.CoreService;
+using KTFramework.Web.Client.Service;
+
+namespace TRC_W_PWT_ProductView.UI.Pages {
+
+    /// <summary>
+    /// (認証キー取得ユーザ情報取得処理)画面
+    /// </summary>
+    public partial class LoginByTrc : BaseForm {
+
+        //ロガー定義
+        private static readonly Logger logger = new Logger( System.Reflection.MethodBase.GetCurrentMethod().DeclaringType );
+
+        #region イベント
+
+        /// <summary>
+        /// ページロード
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void Page_Load( object sender, EventArgs e ) {
+            base.RaiseEvent( DoPageLoad, false );
+        }
+
+        #endregion
+
+        #region ページイベント
+
+        /// <summary>
+        /// ページロード処理
+        /// </summary>
+        protected override void DoPageLoad() {
+
+            //ベース ページロード処理
+            base.DoPageLoad();
+            //画面遷移処理
+            RedirectPage();
+
+        }
+        #endregion
+
+        #region メソッド
+
+        #region 画面初期化処理
+        /// <summary>
+        /// 初期化処理
+        /// </summary>
+        protected override void Initialize() {
+            //ベース処理初期化処理
+            base.Initialize();
+        }
+
+        #endregion
+
+        /// <summary>
+        /// 画面遷移処理
+        /// </summary>
+        private void RedirectPage() {
+
+            //既存のユーザセッション
+            UserInfoSessionHandler.ST_USER loginInfo = base.SessionManager.GetUserInfoHandler().GetUserInfo();
+
+            //WEBサービスによる認証処理
+            C9910WSUserInfoDto userInfoDto = null;
+            string authKey = "";
+            C9910s c9910s = new C9910s();
+            C9910SelectDto selectDto = null;
+
+            //パラメータから認証キーを取得
+            authKey = Page.Request.QueryString.Get( C9910s.RedirectParameter.AUTH_KEY );
+
+            //string apId = Page.Request.QueryString.Get( C9910s.ApiasParameter.AP_ID );
+            string urlNum = Page.Request.QueryString.Get( C9910s.ApiasParameter.URL_NUM );
+
+            Dictionary<string, string> dicTransInfo = new Dictionary<string, string>();
+            foreach ( string reqKey in Page.Request.QueryString.AllKeys ) {
+                if ( reqKey == C9910s.ApiasParameter.AP_ID
+                    || reqKey == C9910s.ApiasParameter.URL_NUM ) {
+                    continue;
+                }
+                dicTransInfo.Add( reqKey, Page.Request.QueryString.Get( reqKey ) );
+            }
+
+            //URL_NUM指定でなければConfig設定を使用する
+            if ( StringUtils.IsBlank( urlNum ) ) {
+                urlNum = WebAppInstance.GetInstance().Config.ApplicationInfo.defaultUrlNum;
+                logger.Info( "URL_NUMが未設定な為、デフォルト設定を使用します。 デフォルト値 = {0}", urlNum );
+            }
+
+            if ( true == StringUtils.IsBlank( authKey ) ) {
+                //認証キーなし(処理なし)
+                //未ログインの場合、後述処理でログイン画面に遷移(ログイン済みであればメインメニューへ)
+            } else {
+
+                //新しい認証キーのユーザ情報を取得
+                selectDto = new C9910SelectDto();
+                selectDto.apId = WebAppInstance.KTAUTH_AP_MASTER_ID;
+                selectDto.ipAddress = KTWebUtils.GetClientIp( Request );
+                selectDto.authKey = authKey;
+                selectDto.urlNo = urlNum;
+                userInfoDto = c9910s.GetUserInfoDto( selectDto );
+
+                logger.Info( "{0} ユーザ情報取得結果 resultCode:{1} authKey:{2} ipAddress:{3}"
+                    , MethodBase.GetCurrentMethod().Name, userInfoDto.resultCode, selectDto.authKey, selectDto.ipAddress );
+                if ( true == ServiceResult.IsError( userInfoDto.resultCode ) ) {
+                    //認証キーアクセス失敗
+
+                    string errMsg = WebServicesUtils.GetErrMsg( userInfoDto.resultCode );
+                    logger.Error( "{0} 認証キーのユーザ情報取得失敗 エラーコード:{1} エラーメッセージ:{2}", MethodBase.GetCurrentMethod().Name, userInfoDto.resultCode, userInfoDto.resultMessage );
+                    //PageUtils.RedirectToErrorPage( this, userInfoDto.resultCode, userInfoDto.resultMessage );
+
+                    PageUtils.RedirectToErrorPage( this, MsgManager.MESSAGE_ERR_89001, userInfoDto.resultCode, errMsg );
+                } else {
+
+                    logger.Info( "{0} ユーザ/権限レベル情報 userId:{1} userName:{2} apAuth:{3} authType:{4}"
+                        , MethodBase.GetCurrentMethod().Name
+                        , userInfoDto.userId
+                        , userInfoDto.userName
+                        , userInfoDto.apAuth
+                        , userInfoDto.authType );
+
+                    if ( true == StringUtils.IsBlank( userInfoDto.apAuth ) ) {
+                        //権限が取得できない時には、ログイン画面に遷移
+                        //アプリケーションIDを付けてIDパスワード画面に飛ばす
+                        dicTransInfo.Add( C9910s.ApiasParameter.AP_ID, WebAppInstance.KTAUTH_AP_MASTER_ID );
+                        dicTransInfo.Add( C9910s.ApiasParameter.URL_NUM, urlNum );
+                        //IDPWのみの認証を指定
+                        dicTransInfo.Add( C9910s.ApiasParameter.LOGIN_METHOD, C9910s.LoginMethod.IDPW_ONLY );
+                        string url = c9910s.GetRedirectUrl( C9910s.ApiasApplicationId.KTAUTH_WEB_AP_MASTER_ID, urlNum );
+                        if ( StringUtils.IsBlank( url ) ) {
+                            PageUtils.RedirectToErrorPage( this, MsgManager.MESSAGE_ERR_70140 );
+                        }
+                        KTWebUtils.RedirectTo( this, url, dicTransInfo );
+                    }
+
+                    if ( userInfoDto.authType == C9910s.AuthResult.AUTH_TYPE_IDPW ) {
+                        //ID/PW認証で来た場合にはユーザ情報を上書きする
+                        loginInfo = new UserInfoSessionHandler.ST_USER();
+                        loginInfo.UserInfo = userInfoDto;
+                    } else {
+                        //AD又は端末認証の時には、既存ユーザ認証を優先する(ユーザ情報が無い時には、ユーザ情報をセット)
+                        if ( true == ObjectUtils.IsNotNull( loginInfo.UserInfo )
+                        && true == StringUtils.IsNotEmpty( loginInfo.UserInfo.userId ) ) {
+                            //現在のログイン情報を書き換えない
+                        } else {
+                            //未ログイン時にはログイン情報をセットする
+                            loginInfo = new UserInfoSessionHandler.ST_USER();
+                            loginInfo.UserInfo = userInfoDto;
+                        }
+                    }
+                }
+                
+                //ログイン情報保持
+                SessionManager.GetUserInfoHandler().SetUserInfo( loginInfo );
+            }
+
+			//userInfoDto = new C9910WSUserInfoDto();
+			//userInfoDto.apAuth = "1";
+			//userInfoDto.userId = "807011";
+			//userInfoDto.userName = "山田　太郎";
+			//userInfoDto.authType = "ADMIN";
+			//userInfoDto.apAuthList = new string[] { "NACHECKLIST_View", "NACHECKLIST_Edit", "PROCESSINGDTEDIT_View", "MAINCORRECTIVEINPUT_Edit", "MAINCORRECTIVEINPUT_View", "ANLITEMINPUT_Edit", "ANLGROUPINPUT_Edit", "ANLGROUPMODELINPUT_Edit", "ANLITEMINPUT_View", "AnlGroupModelInput_View" };
+			//userInfoDto.bumonName = "テスト部門";
+			//loginInfo.UserInfo = userInfoDto;
+			//SessionManager.GetUserInfoHandler().SetUserInfo( loginInfo );
+
+			if ( true == ObjectUtils.IsNotNull( loginInfo.UserInfo )
+                && true == StringUtils.IsNotEmpty( loginInfo.UserInfo.userId ) ) {
+                //ログイン済み
+                    PageUtils.RedirectToTRC( this, CurrentPageInfo.pageId, PageInfo.MaintenanceMenu.url, this.Token, dicTransInfo );
+            } else {
+                //アプリケーションIDを付けてIDパスワード画面に飛ばす
+                dicTransInfo.Add( C9910s.ApiasParameter.AP_ID, WebAppInstance.KTAUTH_AP_MASTER_ID );
+                dicTransInfo.Add( C9910s.ApiasParameter.URL_NUM, urlNum );
+                string url = c9910s.GetRedirectUrl( C9910s.ApiasApplicationId.KTAUTH_WEB_AP_MASTER_ID, urlNum );
+                //string url = c9910s.GetRedirectUrl( C9910s.ApiasApplicationId.KTAUTH_AD_AP_MASTER_ID, urlNum );
+                if ( StringUtils.IsBlank( url ) ) {
+                    PageUtils.RedirectToErrorPage( this, MsgManager.MESSAGE_ERR_70140 );
+                }
+                KTWebUtils.RedirectTo( this, url, dicTransInfo );
+            }
+
+        }
+
+        #endregion
+    }
+}

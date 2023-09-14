@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="Kintai"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+
+    <statement id="select">
+      WITH TMP_EMP AS (
+        SELECT  
+          MJ_J_NO,
+          MAX(MJ_INS_YMD) MJ_INS_YMD
+      FROM
+          MJ_KINTAI_SYAIN
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="UserId" prepend=" AND ">
+          MJ_J_NO = #UserId#
+        </isNotEmpty>
+        <isNotEmpty property="Syozoku" prepend=" AND ">
+          MJ_SYOZOKU_L = #Syozoku#
+        </isNotEmpty>
+      </dynamic>
+      GROUP BY
+          MJ_J_NO
+      )
+      SELECT DISTINCT
+          KIN.MJ_J_NO     AS EMP_NO,
+          KIN.MJ_S_KANJI  AS EMP_NM
+      FROM
+          MJ_KINTAI_SYAIN KIN
+          INNER JOIN TMP_EMP EMP ON (
+            KIN.MJ_J_NO = EMP.MJ_J_NO AND
+            KIN.MJ_INS_YMD >= EMP.MJ_INS_YMD
+          )
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="UserId" prepend=" AND ">
+            KIN.MJ_J_NO = #UserId#
+        </isNotEmpty>
+        <isNotEmpty property="Syozoku" prepend=" AND ">
+            KIN.MJ_SYOZOKU_L = #Syozoku#
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+        KIN.MJ_J_NO
+    </statement>
+   
+    
+  </statements>
+</sqlMap>

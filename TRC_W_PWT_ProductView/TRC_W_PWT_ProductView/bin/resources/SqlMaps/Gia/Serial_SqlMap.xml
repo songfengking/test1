@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="Serial"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <statement id="SelectSerial">
+      SELECT
+        SERIAL7 serial
+      FROM
+        TT_DI_SERIAL7
+      WHERE
+        MODEL_CD = #productModelCd# AND
+        SERIAL6 = #serial6#
+    </statement>
+  </statements>
+</sqlMap>

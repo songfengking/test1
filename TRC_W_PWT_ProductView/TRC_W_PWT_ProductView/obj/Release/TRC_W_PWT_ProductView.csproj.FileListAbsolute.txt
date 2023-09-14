@@ -1,0 +1,5 @@
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\TRC_W_PWT_ProductView\obj\Release\TRC_W_PWT_ProductView.csproj.AssemblyReference.cache
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\TRC_W_PWT_ProductView\obj\Release\TRC_W_PWT_ProductView.dll.licenses
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\TRC_W_PWT_ProductView\obj\Release\TRC_W_PWT_ProductView.csproj.CoreCompileInputs.cache
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\TRC_W_PWT_ProductView\obj\Release\TRC_W_PWT_ProductView.dll
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\TRC_W_PWT_ProductView\obj\Release\TRC_W_PWT_ProductView.pdb

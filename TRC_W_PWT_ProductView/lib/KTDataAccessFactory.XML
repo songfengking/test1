@@ -1,0 +1,213 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>KTDataAccessFactory</name>
+    </assembly>
+    <members>
+        <member name="T:KTFramework.Dao.DaoFactory`1">
+            <summary>
+            DataAccessインスタンス生成クラス。
+            本クラスは抽象クラスです。インスタンス化する為には、本クラスを継承して下さい。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.DaoFactory`1.InitalizeDBMode(System.String)">
+            <summary>
+            接続モードを設定します。
+            </summary>
+            <param name="dbModeStr">接続モード(RELEASE/TEST/DEVELOP)</param>
+        </member>
+        <member name="M:KTFramework.Dao.DaoFactory`1.IsCreated">
+            <summary>
+            DAOインスタンスが生成されているかチェックします
+            </summary>
+            <returns>true:インスタンス生成済み false:インスタンス未生成</returns>
+        </member>
+        <member name="P:KTFramework.Dao.DaoFactory`1.DBModeString">
+            <summary>接続モード(Release/Test/Develop)</summary>
+        </member>
+        <member name="T:KTFramework.Dao.DaoFactory`1.DBMode">
+            <summary>DB接続モード</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DaoFactory`1.DBMode.RELEASE">
+            <summary>本番</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DaoFactory`1.DBMode.TEST">
+            <summary>テスト</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DaoFactory`1.DBMode.DEVELOP">
+            <summary>開発</summary>
+        </member>
+        <member name="T:KTFramework.Dao.DbInstance">
+            <summary>
+            DBインスタンス
+            </summary>
+        </member>
+        <member name="F:KTFramework.Dao.DbInstance.NOP_NAME">
+            <summary>表示名:NOP:不明</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DbInstance.PIC_NAME">
+            <summary>表示名:PIC:作業指示DB</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DbInstance.GIA_NAME">
+            <summary>表示名:GIA:業務DB</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DbInstance.CRE_NAME">
+            <summary>表示名:CRE:コモンレールDB</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DbInstance.IMG_NAME">
+            <summary>表示名:IMG:イメージDB</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DbInstance.MIG_NAME">
+            <summary>表示名:MIG:基幹DB</summary>
+        </member>
+        <member name="M:KTFramework.Dao.DbInstance.GetCode(System.String)">
+            <summary>
+            コードに変換します
+            </summary>
+            <param name="code"></param>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Dao.DbInstance.GetName(KTFramework.Dao.DbInstance.Code)">
+            <summary>
+            表示名を取得します
+            </summary>
+            <param name="code"></param>
+            <returns></returns>
+        </member>
+        <member name="T:KTFramework.Dao.DbInstance.Code">
+            <summary>コード</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DbInstance.Code.NOP">
+            <summary>NOP:不明</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DbInstance.Code.PIC">
+            <summary>PIC:作業指示DB</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DbInstance.Code.GIA">
+            <summary>GIA:業務DB</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DbInstance.Code.CRE">
+            <summary>CRE:コモンレールDB</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DbInstance.Code.IMG">
+            <summary>IMG:イメージDB</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DbInstance.Code.MIG">
+            <summary>MIG:基幹DB</summary>
+        </member>
+        <member name="T:KTFramework.Dao.ImgDao">
+            <summary>
+            イメージDB(IMG)へアクセスするDataAccessクラスをインスタンス化します。
+            </summary>
+        </member>
+        <member name="F:KTFramework.Dao.ImgDao.TARGET_DBNAME">
+            <summary>DB接続識別子</summary>
+        </member>
+        <member name="M:KTFramework.Dao.ImgDao.GetInstance">
+            <summary>
+            イメージDB(IMG)Accessインスタンスを取得します。
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Dao.ImgDao.Terminate">
+            <summary>
+            インスタンスを破棄します。
+            </summary>
+        </member>
+        <member name="T:KTFramework.Dao.PrlDao">
+            <summary>
+            組付履歴DB(PRL)へアクセスするDataAccessクラスをインスタンス化します。
+            </summary>
+        </member>
+        <member name="F:KTFramework.Dao.PrlDao.TARGET_DBNAME">
+            <summary>DB接続識別子</summary>
+        </member>
+        <member name="M:KTFramework.Dao.PrlDao.GetInstance">
+            <summary>
+            組付履歴DB(PRL)Accessインスタンスを取得します。
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Dao.PrlDao.Terminate">
+            <summary>
+            インスタンスを破棄します。
+            </summary>
+        </member>
+        <member name="T:KTFramework.Dao.PicDao">
+            <summary>
+            作業指示DB(PIC)へアクセスするDataAccessクラスをインスタンス化します。
+            </summary>
+        </member>
+        <member name="F:KTFramework.Dao.PicDao.TARGET_DBNAME">
+            <summary>DB接続識別子</summary>
+        </member>
+        <member name="M:KTFramework.Dao.PicDao.GetInstance">
+            <summary>
+            作業指示DB(PIC)Accessインスタンスを取得します。
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Dao.PicDao.Terminate">
+            <summary>
+            インスタンスを破棄します。
+            </summary>
+        </member>
+        <member name="T:KTFramework.Dao.GiaDao">
+            <summary>
+            業務DB(GIA)へアクセスするDataAccessクラスをインスタンス化します。
+            </summary>
+        </member>
+        <member name="F:KTFramework.Dao.GiaDao.TARGET_DBNAME">
+            <summary>DB接続識別子</summary>
+        </member>
+        <member name="M:KTFramework.Dao.GiaDao.GetInstance">
+            <summary>
+            業務DB(GIA)Accessインスタンスを取得します。
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Dao.GiaDao.Terminate">
+            <summary>
+            インスタンスを破棄します。
+            </summary>
+        </member>
+        <member name="T:KTFramework.Dao.MigDao">
+            <summary>
+            基幹DB(MIG)へアクセスするDataAccessクラスをインスタンス化します。
+            </summary>
+        </member>
+        <member name="F:KTFramework.Dao.MigDao.TARGET_DBNAME">
+            <summary>DB接続識別子</summary>
+        </member>
+        <member name="M:KTFramework.Dao.MigDao.GetInstance">
+            <summary>
+            基幹DB(MIG)Accessインスタンスを取得します。
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Dao.MigDao.Terminate">
+            <summary>
+            インスタンスを破棄します。
+            </summary>
+        </member>
+        <member name="T:KTFramework.Dao.CreDao">
+            <summary>
+            コモンレールDB(CRE)へアクセスするDataAccessクラスをインスタンス化します。
+            </summary>
+        </member>
+        <member name="F:KTFramework.Dao.CreDao.TARGET_DBNAME">
+            <summary>DB接続識別子</summary>
+        </member>
+        <member name="M:KTFramework.Dao.CreDao.GetInstance">
+            <summary>
+            コモンレールDB(CRE)Accessインスタンスを取得します。
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Dao.CreDao.Terminate">
+            <summary>
+            インスタンスを破棄します。
+            </summary>
+        </member>
+    </members>
+</doc>

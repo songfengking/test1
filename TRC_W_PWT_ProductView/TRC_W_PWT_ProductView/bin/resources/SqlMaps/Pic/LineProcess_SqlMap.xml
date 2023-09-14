@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="LineProcess"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <!-- ライン工程一覧取得 -->
+    <statement id="SelectLineProcessList">
+        SELECT
+            PRC.LINE_CD           LineCd,
+            LIN.LINE_SHORT_NM     LineShortNm,
+            PRC.PROCESS_CD        ProcessCd,
+            PRC.PROCESS_NM        ProcessNm,
+            PRC.SEARCH_TARGET_FLG SearchTargetFlg
+        FROM (
+                SELECT 
+                    PR0.LINE_CD,
+                    PR0.PROCESS_CD,
+                    PR0.PROCESS_NM,
+                    PR0.GENERAL_PATTERN_CD,
+                    PR0.SEARCH_TARGET_FLG,
+                    PR0.DISPLAY_ODR
+                FROM
+                    TM_PW_TRC_PROCESS  PR0
+                WHERE
+                    PR0.GENERAL_PATTERN_CD = #productKind#
+                AND PR0.TRC_DISPLAY_FLG    = 1
+                AND PR0.SEARCH_TARGET_FLG  = 0
+                UNION
+                SELECT 
+                    PR1.LINE_CD,
+                    PR1.PROCESS_CD,
+                    PR1.PROCESS_NM,
+                    PR1.GENERAL_PATTERN_CD,
+                    PR1.SEARCH_TARGET_FLG,
+                    PR1.DISPLAY_ODR
+                FROM
+                    TM_PW_TRC_PROCESS  PR1
+                INNER JOIN (
+                        SELECT DISTINCT
+                            LINE_CD,
+                            PROCESS_CD
+                        FROM
+                            TM_PW_TRC_WORK
+                        WHERE
+                            COLLECTION_FLG  = 1
+                        AND TRC_DISPLAY_FLG = 1
+                    ) WRK
+                    ON  PR1.LINE_CD    = WRK.LINE_CD
+                    AND PR1.PROCESS_CD = WRK.PROCESS_CD
+                WHERE
+                    PR1.GENERAL_PATTERN_CD = #productKind#
+                AND PR1.TRC_DISPLAY_FLG    = 1
+                AND PR1.SEARCH_TARGET_FLG  = 1
+            ) PRC
+        INNER JOIN TM_PW_TRC_PROCESS_CLASS  PCL
+            ON  PRC.LINE_CD             = PCL.LINE_CD
+            AND PRC.PROCESS_CD          = PCL.PROCESS_CD
+            AND PRC.GENERAL_PATTERN_CD  = PCL.GENERAL_PATTERN_CD
+            AND PCL.ASSEMBLY_PATTERN_CD = #assemblyPatternCd#
+        LEFT JOIN
+            TM_CC_LINE  LIN
+            ON  PRC.LINE_CD         = LIN.LINE_CD
+            AND LIN.PLANT_CD        = '28'
+            AND LIN.DISPLAY_ORDER4 != 0
+            AND (SYSDATE BETWEEN LIN.APPLY_START_DT AND LIN.APPLY_END_DT)
+        ORDER BY
+            LIN.DISPLAY_ORDER4,
+            PRC.DISPLAY_ODR
+    </statement>
+
+  </statements>
+</sqlMap>

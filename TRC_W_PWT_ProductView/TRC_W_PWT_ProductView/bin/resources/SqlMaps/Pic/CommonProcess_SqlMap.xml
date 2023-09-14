@@ -1,0 +1,1290 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="CommonProcess"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ/エンジン共通工程一覧:品質画像証跡検索]                                       -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectCamImageList">
+      SELECT
+      CMI.PRODUCT_CODE                productModelCd,     <!--型式コード-->
+      CMI.SERIAL_NUMBER               serial6,            <!--機番-->
+      MAX(CMI.LAST_UPDATE_DATETIME)   inspectionDt,       <!--測定日-->
+      COUNT(CMI.PRODUCT_CODE)         imageCount          <!--画像登録数-->
+      FROM
+      TT_SQ_CAMERA_IMAGE_STORAGE CMI
+      <dynamic prepend="WHERE">
+        <!-- [ステーション検索](必須) -->
+        <isNotEmpty property="paramStationCdList" prepend="AND">
+          CMI.STATION_CODE IN
+          <iterate property="paramStationCdList" open="(" close=")" conjunction="," >
+            #paramStationCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (CMI.PRODUCT_CODE, CMI.SERIAL_NUMBER) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          CMI.PRODUCT_CODE like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+        <isNotEmpty property="paramProductModelCdList" prepend="AND">
+          CMI.PRODUCT_CODE IN
+          <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+            #paramProductModelCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <!-- [測定日(FROM)検索] -->
+        <isNotEmpty property="paramInspectionDtFrom" prepend="AND">
+          CMI.LAST_UPDATE_DATETIME <![CDATA[>=]]> #paramInspectionDtFrom#
+        </isNotEmpty>
+        <!-- [測定日(TO)検索] -->
+        <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+          CMI.LAST_UPDATE_DATETIME <![CDATA[<=]]> #paramInspectionDtTo#
+        </isNotEmpty>
+      </dynamic>
+      GROUP BY
+      CMI.PRODUCT_CODE, CMI.SERIAL_NUMBER
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ/エンジン共通工程詳細:品質画像証跡検索]                                       -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectCamImageDetail">
+      SELECT
+        PRODUCT_CODE          productModelCd,     <!--生産型式コード-->
+        SERIAL_NUMBER         serial6,            <!--機番-->
+        STATION_CODE          stationCd,          <!--ステーションコード-->
+        CREATION_DATETIME     inspectionDt,       <!--測定日-->
+        SHOOTING_LOCATION   	position,           <!--撮影位置-->
+        HISTORY               historyIndex,       <!--来歴No-->
+        FILE_DATA             imageData,          <!--画像データ-->
+        FILE_NAME             fileNm              <!--ファイル名-->
+      FROM 
+        TT_SQ_CAMERA_IMAGE_STORAGE CMI
+      WHERE
+      <!-- [ステーション検索](必須) -->
+      CMI.STATION_CODE IN
+      <iterate property="paramStationCdList" open="(" close=")" conjunction="," >
+        #paramStationCdList[]#
+      </iterate>
+      AND
+      <!-- [機番検索](modelCd/serial6メンバを含む) -->
+      (CMI.PRODUCT_CODE, CMI.SERIAL_NUMBER) IN ((#paramSerial.productModelCd#, #paramSerial.serial6#))
+      ORDER BY
+      LAST_UPDATE_DATETIME DESC
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ/エンジン共通工程詳細:今ドコデータ検索(工程)]                                 -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectImaDokoProcess">
+      SELECT DISTINCT
+      工場,
+      ステーションコード,
+      工程順序,
+      表示フラグ,
+      表示名称,
+      備考
+      FROM
+      TBL_ステーション通過順序
+      <dynamic prepend="WHERE">
+        <!-- トラクタ -->
+        <isEqual property="assemblyPatternCd" compareValue="32 ">
+          表示フラグ = '4'
+        </isEqual>
+        <!-- 03エンジン(搭載) -->
+        <isEqual property="assemblyPatternCd" compareValue="15 ">
+          表示フラグ IN ('1','3')
+        </isEqual>
+        <!-- 03エンジン(OEM) -->
+        <isEqual property="assemblyPatternCd" compareValue="19 ">
+          表示フラグ IN ('1','3')
+        </isEqual>
+        <!-- 07エンジン(搭載) -->
+        <isEqual property="assemblyPatternCd" compareValue="14 ">
+          表示フラグ IN ('2','3')
+        </isEqual>
+        <!-- 07エンジン(OEM) -->
+        <isEqual property="assemblyPatternCd" compareValue="18 ">
+          表示フラグ IN ('2','3')
+        </isEqual>
+      </dynamic>
+      ORDER BY
+      工程順序
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ/エンジン共通工程詳細:今ドコデータ検索(実績)]                                 -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectImaDokoResult">
+      SELECT
+      ステーション,
+      工程順序,
+      IDNO,
+      型式コード,
+      国コード,
+      型式名,
+      LTRIM(機番7) 機番,
+      指示月度連番,
+      確定月度連番,
+      RTRIM(組立パターン) 組立パターン,
+      エンジン型式コード,
+      エンジンIDNO,
+      LTRIM(エンジン機番7) エンジン機番,
+      実績連番,
+      TO_CHAR(実績日時,'MM/DD')         実績日,
+      TO_CHAR(実績日時,'HH24:MI:SS')    実績時,
+      TO_CHAR(出荷年月日,'MM/DD')       出荷年月日
+      FROM
+      VIW_型式別通過実績データ
+      WHERE
+      実績日時 > '2001/01/01'
+      <isEqual property="assemblyPatternCd" compareValue="32 " prepend="AND">
+        指示レベル = '1' AND 組立パターン = '32 '
+      </isEqual>
+      <isEqual property="assemblyPatternCd" compareValue="15 " prepend="AND">
+        指示レベル = '3' AND 組立パターン = '15 '
+      </isEqual>
+      <!-- 03エンジン(OEM) -->
+      <isEqual property="assemblyPatternCd" compareValue="19 " prepend="AND">
+        指示レベル = '3' AND 組立パターン = '19 '
+      </isEqual>
+      <!-- 07エンジン(搭載) -->
+      <isEqual property="assemblyPatternCd" compareValue="14 " prepend="AND">
+        指示レベル = '7' AND 組立パターン = '14 '
+      </isEqual>
+      <!-- 07エンジン(OEM) -->
+      <isEqual property="assemblyPatternCd" compareValue="18 " prepend="AND">
+        指示レベル = '7' AND 組立パターン = '18 '
+      </isEqual>
+      <isNotEmpty property="modelCd" prepend="AND">
+        型式コード  LIKE #modelCd# || '%'
+      </isNotEmpty>
+      <isNotEmpty property="serial" prepend="AND">
+        機番7 LIKE '%' || #serial# || '%'
+      </isNotEmpty>
+      ORDER BY
+      指示月度連番,
+      工程順序
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ/エンジン共通工程詳細:工程作業最新来歴取得処理]                               -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectNewestProcessWorkHistory">
+      SELECT
+      WRK.LINE_CD,
+      WRK.PROCESS_CD,
+      WRK.DISPLAY_ODR,
+      WRK.WORK_CD,
+      WRK.WORK_NM,
+      HDR.MODEL_CD,
+      HDR.SERIAL,
+      HDR.RECORD_NO,
+      HDR.RESULT_CD,
+      RST.RESULT_NM
+      FROM
+      TM_PW_TRC_WORK  WRK
+      INNER JOIN (
+      SELECT
+      MODEL_CD,
+      SERIAL,
+      LINE_CD,
+      PROCESS_CD,
+      WORK_CD,
+      ROW_NUMBER() OVER(PARTITION BY MODEL_CD, SERIAL, LINE_CD, PROCESS_CD, WORK_CD ORDER BY RECORD_NO DESC)  NEW_ORDER,
+      RECORD_NO,
+      RESULT_CD
+      FROM
+      TT_PW_TRC_HEADER
+      WHERE
+      MODEL_CD   = #modelCd#
+      AND SERIAL     = #serial#
+      AND LINE_CD    = #lineCd#
+      AND PROCESS_CD = #processCd#
+      )  HDR
+      ON  WRK.LINE_CD    = HDR.LINE_CD
+      AND WRK.PROCESS_CD = HDR.PROCESS_CD
+      AND WRK.WORK_CD    = HDR.WORK_CD
+      AND HDR.NEW_ORDER  = 1
+      LEFT JOIN
+      TM_PW_TRC_RESULT  RST
+      ON  HDR.LINE_CD    = RST.LINE_CD
+      AND HDR.PROCESS_CD = RST.PROCESS_CD
+      AND HDR.WORK_CD    = RST.WORK_CD
+      AND HDR.RESULT_CD  = RST.RESULT_CD
+      WHERE
+      WRK.COLLECTION_FLG  = 1
+      AND WRK.TRC_DISPLAY_FLG = 1
+      ORDER BY
+      WRK.DISPLAY_ODR
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ/エンジン共通工程詳細:計測項目情報取得処理]                                   -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectMeasuringItemInfo">
+      SELECT
+      ATR.LINE_CD,
+      ATR.PROCESS_CD,
+      ATR.WORK_CD,
+      ATR.ATTRIBUTE_CD,
+      ATR.ATTRIBUTE_NM,
+      ATR.DATA_TYP,
+      ATR.INTEGER_DGT,
+      ATR.DECIMAL_DGT,
+      ATR.UNIT,
+      ATR.DISPLAY_ODR
+      FROM
+      TM_PW_TRC_TRACEABLE_ATTRIBUTE  ATR
+      WHERE
+      ATR.LINE_CD     = #lineCd#
+      AND ATR.PROCESS_CD  = #processCd#
+      AND ATR.WORK_CD     = #workCd#
+      AND ATR.DISPLAY_FLG = 1
+      ORDER BY
+      ATR.DISPLAY_ODR
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ/エンジン共通工程詳細:作業来歴情報取得処理]                                   -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectWorkHistoryInfo">
+      SELECT
+      TMP.MODEL_CD,
+      TMP.SERIAL,
+      TMP.LINE_CD,
+      TMP.PROCESS_CD,
+      TMP.WORK_CD,
+      TMP.RECORD_NO,
+      TMP.DEVICE_NO,
+      TMP.RESULT_DT
+      <!-- 計測項目リスト分、動的に抽出項目を作成する -->
+      <iterate property="attributeCdList" conjunction="," prepend=",">
+        MAX(CASE WHEN TMP.ATTRIBUTE_CD = #attributeCdList[]# THEN TMP.RESULT_VAL ELSE NULL END)  "$attributeCdList[]$"
+      </iterate>
+      FROM (
+      SELECT
+      DTL.MODEL_CD,
+      DTL.SERIAL,
+      DTL.LINE_CD,
+      DTL.PROCESS_CD,
+      DTL.WORK_CD,
+      DTL.RECORD_NO,
+      DTL.DEVICE_NO,
+      DTL.ATTRIBUTE_CD,
+      DTL.RESULT_VAL,
+      HDR.RESULT_DT
+      FROM
+      TT_PW_TRC_DETAIL  DTL
+      INNER JOIN
+      TM_PW_TRC_TRACEABLE_ATTRIBUTE  ATR
+      ON  DTL.LINE_CD      = ATR.LINE_CD
+      AND DTL.PROCESS_CD   = ATR.PROCESS_CD
+      AND DTL.WORK_CD      = ATR.WORK_CD
+      AND DTL.ATTRIBUTE_CD = ATR.ATTRIBUTE_CD
+      AND ATR.DISPLAY_FLG  = 1
+      INNER JOIN
+      TT_PW_TRC_HEADER  HDR
+      ON  DTL.MODEL_CD   = HDR.MODEL_CD
+      AND DTL.SERIAL     = HDR.SERIAL
+      AND DTL.LINE_CD    = HDR.LINE_CD
+      AND DTL.PROCESS_CD = HDR.PROCESS_CD
+      AND DTL.WORK_CD    = HDR.WORK_CD
+      AND DTL.RECORD_NO  = HDR.RECORD_NO
+      WHERE
+      DTL.MODEL_CD   = #modelCd#
+      AND DTL.SERIAL     = #serial#
+      AND DTL.LINE_CD    = #lineCd#
+      AND DTL.PROCESS_CD = #processCd#
+      AND DTL.WORK_CD    = #workCd#
+      ) TMP
+      GROUP BY
+      TMP.MODEL_CD,
+      TMP.SERIAL,
+      TMP.LINE_CD,
+      TMP.PROCESS_CD,
+      TMP.WORK_CD,
+      TMP.RECORD_NO,
+      TMP.DEVICE_NO,
+      TMP.RESULT_DT
+      ORDER BY
+      TMP.RECORD_NO DESC,
+      TMP.DEVICE_NO
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ/エンジン共通工程区分:トレーサビリティ工程区分マスタ取得]                     -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectAllProcessClass">
+        SELECT
+            LINE_CD                 "LineCd",
+            PROCESS_CD              "ProcessCd",
+            GENERAL_PATTERN_CD      "GeneralPatternCd",
+            INSPECTION_CD           "InspectionCd",
+            ASSEMBLY_PATTERN_CD     "AssemblyPatternCd"
+        FROM TM_PW_TRC_PROCESS_CLASS
+        WHERE
+            DELETE_FLG = 0
+        ORDER BY
+            GENERAL_PATTERN_CD,
+            LINE_CD,
+            PROCESS_CD
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ/エンジン共通工程一覧:イメージチェックシート検索(一覧画面)]                   -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectImgCheckList">
+        SELECT
+            RES.MODEL_CD                    productModelCd,     <!--型式コード-->
+            NVL(SR7.SERIAL6,RES.SERIAL)     serial6,            <!--機番(6桁)-->
+            RES.SERIAL                      serial,             <!--機番(7桁)-->
+            RES.LINE_CD                     lineCd,             <!--ラインコード-->
+            ILN.LINE_NM                     lineNm,             <!--ライン名-->
+            CASE
+                WHEN RES.INS_STATUS = '1' THEN '合格' 
+                WHEN RES.INS_STATUS = '2' THEN '不合格' 
+                ELSE '検査中' 
+              END   result,                                     <!--結果-->
+            TO_CHAR(MAX(RES.CREATE_DT) ,'YYYY/MM/DD HH24:MI:SS') inspectionDt,  <!--測定日-->
+            CASE
+                WHEN RES.INS_STATUS = '1' THEN RES.PASS_BY 
+                ELSE null 
+              END  judgeEmpCd,                                  <!--合格判定社員-->
+            NULL lastProc,                                      <!--最終検査工程-->
+            RES.CREATE_BY                   startBy,            <!--検査開始社員--> 
+            RES.UPDATE_BY                   updateBy            <!--更新社員--> 
+        FROM TT_SQ_ICS_INS_RESULT  RES
+        LEFT JOIN TT_DI_SERIAL7  SR7
+            ON  RES.MODEL_CD = SR7.MODEL_CD
+            AND RES.SERIAL   = SR7.SERIAL7
+        LEFT JOIN TM_SQ_ICS_LINE  ILN
+            ON  RES.LINE_CD = ILN.LINE_CD
+            AND ILN.PLANT_CD = '28'
+            AND (RES.CREATE_DT BETWEEN ILN.APPLY_START_DT AND ILN.APPLY_END_DT)
+        LEFT JOIN VM_CC_PRODUCT_MODEL  VPM
+            ON  RES.MODEL_CD = VPM.PRODUCT_MODEL_CD
+        <dynamic prepend="WHERE">
+          <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+          <isNotEmpty property="paramSerialList" prepend="AND">
+            (RES.MODEL_CD, RES.SERIAL) IN
+            <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+              (#paramSerialList[].productModelCd#, #paramSerialList[].serial#)
+            </iterate>
+          </isNotEmpty>
+          <!-- [生産型式コード検索] -->
+          <isNotEmpty property="paramProductModelCd" prepend="AND">
+            RES.MODEL_CD LIKE #paramProductModelCd# || '%'
+          </isNotEmpty>
+          <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+          <isNotEmpty property="paramProductModelCdList" prepend="AND">
+            RES.MODEL_CD IN
+            <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+              #paramProductModelCdList[]#
+            </iterate>
+          </isNotEmpty>
+          <!-- [測定日(FROM)検索] -->
+          <isNotEmpty property="paramInspectionDtFrom" prepend="AND">
+            RES.CREATE_DT <![CDATA[>=]]> #paramInspectionDtFrom#
+          </isNotEmpty>
+          <!-- [測定日(TO)検索] -->
+          <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+            RES.CREATE_DT <![CDATA[<=]]> #paramInspectionDtTo#
+          </isNotEmpty>
+          <!-- [製品種別検索] -->
+          <isNotEmpty property="paramProductKindCd" prepend="AND">
+            VPM.GENERAL_PATTERN_CD = #paramProductKindCd#
+          </isNotEmpty>
+        </dynamic>
+        GROUP BY
+            RES.MODEL_CD,
+            SR7.SERIAL6,
+            RES.SERIAL,
+            RES.LINE_CD,
+            ILN.LINE_NM,
+            RES.INS_STATUS,
+            RES.PASS_BY,
+            RES.CREATE_BY,
+            RES.UPDATE_BY
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ/エンジン共通工程詳細:イメージチェックシート検索]                             -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectImgCheckHeader">
+        WITH
+        SGY AS (
+            SELECT
+                SGY.型式コード  MODEL_CD,
+                SGY.機番        SERIAL6,
+                SR7.SERIAL7     SERIAL7,
+                SGY.指示月度    ORDER_YM,
+                SGY.指示連番    ORDER_SEQ,
+                DECODE( LENGTH(TRIM(SGY.指示月度)), 0,NULL, SGY.指示月度 || '-' || LPAD(SGY.指示連番,5,'0') ) ORDER_YM_SEQ,
+                DECODE( LENGTH(TRIM(ZSK.実績月度)), 0,NULL, ZSK.実績月度 || '-' || LPAD(ZSK.実績連番,5,'0') ) FIX_YM_SEQ
+            FROM TBL_作業指示保存  SGY
+            LEFT JOIN TT_DI_SERIAL7  SR7
+                ON  SGY.型式コード = SR7.MODEL_CD
+                AND SGY.機番       = SR7.SERIAL6
+            LEFT JOIN TBL_通過実績保存 ZSK
+                ON  ZSK.ステーション = '214011'
+                AND SGY.指示レベル = ZSK.指示レベル
+                AND SGY.IDNO = ZSK.IDNO
+                AND SGY.指示月度 = ZSK.指示月度
+            <dynamic prepend="WHERE">
+              <!-- エンジン -->
+              <isEqual property="paramProductKindCd" compareValue="10" prepend="AND">
+                SGY.指示レベル IN ('3','7')
+              </isEqual>
+              <!-- トラクタ -->
+              <isEqual property="paramProductKindCd" compareValue="30" prepend="AND">
+                SGY.指示レベル = '1'
+              </isEqual>
+              <isNotEmpty property="paramProductModelCd" prepend="AND">
+                SGY.型式コード = #paramProductModelCd#
+              </isNotEmpty>
+              <isNotEmpty property="paramSerial">
+                <!-- エンジン -->
+                <isEqual property="paramProductKindCd" compareValue="10" prepend="AND">
+                  SR7.SERIAL7  = #paramSerial#
+                </isEqual>
+                <!-- トラクタ -->
+                <isEqual property="paramProductKindCd" compareValue="30" prepend="AND">
+                  SGY.機番     = #paramSerial#
+                </isEqual>
+              </isNotEmpty>
+            </dynamic>
+        )
+        SELECT
+            RES.LINE_CD,
+            RES.LINE_CD || '：' || ILN.LINE_NM   LINE_NM,
+            CASE
+                WHEN RES.INS_STATUS = '1' THEN '合格'
+                WHEN RES.INS_STATUS = '2' THEN '不合格'
+                ELSE '検査中'
+            END  PASS_STATUS,
+            CASE
+                WHEN RES.INS_STATUS = '1' THEN RES.PASS_BY
+                ELSE NULL
+            END  PASS_EMPLOYEE_CD,
+            TO_CHAR(RES.CREATE_DT,'YYYY/MM/DD HH24:MI:SS') INS_START_DT,
+            CASE
+                WHEN RES.INS_STATUS = '1' THEN TO_CHAR(RES.PASS_DT,'YYYY/MM/DD HH24:MI:SS')
+                ELSE NULL
+            END INS_END_DT,
+            SGY.ORDER_YM_SEQ  ORDER_NO,
+            SGY.FIX_YM_SEQ    DECISION_NO,
+            NULL        lastProc,
+            RES.CREATE_BY       INS_START_BY
+        FROM TT_SQ_ICS_INS_RESULT RES
+        LEFT JOIN SGY
+            ON  RES.MODEL_CD = SGY.MODEL_CD
+          <!-- エンジン -->
+          <isEqual property="paramProductKindCd" compareValue="10" prepend="AND">
+                RES.SERIAL   = SGY.SERIAL7
+          </isEqual>
+          <!-- トラクタ -->
+          <isEqual property="paramProductKindCd" compareValue="30" prepend="AND">
+                RES.SERIAL   = SGY.SERIAL6
+          </isEqual>
+        LEFT JOIN TM_SQ_ICS_LINE ILN
+            ON  RES.LINE_CD = ILN.LINE_CD
+            AND ILN.PLANT_CD ='28'
+            AND (RES.CREATE_DT BETWEEN ILN.APPLY_START_DT AND ILN.APPLY_END_DT)
+        <dynamic prepend="WHERE">
+          <isNotEmpty property="paramProductModelCd" prepend="AND">
+            RES.MODEL_CD = #paramProductModelCd#
+          </isNotEmpty>
+          <isNotEmpty property="paramSerial" prepend="AND">
+            RES.SERIAL = #paramSerial#
+          </isNotEmpty>
+          <isNotEmpty property="paramLineCd" prepend="AND">
+            RES.LINE_CD = #paramLineCd#
+          </isNotEmpty>
+        </dynamic>
+        ORDER BY
+            RES.CREATE_DT DESC,
+            RES.LINE_CD
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ/エンジン共通工程詳細:電子チェックシート 検査情報取得]                        -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectIcsChkInfo">
+        WITH
+        MAX_DTL AS (
+            SELECT
+                LINE_CD,
+                MODEL_CD,
+                SERIAL,
+                IDNO,
+                PROCESS_CD,
+                GUARANTEE_NO,
+                MAX(HISTORY_NO)    HISTORY_NO
+            FROM
+                TT_SQ_ICS_INS_RESULT_DTL
+            <dynamic prepend="WHERE">
+              <isNotEmpty property="paramProductModelCd" prepend="AND">
+                MODEL_CD = #paramProductModelCd#
+              </isNotEmpty>
+              <isNotEmpty property="paramSerial" prepend="AND">
+                SERIAL = #paramSerial#
+              </isNotEmpty>
+              <isNotEmpty property="paramLineCd" prepend="AND">
+                LINE_CD = #paramLineCd#
+              </isNotEmpty>
+            </dynamic>
+            GROUP BY
+                LINE_CD,
+                MODEL_CD,
+                SERIAL,
+                IDNO,
+                PROCESS_CD,
+                GUARANTEE_NO
+        ),
+        CHK_INFO AS (
+            SELECT DISTINCT
+                ITEM.PROCESS_CD,
+                PRO.PROCESS_SHORT_NM         PROD_PROC,
+                ITEM.DISPLAY_ORDER           GUARANTEE_NO,
+                ITEM.IMPORTANCE              CRIT_KIND,
+                ITEM.GUARANTEE_ITEM_NM  GUARANTEE_ITEM_NM,
+                CASE
+                    WHEN RDT.INPUT_VALUE1 IS NOT NULL THEN RDT.INPUT_VALUE1 || ITEM.SUFFIX_TEXT1
+                END  INPUT_VALUE1,
+                CASE
+                    WHEN RDT.INPUT_VALUE2 IS NOT NULL THEN RDT.INPUT_VALUE2 || ITEM.SUFFIX_TEXT2
+                END  INPUT_VALUE2,
+                CASE
+                    WHEN RDT.RESULT = '1' THEN 'OK'
+                    WHEN RDT.RESULT = '2' THEN 'NG'
+                END  PASS_STATUS,
+                RDT.INSPECT_DT    INS_DT,
+                RDT.INSPECT_BY  EMPLOYEE_CD,
+                DTL.HISTORY_NO,
+                PRO.DISPLAY_ORDER  DISPLAY_ORDER1
+            FROM
+                TT_SQ_ICS_INS_RESULT  RES
+            LEFT JOIN
+                TM_SQ_ICS_GUARANTEE_ITEM  ITEM
+                ON  ITEM.LINE_CD          = RES.LINE_CD
+                AND ITEM.GUARANTEE_GRP_CD = RES.GUARANTEE_GRP_CD
+                AND ITEM.REVISION_NO      = RES.REVISION_NO
+            LEFT JOIN
+                MAX_DTL  DTL
+                ON  RES.LINE_CD        = DTL.LINE_CD
+                AND RES.MODEL_CD       = DTL.MODEL_CD
+                AND RES.SERIAL         = DTL.SERIAL
+                AND RES.IDNO           = DTL.IDNO
+                AND ITEM.LINE_CD       = DTL.LINE_CD
+                AND ITEM.PROCESS_CD    = DTL.PROCESS_CD
+                AND ITEM.DISPLAY_ORDER = DTL.GUARANTEE_NO
+            LEFT JOIN
+                TT_SQ_ICS_INS_RESULT_DTL  RDT
+                ON  DTL.LINE_CD      = RDT.LINE_CD
+                AND DTL.MODEL_CD     = RDT.MODEL_CD
+                AND DTL.SERIAL       = RDT.SERIAL
+                AND DTL.IDNO         = RDT.IDNO
+                AND DTL.PROCESS_CD   = RDT.PROCESS_CD
+                AND DTL.GUARANTEE_NO = RDT.GUARANTEE_NO
+                AND DTL.HISTORY_NO    = RDT.HISTORY_NO
+            LEFT JOIN
+                TM_SQ_ICS_PROCESS  PRO
+                ON  ITEM.LINE_CD    = PRO.LINE_CD
+                AND ITEM.PROCESS_CD = PRO.PROCESS_CD
+                AND RES.CREATE_DT <![CDATA[>=]]> PRO.APPLY_START_DT
+                AND RES.CREATE_DT <![CDATA[<=]]> PRO.APPLY_END_DT
+            <dynamic prepend="WHERE">
+              <isNotEmpty property="paramProductModelCd" prepend="AND">
+                RES.MODEL_CD = #paramProductModelCd#
+              </isNotEmpty>
+              <isNotEmpty property="paramSerial" prepend="AND">
+                RES.SERIAL   = #paramSerial#
+              </isNotEmpty>
+              <isNotEmpty property="paramLineCd" prepend="AND">
+                RES.LINE_CD  = #paramLineCd#
+              </isNotEmpty>
+            </dynamic>
+        )
+        SELECT
+            PROD_PROC,
+            GUARANTEE_NO,
+            CRIT_KIND,
+            GUARANTEE_ITEM_NM,
+            INPUT_VALUE1,
+            INPUT_VALUE2,
+            PASS_STATUS,
+            CASE
+                WHEN PASS_STATUS IS NOT NULL THEN TO_CHAR(INS_DT,'YYYY/MM/DD HH24:MI:SS')
+            END INS_DT,
+            CASE
+                WHEN PASS_STATUS IS NOT NULL THEN EMPLOYEE_CD
+            END EMPLOYEE_CD
+        FROM
+            CHK_INFO
+        ORDER BY
+            DISPLAY_ORDER1,
+            PROCESS_CD,
+            GUARANTEE_NO
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ/エンジン共通工程詳細:電子チェックシート 不具合一覧取得]                      -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectIcsNGList">
+        WITH
+        IMG_CNT AS (
+            SELECT
+                LINE_CD,
+                MODEL_CD,
+                SERIAL,
+                PROCESS_CD,
+                GUARANTEE_NO,
+                NG_NO,
+                COUNT(CASE WHEN IMG_TYPE = '1' THEN 1 END) KIND1_CNT,
+                COUNT(CASE WHEN IMG_TYPE = '2' THEN 1 END) KIND2_CNT
+            FROM
+                TT_SQ_ICS_INS_RESULT_IMG
+            <dynamic prepend="WHERE">
+              <isNotEmpty property="paramProductModelCd" prepend="AND">
+                MODEL_CD = #paramProductModelCd#
+              </isNotEmpty>
+              <isNotEmpty property="paramSerial" prepend="AND">
+                SERIAL = #paramSerial#
+              </isNotEmpty>
+              <isNotEmpty property="paramLineCd" prepend="AND">
+                LINE_CD = #paramLineCd#
+              </isNotEmpty>
+            </dynamic>
+            GROUP BY
+                LINE_CD,
+                MODEL_CD,
+                SERIAL,
+                PROCESS_CD,
+                GUARANTEE_NO,
+                NG_NO
+        ),
+        NG_MAX AS (
+            SELECT
+                LINE_CD,
+                MODEL_CD,
+                SERIAL,
+                PROCESS_CD,
+                GUARANTEE_NO,
+                NG_NO
+                <!--MAX(HISTORY_NO)  HISTORY_NO-->
+            FROM
+                TT_SQ_ICS_INS_NG
+            <dynamic prepend="WHERE">
+              <isNotEmpty property="paramProductModelCd" prepend="AND">
+                MODEL_CD = #paramProductModelCd#
+              </isNotEmpty>
+              <isNotEmpty property="paramSerial" prepend="AND">
+                SERIAL = #paramSerial#
+              </isNotEmpty>
+              <isNotEmpty property="paramLineCd" prepend="AND">
+                LINE_CD = #paramLineCd#
+              </isNotEmpty>
+            </dynamic>
+        <!--GROUP BY-->
+        <!--        LINE_CD,-->
+        <!--        MODEL_CD,-->
+        <!--        SERIAL,-->
+        <!--        PROCESS_CD,-->
+        <!--        GUARANTEE_NO,-->
+        <!--        NG_NO-->
+        ),
+        DTL_MIN AS (
+            SELECT
+                LINE_CD,
+                MODEL_CD,
+                SERIAL,
+                PROCESS_CD,
+                GUARANTEE_NO,
+                MIN(HISTORY_NO)  HISTORY_NO
+            FROM
+                TT_SQ_ICS_INS_RESULT_DTL
+            WHERE
+                RESULT = '2'
+              <isNotEmpty property="paramProductModelCd" prepend="AND">
+                MODEL_CD = #paramProductModelCd#
+              </isNotEmpty>
+              <isNotEmpty property="paramSerial" prepend="AND">
+                SERIAL = #paramSerial#
+              </isNotEmpty>
+              <isNotEmpty property="paramLineCd" prepend="AND">
+                LINE_CD = #paramLineCd#
+              </isNotEmpty>
+            GROUP BY
+                LINE_CD,
+                MODEL_CD,
+                SERIAL,
+                PROCESS_CD,
+                GUARANTEE_NO
+        ),
+        DTL_BASE AS (
+            SELECT
+                DTL.LINE_CD,
+                DTL.MODEL_CD,
+                DTL.SERIAL,
+                DTL.PROCESS_CD,
+                DTL.GUARANTEE_NO,
+                DTL.HISTORY_NO,
+                DTL.INPUT_VALUE1,
+                DTL.INPUT_VALUE2
+            FROM
+                TT_SQ_ICS_INS_RESULT_DTL  DTL
+            INNER JOIN
+                DTL_MIN
+                ON  DTL.LINE_CD      = DTL_MIN.LINE_CD
+                AND DTL.MODEL_CD     = DTL_MIN.MODEL_CD
+                AND DTL.SERIAL       = DTL_MIN.SERIAL
+                AND DTL.PROCESS_CD   = DTL_MIN.PROCESS_CD
+                AND DTL.GUARANTEE_NO = DTL_MIN.GUARANTEE_NO
+                AND DTL.HISTORY_NO   = DTL_MIN.HISTORY_NO
+        )
+        SELECT
+            PRO.PROCESS_SHORT_NM      PROD_PROC,
+            NVL(ITEM.DISPLAY_ORDER,0) GUARANTEE_NO,
+            NG.NG_NO                  RECORD_NO,
+            ITEM.IMPORTANCE           CRIT_KIND,
+            CASE
+                WHEN ITEM.DISPLAY_ORDER IS NULL THEN N'追加不具合'
+                ELSE ITEM.GUARANTEE_ITEM_NM
+            END  GUARANTEE_NM,
+            CASE
+                WHEN NG.CONFIRM_COMP_FLG = '1' THEN '確認済み'
+                ELSE '未確認'
+            END  CONFIRM_STATUS,
+            NG.NG_DTL,
+            DTL.INPUT_VALUE1 || ITEM.SUFFIX_TEXT1 INPUT_VALUE1,
+            DTL.INPUT_VALUE2 || ITEM.SUFFIX_TEXT2 INPUT_VALUE2,
+            CASE
+                WHEN DTL.INPUT_VALUE2 IS NOT NULL THEN DTL.INPUT_VALUE1 || ITEM.SUFFIX_TEXT1 || '／' || DTL.INPUT_VALUE2 || ITEM.SUFFIX_TEXT2
+                WHEN DTL.INPUT_VALUE1 IS NOT NULL THEN DTL.INPUT_VALUE1 || ITEM.SUFFIX_TEXT1
+            END  NG_VALUE,
+            TO_CHAR(NG.NG_RECORD_DT,'YYYY/MM/DD HH24:MI:SS')  NG_UPDATE_DT,
+            NG.NG_RECORD_BY  NG_UPDATE_EMPL_CD,
+            CASE
+                WHEN IMG.KIND1_CNT <![CDATA[>]]> 0 THEN IMG.KIND1_CNT
+                ELSE 0
+            END  NG_IMG_CNT,
+            CASE WHEN NG.ADJUST_COMP_FLG = 0 THEN '手直し無し'
+                 WHEN NG.ADJUST_COMP_FLG = 1 THEN '手直し有り'
+                END  ADJUST_STATUS,
+            NG.ADJUST_DTL,
+            CASE
+                WHEN NG.RESPONSIBLE_TO IS NOT NULL THEN NG.RESPONSIBLE_TO || '：' || CAU.MINOR_SHORT_NM
+            END  NG_CAUSED_LINE_CD,
+            NG.REMARK  NG_CAUSED_LINE,
+            TO_CHAR(NG.ADJUST_RECORD_DT,'YYYY/MM/DD HH24:MI:SS')  ADJUST_DT,
+            NG.ADJUST_RECORD_BY  ADJUST_EMPL_CD,
+            CASE
+                WHEN IMG.KIND2_CNT <![CDATA[>]]> 0 THEN IMG.KIND2_CNT
+                ELSE 0
+            END  ADJUST_IMG_CNT,
+            TO_CHAR(NG.CONFIRM_DT,'YYYY/MM/DD HH24:MI:SS')  CONFIRM_DT,
+            NG.CONFIRM_BY  CONFIRM_EMPL_CD
+        FROM
+            TT_SQ_ICS_INS_NG  NG
+        INNER JOIN
+            NG_MAX
+            ON  NG.LINE_CD      = NG_MAX.LINE_CD
+            AND NG.MODEL_CD     = NG_MAX.MODEL_CD
+            AND NG.SERIAL       = NG_MAX.SERIAL
+            AND NG.PROCESS_CD   = NG_MAX.PROCESS_CD
+            AND NG.GUARANTEE_NO = NG_MAX.GUARANTEE_NO
+            <!--AND NG.HISTORY_NO    = NG_MAX.HISTORY_NO-->
+            AND NG.NG_NO        = NG_MAX.NG_NO
+        INNER JOIN
+            TT_SQ_ICS_INS_RESULT  RES
+            ON  NG.LINE_CD  = RES.LINE_CD
+            AND NG.MODEL_CD = RES.MODEL_CD
+            AND NG.SERIAL   = RES.SERIAL
+        LEFT JOIN
+            TM_SQ_ICS_GUARANTEE_ITEM  ITEM
+            ON  RES.LINE_CD          = ITEM.LINE_CD
+            AND RES.GUARANTEE_GRP_CD = ITEM.GUARANTEE_GRP_CD
+            AND RES.REVISION_NO      = ITEM.REVISION_NO
+            AND NG.PROCESS_CD        = ITEM.PROCESS_CD
+            AND NG.GUARANTEE_NO      = ITEM.GUARANTEE_NO
+        LEFT JOIN
+            DTL_BASE  DTL
+            ON  NG.LINE_CD      = DTL.LINE_CD
+            AND NG.MODEL_CD     = DTL.MODEL_CD
+            AND NG.SERIAL       = DTL.SERIAL
+            AND NG.PROCESS_CD   = DTL.PROCESS_CD
+            AND NG.GUARANTEE_NO = DTL.GUARANTEE_NO
+        LEFT JOIN
+            IMG_CNT  IMG
+            ON  NG.LINE_CD      = IMG.LINE_CD
+            AND NG.MODEL_CD     = IMG.MODEL_CD
+            AND NG.SERIAL       = IMG.SERIAL
+            AND NG.PROCESS_CD   = IMG.PROCESS_CD
+            AND NG.GUARANTEE_NO = IMG.GUARANTEE_NO
+            AND NG.NG_NO        = IMG.NG_NO
+        LEFT JOIN
+            TM_SQ_ICS_NG_CAUSE  CAU
+            ON  NG.LINE_CD = CAU.LINE_CD
+            AND NG.RESPONSIBLE_TO = CAU.MINOR_CD
+            AND NG.ADJUST_RECORD_DT <![CDATA[>=]]> CAU.APPLY_START_DT
+            AND CAU.APPLY_END_DT <![CDATA[>=]]> NG.ADJUST_RECORD_DT
+        LEFT JOIN
+            TM_SQ_ICS_PROCESS  PRO
+            ON  NG.LINE_CD    = PRO.LINE_CD
+            AND NG.PROCESS_CD = PRO.PROCESS_CD
+            AND NG.NG_RECORD_DT <![CDATA[>=]]> PRO.APPLY_START_DT
+            AND NG.NG_RECORD_DT <![CDATA[<=]]> PRO.APPLY_END_DT
+        <dynamic prepend="WHERE">
+          <isNotEmpty property="paramProductModelCd" prepend="AND">
+            NG.MODEL_CD = #paramProductModelCd#
+          </isNotEmpty>
+          <isNotEmpty property="paramSerial" prepend="AND">
+            NG.SERIAL = #paramSerial#
+          </isNotEmpty>
+          <isNotEmpty property="paramLineCd" prepend="AND">
+            NG.LINE_CD = #paramLineCd#
+          </isNotEmpty>
+        </dynamic>
+        ORDER BY
+            NG.PROCESS_CD,
+            ITEM.DISPLAY_ORDER,
+            NG.NG_NO
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ/エンジン共通工程詳細:電子チェックシート 不具合画像検索]                      -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectIcsNGImg">
+        WITH NG_MAX AS (
+            SELECT
+                LINE_CD,
+                MODEL_CD,
+                SERIAL,
+                IDNO,
+                PROCESS_CD,
+                GUARANTEE_NO,
+                NG_NO
+                <!--MAX(HISTORY_NO)  HISTORY_NO-->
+            FROM
+                TT_SQ_ICS_INS_NG
+            <dynamic prepend="WHERE">
+              <isNotEmpty property="paramProductModelCd" prepend="AND">
+                MODEL_CD = #paramProductModelCd#
+              </isNotEmpty>
+              <isNotEmpty property="paramSerial" prepend="AND">
+                SERIAL   = #paramSerial#
+              </isNotEmpty>
+              <isNotEmpty property="paramLineCd" prepend="AND">
+                LINE_CD  = #paramLineCd#
+              </isNotEmpty>
+            </dynamic>
+        <!--GROUP BY-->
+        <!--    LINE_CD,-->
+        <!--    MODEL_CD,-->
+        <!--    SERIAL,-->
+        <!--    IDNO,-->
+        <!--    PROCESS_CD,-->
+        <!--    GUARANTEE_NO,-->
+        <!--    IDNO,-->
+        <!--    NG_NO-->
+        )
+        SELECT
+            CASE
+                WHEN NG.GUARANTEE_NO IS NULL THEN NULL
+                WHEN NG.GUARANTEE_NO = 0 THEN PRO.PROCESS_SHORT_NM || '-' || NG.NG_NO
+                ELSE PRO.PROCESS_SHORT_NM || '-' || NG.GUARANTEE_NO || '-' || NG.NG_NO
+            END PROD_PROC_INFO,
+            NG.NG_DTL,
+            IMG.IMG_DATA  IMAGE_DATA
+        FROM
+            TT_SQ_ICS_INS_RESULT_IMG  IMG
+        INNER JOIN
+            TT_SQ_ICS_INS_NG  NG
+            ON  IMG.LINE_CD      = NG.LINE_CD
+            AND IMG.MODEL_CD     = NG.MODEL_CD
+            AND IMG.SERIAL       = NG.SERIAL
+            AND IMG.IDNO         = NG.IDNO
+            AND IMG.PROCESS_CD   = NG.PROCESS_CD
+            AND IMG.GUARANTEE_NO = NG.GUARANTEE_NO
+            AND IMG.NG_NO        = NG.NG_NO
+        INNER JOIN
+            NG_MAX
+            ON  NG.LINE_CD      = NG_MAX.LINE_CD
+            AND NG.MODEL_CD     = NG_MAX.MODEL_CD
+            AND NG.SERIAL       = NG_MAX.SERIAL
+            AND NG.PROCESS_CD   = NG_MAX.PROCESS_CD
+            AND NG.GUARANTEE_NO = NG_MAX.GUARANTEE_NO
+            <!--AND NG.HISTORY_NO    = NG_MAX.HISTORY_NO-->
+            AND NG.NG_NO    = NG_MAX.NG_NO
+        LEFT JOIN
+            TM_SQ_ICS_PROCESS PRO
+            ON  IMG.LINE_CD     = PRO.LINE_CD
+            AND IMG.PROCESS_CD  = PRO.PROCESS_CD
+            AND NG.NG_RECORD_DT <![CDATA[>=]]> PRO.APPLY_START_DT
+            AND NG.NG_RECORD_DT <![CDATA[<=]]> PRO.APPLY_END_DT
+        WHERE
+            IMG.IMG_TYPE IN ('1','2')
+          <isNotEmpty property="paramProductModelCd" prepend="AND">
+            IMG.MODEL_CD = #paramProductModelCd#
+          </isNotEmpty>
+          <isNotEmpty property="paramSerial" prepend="AND">
+            IMG.SERIAL = #paramSerial#
+          </isNotEmpty>
+          <isNotEmpty property="paramLineCd" prepend="AND">
+            IMG.LINE_CD = #paramLineCd#
+          </isNotEmpty>
+        ORDER BY
+            IMG.PROCESS_CD,
+            DECODE(IMG.GUARANTEE_NO,0,999,IMG.GUARANTEE_NO),
+            IMG.NG_NO
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ/エンジン共通工程詳細:電子チェックシート 検査画像画像取得]                    -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectIcsChkImg">
+        SELECT
+            PRO.PROCESS_SHORT_NM  PROD_PROC_INFO,
+            IMG.IMG_DATA          IMAGE_DATA
+        FROM
+            TT_SQ_ICS_INS_RESULT_IMG IMG
+        LEFT JOIN
+            TM_SQ_ICS_PROCESS PRO
+            ON  IMG.LINE_CD    = PRO.LINE_CD
+            AND IMG.PROCESS_CD = PRO.PROCESS_CD
+            AND IMG.CREATE_DT <![CDATA[>=]]> PRO.APPLY_START_DT
+            AND IMG.CREATE_DT <![CDATA[<=]]> PRO.APPLY_END_DT
+        WHERE
+            IMG.IMG_TYPE = '3'
+          <isNotEmpty property="paramProductModelCd" prepend="AND">
+            IMG.MODEL_CD = #paramProductModelCd#
+          </isNotEmpty>
+          <isNotEmpty property="paramSerial" prepend="AND">
+            IMG.SERIAL = #paramSerial#
+          </isNotEmpty>
+          <isNotEmpty property="paramLineCd" prepend="AND">
+            IMG.LINE_CD = #paramLineCd#
+          </isNotEmpty>
+        ORDER BY
+            IMG.PROCESS_CD,
+            IMG.IMG_NO
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ/エンジン共通工程詳細:イメージチェックシート検索(最終工程)]                   -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectImgCheckLastProc">
+        WITH
+        MAXDTL AS (
+            SELECT
+                MAX(UPDATE_DT) UPDATE_DT
+            FROM
+                TT_SQ_ICS_INS_RESULT_DTL
+            <dynamic prepend="WHERE">
+              <isNotEmpty property="paramProductModelCd" prepend="AND">
+                MODEL_CD = #paramProductModelCd#
+              </isNotEmpty>
+              <isNotEmpty property="paramSerial" prepend="AND">
+                SERIAL = #paramSerial#
+              </isNotEmpty>
+              <isNotEmpty property="paramLineCd" prepend="AND">
+                LINE_CD = #paramLineCd#
+              </isNotEmpty>
+            </dynamic>
+          ),
+        MAXNG AS (
+            SELECT
+                MAX(UPDATE_DT) UPDATE_DT
+            FROM
+                TT_SQ_ICS_INS_NG
+            <dynamic prepend="WHERE">
+              <isNotEmpty property="paramProductModelCd" prepend="AND">
+                MODEL_CD = #paramProductModelCd#
+              </isNotEmpty>
+              <isNotEmpty property="paramSerial" prepend="AND">
+                SERIAL = #paramSerial#
+              </isNotEmpty>
+              <isNotEmpty property="paramLineCd" prepend="AND">
+                LINE_CD = #paramLineCd#
+              </isNotEmpty>
+            </dynamic>
+          ),
+        MAXIMG AS (
+            SELECT
+                MAX(UPDATE_DT) UPDATE_DT
+            FROM
+              TT_SQ_ICS_INS_RESULT_IMG
+            <dynamic prepend="WHERE">
+              <isNotEmpty property="paramProductModelCd" prepend="AND">
+                MODEL_CD = #paramProductModelCd#
+              </isNotEmpty>
+              <isNotEmpty property="paramSerial" prepend="AND">
+                SERIAL = #paramSerial#
+              </isNotEmpty>
+              <isNotEmpty property="paramLineCd" prepend="AND">
+                LINE_CD = #paramLineCd#
+              </isNotEmpty>
+            </dynamic>
+          ),
+        WRK AS (
+            SELECT DISTINCT
+                DTL.LINE_CD,
+                DTL.MODEL_CD,
+                DTL.SERIAL,
+                DTL.IDNO,
+                DTL.PROCESS_CD,
+                DTL.UPDATE_DT
+            FROM
+                TT_SQ_ICS_INS_RESULT_DTL DTL
+            INNER JOIN
+                MAXDTL ON ( DTL.UPDATE_DT = MAXDTL.UPDATE_DT)
+            <dynamic prepend="WHERE">
+              <isNotEmpty property="paramProductModelCd" prepend="AND">
+                DTL.MODEL_CD = #paramProductModelCd#
+              </isNotEmpty>
+              <isNotEmpty property="paramSerial" prepend="AND">
+                DTL.SERIAL = #paramSerial#
+              </isNotEmpty>
+              <isNotEmpty property="paramLineCd" prepend="AND">
+                DTL.LINE_CD = #paramLineCd#
+              </isNotEmpty>
+            </dynamic>
+            UNION
+            SELECT DISTINCT
+                NG.LINE_CD,
+                NG.MODEL_CD,
+                NG.SERIAL,
+                NG.IDNO,
+                NG.PROCESS_CD,
+                NG.UPDATE_DT
+            FROM
+                TT_SQ_ICS_INS_NG NG
+            INNER JOIN
+                MAXNG
+                ON  NG.UPDATE_DT = MAXNG.UPDATE_DT
+            <dynamic prepend="WHERE">
+              <isNotEmpty property="paramProductModelCd" prepend="AND">
+                NG.MODEL_CD = #paramProductModelCd#
+              </isNotEmpty>
+              <isNotEmpty property="paramSerial" prepend="AND">
+                NG.SERIAL = #paramSerial#
+              </isNotEmpty>
+              <isNotEmpty property="paramLineCd" prepend="AND">
+                NG.LINE_CD = #paramLineCd#
+              </isNotEmpty>
+            </dynamic>
+            UNION
+            SELECT DISTINCT
+                IMG.LINE_CD,
+                IMG.MODEL_CD,
+                IMG.SERIAL,
+                IMG.IDNO,
+                IMG.PROCESS_CD,
+                IMG.UPDATE_DT
+            FROM
+                TT_SQ_ICS_INS_RESULT_IMG IMG
+            INNER JOIN
+                MAXIMG
+                ON  IMG.UPDATE_DT = MAXIMG.UPDATE_DT
+            <dynamic prepend="WHERE">
+              <isNotEmpty property="paramProductModelCd" prepend="AND">
+                IMG.MODEL_CD = #paramProductModelCd#
+              </isNotEmpty>
+              <isNotEmpty property="paramSerial" prepend="AND">
+                IMG.SERIAL = #paramSerial#
+              </isNotEmpty>
+              <isNotEmpty property="paramLineCd" prepend="AND">
+                IMG.LINE_CD = #paramLineCd#
+              </isNotEmpty>
+            </dynamic>
+          ),
+        BASE AS (
+            SELECT
+                WRK.LINE_CD,
+                WRK.MODEL_CD,
+                WRK.SERIAL,
+                WRK.IDNO,
+                PRO.PROCESS_SHORT_NM  lastProc
+            FROM
+                WRK
+            LEFT JOIN
+                TM_SQ_ICS_PROCESS  PRO
+                ON  WRK.LINE_CD  = PRO.LINE_CD
+                AND WRK.PROCESS_CD = PRO.PROCESS_CD
+                AND #paramInspectDt# <![CDATA[>=]]> PRO.APPLY_START_DT
+                AND #paramInspectDt# <![CDATA[<=]]> PRO.APPLY_END_DT
+            ORDER BY
+                WRK.UPDATE_DT DESC  NULLS LAST
+          )
+        SELECT
+            LINE_CD,
+            MODEL_CD,
+            SERIAL,
+            lastPRoc
+        FROM
+            BASE
+        WHERE
+            ROWNUM = 1
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ/エンジン共通工程詳細:課情報検索]                                             -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectSection">
+        SELECT
+            SEC.SECTION_CD,
+            SEC.SECTION_NM,
+            SEC.SECTION_SHORT_NM,
+            LINE.LINE_CD,
+            LINE.LINE_NM,
+            LINE.LINE_SHORT_NM
+        FROM TM_CC_SECTION  SEC
+        INNER JOIN TM_SQ_ICS_LINE LINE
+            ON  LINE.SECTION_CD = SEC.SECTION_CD
+            AND LINE.PLANT_CD = '28'
+        WHERE
+            SEC.PLANT_CD = '28'
+        <isNotEmpty property="lineCd" prepend=" AND ">
+            LINE.LINE_CD = #lineCd#
+        </isNotEmpty>
+      　  <isNotEmpty property="insStartDate" prepend=" AND ">
+            (#insStartDate# BETWEEN LINE.APPLY_START_DT AND LINE.APPLY_END_DT)
+        </isNotEmpty>
+        ORDER BY
+            SEC.SECTION_CD,
+            LINE.LINE_CD
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ/エンジン共通工程一覧:AI画像解析検索]                                         -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectAiImageList">
+        SELECT
+            IAR.STATION stationCd, 
+            NULL stationNm, 
+            IAR.MODEL_CD productModelCd, 
+            IAR.SERIAL serial6, 
+            IAR.ANL_RUSULT result,
+            ISW.G_DRIVE_PATH pathByWork, 
+            ISD.G_DRIVE_PATH pathByDay,
+            NULL gDrivePath
+        FROM
+            TT_SQ_IMG_ANL_RESULT IAR 
+        INNER JOIN
+        (
+            SELECT 
+                STATION, MODEL_CD, SERIAL, MAX(RECORD_NO) RECORD_NO
+            FROM
+                TT_SQ_IMG_ANL_RESULT
+            GROUP BY
+                STATION, MODEL_CD, SERIAL
+        ) IAR_G ON IAR.STATION = IAR_G.STATION AND IAR.MODEL_CD = IAR_G.MODEL_CD AND IAR.SERIAL = IAR_G.SERIAL AND IAR.RECORD_NO = IAR_G.RECORD_NO 
+        LEFT JOIN TT_PC_IMAGE_STRAGE_BY_WORK ISW 
+            ON IAR.STATION = ISW.STATION AND
+            IAR.IDNO = ISW.IDNO AND
+            IAR.MONTHLY_SEQUENCE_NUMBER = ISW.MONTHLY_SEQUENCE_NUMBER AND
+            IAR.RECORD_NO = ISW.RECORD_NO 
+        LEFT JOIN TT_PC_IMAGE_STRAGE_BY_DAY ISD 
+            ON IAR.STATION = ISD.STATION AND
+            TO_CHAR(IAR.ANL_DATE, 'YYYYMMDD') = TO_CHAR(ISD.PROCESS_DT, 'YYYYMMDD')
+      <dynamic prepend="WHERE">
+        <!-- [ステーション検索](必須) -->
+        <isNotEmpty property="paramStationCdList" prepend="AND">
+          IAR.STATION IN
+          <iterate property="paramStationCdList" open="(" close=")" conjunction="," >
+            #paramStationCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <!--[機番検索](modelCd/serial6メンバを含むリスト)-->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (IAR.MODEL_CD, IAR.SERIAL) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!--[生産型式コード検索]-->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          IAR.MODEL_CD like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!--[生産型式コードリスト検索(型式名からの逆引き用)]-->
+        <isNotEmpty property="paramProductModelCdList" prepend="AND">
+          IAR.MODEL_CD IN
+          <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+            #paramProductModelCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <!--[測定日(FROM)検索]-->
+        <isNotEmpty property="paramInspectionDtFrom" prepend="AND">
+          IAR.ANL_DATE <![CDATA[>=]]> #paramInspectionDtFrom#
+        </isNotEmpty>
+        <!--[測定日(TO)検索]-->
+        <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+          IAR.ANL_DATE <![CDATA[<=]]> #paramInspectionDtTo#
+        </isNotEmpty>
+      </dynamic>
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ/エンジン共通工程詳細:AI画像解析検索]                                         -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectAiImageDetail">
+        SELECT
+            IAR.STATION stationCd, 
+            NULL stationNm,          
+            CASE
+                WHEN IAR.ANL_RUSULT = '0' THEN 'NG'
+                WHEN IAR.ANL_RUSULT = '1' THEN 'OK'
+                WHEN IAR.ANL_RUSULT = '2' THEN 'スキップ'
+            END  result,
+            TO_CHAR(IAR.ANL_DATE, 'YYYY/MM/DD HH24:MI:SS') anlDate,
+            ISW.PREVIEW_PATH previewPath, 
+            IAI.CATEGORY category, 
+            IAI.IMG_ANL_ITEM_NM anlItemNm, 
+            NT.NG_TYPE_NM ngTypeNm
+        FROM
+            TT_SQ_IMG_ANL_RESULT IAR 
+        INNER JOIN
+        (
+            SELECT 
+                STATION, MODEL_CD, SERIAL, MAX(RECORD_NO) RECORD_NO
+            FROM
+                TT_SQ_IMG_ANL_RESULT
+            GROUP BY
+                STATION, MODEL_CD, SERIAL
+        ) IAR_G ON IAR.STATION = IAR_G.STATION AND IAR.MODEL_CD = IAR_G.MODEL_CD AND IAR.SERIAL = IAR_G.SERIAL AND IAR.RECORD_NO = IAR_G.RECORD_NO 
+        LEFT JOIN TT_PC_IMAGE_STRAGE_BY_WORK ISW 
+            ON IAR.STATION = ISW.STATION AND
+            IAR.IDNO = ISW.IDNO AND
+            IAR.MONTHLY_SEQUENCE_NUMBER = ISW.MONTHLY_SEQUENCE_NUMBER AND
+            IAR.RECORD_NO = ISW.RECORD_NO 
+        LEFT JOIN TM_SQ_IMG_ANL_ITEM IAI 
+            ON IAR.IMG_ANL_ITEM_CD = IAI.IMG_ANL_ITEM_CD AND
+            IAR.REVISION_NO = IAI.REVISION_NO
+        LEFT JOIN TM_SQ_IMG_ANL_NG_TYPE NT 
+            ON IAR.NG_TYPE_CD = NT.NG_TYPE_CD
+        <dynamic prepend="WHERE">
+          <!-- [ステーション検索](必須) -->
+          <isNotEmpty property="paramStationCdList" prepend="AND">
+            IAR.STATION IN
+            <iterate property="paramStationCdList" open="(" close=")" conjunction="," >
+              #paramStationCdList[]#
+            </iterate>
+          </isNotEmpty>
+          <isNotEmpty property="paramSerial" prepend="AND">
+            (IAR.MODEL_CD, IAR.SERIAL) IN ((#paramSerial.productModelCd#, #paramSerial.serial6#))
+          </isNotEmpty>
+        </dynamic>
+        ORDER BY
+            IAR.STATION
+    </statement>
+  </statements>
+</sqlMap>

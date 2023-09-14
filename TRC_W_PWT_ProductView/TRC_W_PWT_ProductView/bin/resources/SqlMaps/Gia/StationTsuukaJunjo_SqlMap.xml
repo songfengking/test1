@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="StationTsuukaJunjo"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <statement id="SelectList">
+      SELECT DISTINCT
+      工場,
+      ステーションコード,
+      工程順序,
+      表示フラグ,
+      表示名称,
+      備考
+      FROM
+      TBL_ステーション通過順序
+      WHERE
+      <!-- トラクタ -->
+      <isEqual property="shijiLevel" compareValue="1">
+        表示フラグ = '4'
+      </isEqual>
+      <!-- 03エンジン -->
+      <isEqual property="shijiLevel" compareValue="3">
+        表示フラグ IN ('1','3')
+      </isEqual>
+      <!-- 07エンジン -->
+      <isEqual property="shijiLevel" compareValue="7">
+        表示フラグ IN ('2','3')
+      </isEqual>
+      ORDER BY
+      工程順序
+    </statement>
+  </statements>
+</sqlMap>

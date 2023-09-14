@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="PickingDetail"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+
+    <!-- ************************************************************************************** -->
+    <!-- [ピッキング明細情報]                                                        -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectPickingDetail">
+      SELECT
+        KPD.DISP_ORDER                      NO,
+        TRIM(KPD.PARTS_NUMBER)              PARTS_NUMBER,
+        TRIM(KPD.MATERIAL_NAME)             MATERIAL_NAME,
+        KPD.END_TIME                        END_TIME,
+        TO_CHAR(KPICR.DELIVERY_INSTRUCTION_DATE,'YYYY/MM/DD') DELIVERY_INSTRUCTION_DATE,
+        TRIM(KPD.ZAIKAN_PRIMARY_LOCATION)   ZAIKAN_PRIMARY_LOCATION,
+        TRIM(KPD.ZAIKAN_SECONDARY_LOCATION) || '-' || TRIM(KPD.ZAIKAN_TERTIARY_LOCATION)  ZAIKAN_SEC_TER_LOCATION,
+        TRIM(KPD.SNP)                       SNP,
+        TRIM(KPD.SCAN_COMP_PICKING_BOX_COUNT) || '/' || TRIM(KPD.PICKING_BOX_COUNT)  PICKING_BOX_COUNT,
+        CASE
+          WHEN KPD.STATUS = 9 THEN '完了'
+          ELSE '未完了'
+        END                                 PICKING_STATUS,
+        KPD.KANBAN_COMPARE_COMP_TIME        KANBAN_COMPARE_COMP_TIME
+      FROM
+        TT_HR_KANBAN_PICKING_DETAIL KPD
+      LEFT JOIN
+        TT_HR_KANBAN_PICKING_IDENTIFICATION_CARD_RECORD KPICR
+      ON
+        KPD.PICKING_LIST_NO = KPICR.PICKING_LIST_NO
+      AND
+        KPD.DISP_ORDER = KPICR.DISP_ORDER
+      WHERE
+        KPD.PICKING_LIST_NO     = #pickingNo#
+      ORDER BY
+        KPD.DISP_ORDER,
+        KPICR.DELIVERY_INSTRUCTION_DATE ASC
+
+    </statement>
+
+
+  </statements>
+</sqlMap>

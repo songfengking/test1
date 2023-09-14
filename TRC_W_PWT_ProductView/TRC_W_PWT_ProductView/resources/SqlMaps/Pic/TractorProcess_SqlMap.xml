@@ -1,0 +1,3094 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="TractorProcess"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:パワクロ走行検査検索]                                                -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectTractorPCrawlerList">
+      SELECT
+        SIIR.MODEL_CD                productModelCd,     <!--型式コード-->
+        SIIR.SERIAL_NUMBER           serial6,            <!--機番-->
+        SIIR.FINAL_INSPECTION_END_TIME inspectionDt,       <!--測定日 -->
+        CASE                                            <!--結果-->
+          WHEN SIIR.ALL_INSPECTION_COMPLETE_FLAG = '1' THEN 'OK'
+          ELSE 'NG'
+        END  result,
+        CASE                                            <!--モンロー検査-->
+          WHEN SIIR.RT_MONROE_INS_FLAG = '0' THEN 'しない'
+          WHEN SIIR.RT_MONROE_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_MONROE_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_MONROE_INS_FLAG = '3' THEN '未実施'
+        END monroeResult,
+        CASE                                            <!--PTO検査-->
+          WHEN SIIR.RT_PTO_INS_FLAG = '0' THEN 'しない'
+          WHEN SIIR.RT_PTO_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_PTO_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_PTO_INS_FLAG = '3' THEN '未実施'
+        END ptoResult,
+        CASE                                            <!--油圧検査-->
+          WHEN SIIR.RT_HYDRAULIC_INS_FLAG = '0' THEN 'しない'
+          WHEN SIIR.RT_HYDRAULIC_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_HYDRAULIC_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_HYDRAULIC_INS_FLAG = '3' THEN '未実施'
+        END hydraulicResult,
+        CASE                                            <!--ライト検査-->
+          WHEN SIIR.RT_HEADLIGHT_INS_FLAG = '0' THEN 'しない'
+          WHEN SIIR.RT_HEADLIGHT_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_HEADLIGHT_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_HEADLIGHT_INS_FLAG = '3' THEN '未実施'
+        END headlightResult,
+        CASE                                            <!--キーストップ検査-->
+          WHEN SIIR.RT_KEY_STOP_INS_FLAG = '0' THEN 'しない'
+          WHEN SIIR.RT_KEY_STOP_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_KEY_STOP_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_KEY_STOP_INS_FLAG = '3' THEN '未実施'
+        END keystopResult,
+        CASE                                            <!--ハンドル締付検査-->
+          WHEN SIIR.RT_STG_TIGHTEN_INS_FLAG = '0' THEN 'しない'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_FLAG = '3' THEN '未実施'
+        END steeringResult,
+        CASE                                            <!--走行検査-->
+          WHEN SIIR.RT_MAX_SPEED_INS_FLAG = '0' THEN 'しない'
+          WHEN SIIR.RT_MAX_SPEED_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_MAX_SPEED_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_MAX_SPEED_INS_FLAG = '3' THEN '未実施'
+        END speedResult,
+        CASE                                            <!--異音検査-->
+          WHEN SIIR.RT_SIS_INS_FLAG = '0' THEN 'しない'
+          WHEN SIIR.RT_SIS_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_SIS_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_SIS_INS_FLAG = '3' THEN '未実施'
+        END noiseResult,
+        SIIR_G.HISTORY_COUNT         historyIndex        <!--来歴No-->
+      FROM
+        TT_SQ_SPT_INS_ITEM_RESULT SIIR
+        INNER JOIN
+        (
+        SELECT
+          MODEL_CD, SERIAL_NUMBER, MAX(FINAL_INSPECTION_END_TIME) FINAL_INSPECTION_END_TIME, COUNT(ALL_INSPECTION_COMPLETE_FLAG) HISTORY_COUNT
+        FROM
+          TT_SQ_SPT_INS_ITEM_RESULT
+        GROUP BY
+          MODEL_CD, SERIAL_NUMBER
+        ) SIIR_G ON SIIR.MODEL_CD = SIIR_G.MODEL_CD AND SIIR.SERIAL_NUMBER = SIIR_G.SERIAL_NUMBER AND SIIR.FINAL_INSPECTION_END_TIME = SIIR_G.FINAL_INSPECTION_END_TIME
+      <dynamic prepend="WHERE">
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (SIIR.MODEL_CD, SIIR.SERIAL_NUMBER) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          SIIR.MODEL_CD like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+        <isNotEmpty property="paramProductModelCdList" prepend="AND">
+          SIIR.MODEL_CD IN
+          <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+            #paramProductModelCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <!-- [測定日(FROM)検索] -->
+        <isNotEmpty property="paramInspectionDtFrom" prepend="AND">
+          SIIR.FINAL_INSPECTION_END_TIME <![CDATA[>=]]> #paramInspectionDtFrom#
+        </isNotEmpty>
+        <!-- [測定日(TO)検索] -->
+        <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+          SIIR.FINAL_INSPECTION_END_TIME <![CDATA[<=]]> #paramInspectionDtTo#
+        </isNotEmpty>
+      </dynamic>
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:チェックシートイメージ検索]                                          -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectTractorCheckSheetList">
+      SELECT
+        CHK.型式コード              productModelCd,     <!--型式コード-->
+        CHK.機番                    serial6,            <!--機番-->
+        MAX(CHK.作成日時)           inspectionDt,       <!--測定日-->
+        COUNT(型式コード)           checkSheetCount     <!--チェックシート数-->
+      FROM
+        TBL_チェックシートイメージ CHK
+      <dynamic prepend="WHERE">
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (CHK.型式コード, CHK.機番) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          CHK.型式コード like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+        <isNotEmpty property="paramProductModelCdList" prepend="AND">
+          CHK.型式コード IN
+          <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+            #paramProductModelCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <!-- [測定日(FROM)検索] -->
+        <isNotEmpty property="paramInspectionDtFrom" prepend="AND">
+          CHK.作成日時 <![CDATA[>=]]> #paramInspectionDtFrom#
+        </isNotEmpty>
+        <!-- [測定日(TO)検索] -->
+        <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+          CHK.作成日時 <![CDATA[<=]]> #paramInspectionDtTo#
+        </isNotEmpty>
+      </dynamic>
+      GROUP BY
+      CHK.型式コード, CHK.機番
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:検査ベンチ検索]                                                      -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectTestBenchList">
+      WITH TARGET AS (
+        SELECT
+          PRO_CODE,SERIAL,HISTORY_NO,RESULT,CREATE_DT
+        FROM
+          TT_SF_MAF_BENCH_INSP_RESULT
+          <dynamic prepend="WHERE">
+            <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+            <isNotEmpty property="paramSerialList" prepend="AND">
+              (PRO_CODE, SERIAL) IN
+              <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+                (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+              </iterate>
+            </isNotEmpty>
+            <!-- [生産型式コード検索] -->
+            <isNotEmpty property="paramProductModelCd" prepend="AND">
+              PRO_CODE like #paramProductModelCd# || '%'
+            </isNotEmpty>
+            <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+            <isNotEmpty property="paramProductModelCdList" prepend="AND">
+              PRO_CODE
+              <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+                #paramProductModelCdList[]#
+              </iterate>
+            </isNotEmpty>
+            <!-- [測定日(FROM)検索] -->
+            <isNotEmpty property="paramInspectionDtFrom" prepend="AND">
+              CREATE_DT <![CDATA[>=]]> #paramInspectionDtFrom#
+            </isNotEmpty>
+            <!-- [測定日(TO)検索] -->
+            <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+              CREATE_DT <![CDATA[<=]]> #paramInspectionDtTo#
+            </isNotEmpty>
+          </dynamic>
+      )
+      SELECT
+        RANKED.PRO_CODE productModelCd,
+        RANKED.SERIAL serial6,
+        RANKED.HISTORY_NO historyNo,
+        CASE
+          WHEN RANKED.RESULT = 0 THEN 'OK'
+          ELSE 'NG'
+        END  result,
+        RANKED.CREATE_DT inspectionDt
+      FROM (
+        SELECT
+        PRO_CODE,SERIAL,HISTORY_NO,RESULT,CREATE_DT,
+        ROW_NUMBER() OVER (PARTITION BY PRO_CODE,SERIAL ORDER BY HISTORY_NO DESC) RANK
+      FROM
+        TARGET
+      ) RANKED
+      WHERE
+        RANKED.RANK = 1
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程詳細:パワクロ走行検査(ヘッダ)]                                            -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectTractorPCrawlerHeader">
+      SELECT
+        SIIR.IDNO                           idno,                       <!--IDNo-->
+        SIIR.MODEL_CD                       productModelCd,             <!--型式コード-->
+        SIIR.COUNTRY_CD                     countryCd,                  <!--国コード-->
+        SIIR.SERIAL_NUMBER                  serial6,                    <!--機番-->
+        <!-- STATION                        stationCd,                  ステーションコード -->
+        CASE                                                            <!--モンロー検査ステーションコード-->
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END monroeStationCd,
+        CASE                                                            <!--PTO検査ステーションコード-->
+          WHEN SIIR.RT_PTO_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_PTO_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_PTO_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_PTO_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_PTO_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_PTO_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END ptoStationCd,
+        CASE                                                            <!--油圧検査ステーションコード-->
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END hydraulicStationCd,
+        CASE                                                            <!--ヘッドライト検査ステーションコード-->
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END headlightStationCd,
+        CASE                                                            <!--キーストップ検査ステーションコード-->
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END keystopStationCd,
+        CASE                                                            <!--ハンドル締付検査ステーションコード-->
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END stgtightenStationCd,
+        CASE                                                            <!--走行検査ステーションコード-->
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END maxspeedStationCd,
+        CASE                                                            <!--電子チェックシート検査ステーションコード-->
+          WHEN SIIR.RT_SIS_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_SIS_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_SIS_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_SIS_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_SIS_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_SIS_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END sisStationCd,
+
+        SIIR.FINAL_INSPECTION_END_TIME      inspectionDt,               <!--検査終了時刻-->
+        SIIR.FINAL_INSPECTION_EMPL_CD       employeeCd,                 <!--従業員番号-->
+        SIIR.RT_MONROE_INS_EMPL_CD          monroeEmployeeCd,           <!-- モンロー検査員 -->
+        SIIR.RT_PTO_INS_EMPL_CD             ptoEmployeeCd,              <!-- PTO検査員 -->
+        SIIR.RT_HYDRAULIC_INS_EMPL_CD       hydraulicEmployeeCd,        <!-- 油圧検査員 -->
+        SIIR.RT_HEADLIGHT_INS_EMPL_CD       headLightEmployeeCd,        <!-- ヘッドライト検査員 -->
+        SIIR.RT_KEY_STOP_INS_EMPL_CD        keyStopEmployeeCd,          <!-- キーストップ検査員 -->
+        SIIR.RT_STG_TIGHTEN_INS_EMPL_CD     stgTightenEmployeeCd,       <!-- ハンドル締付検査員 -->
+        SIIR.RT_MAX_SPEED_INS_EMPL_CD       maxSpeedEmployeeCd,         <!-- 走行検査員 -->
+        SIIR.RT_SIS_INS_EMPL_CD             abnormalNoiseEmployeeCd,    <!-- 異音検査員 -->
+        SIIR.INSPECTION_GROUP               inspectionGroup,            <!--検査グループ-->
+        CASE                                                            <!--全検査完了フラグ-->
+          WHEN SIIR.ALL_INSPECTION_COMPLETE_FLAG = '1' THEN 'OK'
+          ELSE 'NG'
+        END  result,
+        SIIR.MONROE_INS_FLAG                monroeInsFlag,              <!--規格値モンロー検査フラグ-->
+        SIIR.PTO_INS_FLAG                   ptoInsFlag,                 <!--規格値PTO検査フラグ-->
+        SIIR.HYDRAULIC_INS_FLAG             hydraulic,                  <!--規格値油圧検査フラグ-->
+        SIIR.HEADLIGHT_INS_FLAG             headlightInsFlag,           <!--規格値ライト検査フラグ-->
+        SIIR.KEY_STOP_INS_FLAG              keyStopInsFlag,             <!--規格値キーストップ検査フラグ-->
+        SIIR.STEERING_TIGHTEN_INS_FLAG      steeringTightenInsFlag,     <!--規格値ハンドル締付フラグ-->
+        SIIR.MAX_SPEED_INS_FLAG             speedInsFlag,               <!--規格値走行検査フラグ-->
+        SIIR.SIS_INS_FLAG                   abnormalNoiseInsFlag,       <!--規格値異音検査フラグ-->
+        SIIR.FRONT_WHEEL_POS                frontWheelPos,              <!--規格値前輪位置-->
+        SIIR.FRONT_WHEEL_POS_STANDBY_TIME   frontWheelPosStandbyTime,   <!--規格値前輪位置確定待機時間-->
+        CASE                                                            <!--結果モンロー検査フラグ-->
+          WHEN SIIR.RT_MONROE_INS_FLAG = '0' THEN 'しない'
+          WHEN SIIR.RT_MONROE_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_MONROE_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_MONROE_INS_FLAG = '3' THEN '未実施'
+        END monroeResult,
+        CASE                                                            <!--結果PTO検査フラグ-->
+          WHEN SIIR.RT_PTO_INS_FLG = '0' THEN 'しない'
+          WHEN SIIR.RT_PTO_INS_FLG = '1' THEN 'OK'
+          WHEN SIIR.RT_PTO_INS_FLG = '2' THEN 'NG'
+          WHEN SIIR.RT_PTO_INS_FLG = '3' THEN '未実施'
+        END ptoResult,
+        CASE                                                            <!--結果油圧検査フラグ-->
+          WHEN SIIR.RT_HYDRAULIC_INS_FLAG = '0' THEN 'しない'
+          WHEN SIIR.RT_HYDRAULIC_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_HYDRAULIC_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_HYDRAULIC_INS_FLAG = '3' THEN '未実施'
+        END hydraulicResult,
+        CASE                                                            <!--結果ライト検査フラグ-->
+          WHEN SIIR.RT_HEADLIGHT_INS_FLAG = '0' THEN 'しない'
+          WHEN SIIR.RT_HEADLIGHT_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_HEADLIGHT_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_HEADLIGHT_INS_FLAG = '3' THEN '未実施'
+        END headlightResult,
+        CASE                                                            <!--結果キーストップ検査フラグ-->
+          WHEN SIIR.RT_KEY_STOP_INS_FLAG = '0' THEN 'しない'
+          WHEN SIIR.RT_KEY_STOP_INS_FLAG= '1' THEN 'OK'
+          WHEN SIIR.RT_KEY_STOP_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_KEY_STOP_INS_FLAG = '3' THEN '未実施'
+        END keystopResult,
+        CASE                                                            <!--結果ハンドル締付フラグ-->
+          WHEN SIIR.RT_STG_TIGHTEN_INS_FLAG = '0' THEN 'しない'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_FLAG = '3' THEN '未実施'
+        END steeringResult,
+        CASE                                                            <!--結果走行検査フラグ-->
+          WHEN SIIR.RT_MAX_SPEED_INS_FLAG = '0' THEN 'しない'
+          WHEN SIIR.RT_MAX_SPEED_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_MAX_SPEED_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_MAX_SPEED_INS_FLAG = '3' THEN '未実施'
+        END speedResult,
+        CASE                                                            <!--結果異音検査フラグ-->
+          WHEN SIIR.RT_SIS_INS_FLAG = '0' THEN 'しない'
+          WHEN SIIR.RT_SIS_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_SIS_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_SIS_INS_FLAG = '3' THEN '未実施'
+        END noiseResult,
+        SIIR.CREATE_DT                          createDt,               <!--作成日時-->
+        SIIR.CREATE_BY                          createUserId,           <!--作成者-->
+        SIIR.CREATE_PG                          createUserPg,           <!--作成プログラム-->
+        SIIR.UPDATE_DT                          updateDt,               <!--更新日時-->
+        SIIR.UPDATE_BY                          updateUserId,           <!--更新者-->
+        SIIR.UPDATE_PG                          updateUserPg,           <!--更新プログラム-->
+      FROM
+        TT_SQ_SPT_INS_ITEM_RESULT SIIR
+      WHERE
+        <!-- [機番検索](modelCd/serial6メンバを含む) -->
+        (SIIR.MODEL_CD, SIIR.SERIAL_NUMBER) IN ((#paramSerial.productModelCd#, #paramSerial.serial6#))
+      ORDER BY
+        SIIR.FINAL_INSPECTION_END_TIME DESC
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程詳細:パワクロ走行検査(詳細)]                                              -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectTractorPCrawlerDetail">
+      SELECT
+        SIIR.IDNO                          idno,                             <!--IDNo-->
+        SISR.MODEL_CD                      productModelCd,                   <!--型式コード-->
+        SIIR.COUNTRY_CD                    countryCd,                        <!--国コード-->
+        SISR.SERIAL_NUMBER                 serial6,                          <!--機番-->
+        <!-- STATION                       stationCd,                        ステーションコード-->
+        CASE                                                            <!--モンロー検査ステーションコード-->
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END monroeStationCd,
+        CASE                                                            <!--PTO検査ステーションコード-->
+          WHEN SIIR.RT_PTO_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_PTO_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_PTO_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_PTO_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_PTO_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_PTO_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END ptoStationCd,
+        CASE                                                            <!--油圧検査ステーションコード-->
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END hydraulicStationCd,
+        CASE                                                            <!--ヘッドライト検査ステーションコード-->
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END headlightStationCd,
+        CASE                                                            <!--キーストップ検査ステーションコード-->
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END keystopStationCd,
+        CASE                                                            <!--ハンドル締付検査ステーションコード-->
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END stgtightenStationCd,
+        CASE                                                            <!--走行検査ステーションコード-->
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END maxspeedStationCd,
+        CASE                                                            <!--電子チェックシート検査ステーションコード-->
+          WHEN SIIR.RT_SIS_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_SIS_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_SIS_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_SIS_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_SIS_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_SIS_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END sisStationCd,
+        SISR.INSPECTION_END_DATETIME       inspectionDt,                     <!--検査終了時刻-->
+        SISR.INSPECTION_GROUP              inspectionGroup,                  <!--検査グループ-->
+        SISR.INSPECTION_SEQ                inspectionSeq,                    <!--検査順序-->
+        CASE                                                                 <!--結果フラグ-->
+          WHEN SISR.RT_SPEED_INS_FLAG = '0' THEN 'しない'
+          WHEN SISR.RT_SPEED_INS_FLAG = '1' THEN 'OK'
+          WHEN SISR.RT_SPEED_INS_FLAG = '2' THEN 'NG'
+          WHEN SISR.RT_SPEED_INS_FLAG = '3' THEN '未実施'
+        END result,
+        SIIR.WHEEL_DRIVE                   standardWheelDrive,               <!--規格値2WD/4WD-->
+        CASE
+          WHEN SISR.SUB_TRANSMISSION = '1' THEN '低'
+          WHEN SISR.SUB_TRANSMISSION = '2' THEN '高'
+          WHEN SISR.SUB_TRANSMISSION = '3' THEN '高速'
+        END standardSubTransmission,
+        SISR.MAIN_TRANSMISSION             standardMainTransmission,         <!--規格値主変速-->
+        SISR.FORWARD_REVERSE_KIND          standardForwardReverseKind,       <!--規格値前進後進-->
+        SISR.SP_SPEED_FRONT_WHEEL_MIN      standardTargetSpeedFWheelMin,     <!--規格値目標速度前輪下限-->
+        SISR.SP_SPEED_FRONT_WHEEL_MAX      standardTargetSpeedFWheelMax,     <!--規格値目標速度前輪上限-->
+        SISR.SP_SPEED_REAR_WHEEL_MIN       standardTargetSpeedRWheelMin,     <!--規格値目標速度後輪下限-->
+        SISR.SP_SPEED_REAR_WHEEL_MAX       standardTargetSpeedRWheelMax,     <!--規格値目標速度後輪上限-->
+        SISR.SP_SPEED_RANGE_HOLD_TIME      standardTargetSpeedHoldTime,      <!--規格値速度到達後計測時間-->
+        SISR.SP_SPEED_CLOSE_TIME           standardTargetSpeedCloseTime,     <!--規格値速度範囲外打ち切り時間-->
+        SISR.RT_SP_SPEED_FRONT_WHEEL_R     measureValueRFrontWheel,          <!--測定値速度右前輪-->
+        SISR.RT_SP_SPEED_FRONT_WHEEL_L     measureValueLFrontWheel,          <!--測定値速度左前輪-->
+        SISR.RT_SP_SPEED_REAR_WHEEL_R      measureValueRRearWheel,           <!--測定値速度右後輪-->
+        SISR.RT_SP_SPEED_REAR_WHEEL_L      measureValueLRearWheel,           <!--測定値速度左後輪-->
+        SISR.RT_SP_SPEED_FRONT_WHEEL_R_CV     measureValueRFrontWheelCv,          <!--測定値速度右前輪補正値-->
+        SISR.RT_SP_SPEED_FRONT_WHEEL_L_CV     measureValueLFrontWheelCv,          <!--測定値速度左前輪補正値-->
+        SISR.RT_SP_SPEED_REAR_WHEEL_R_CV      measureValueRRearWheelCv,           <!--測定値速度右後輪補正値-->
+        SISR.RT_SP_SPEED_REAR_WHEEL_L_CV      measureValueLRearWheelCv,           <!--測定値速度左後輪補正値-->
+        SISR.CREATE_DT                     createDt,                         <!--作成日時-->
+        SISR.CREATE_BY                     createUserId,                     <!--作成者-->
+        SISR.CREATE_PG                     createUserPg,                     <!--作成プログラム-->
+        SISR.UPDATE_DT                     updateDt,                         <!--更新日時-->
+        SISR.UPDATE_BY                     updateUserId,                     <!--更新者-->
+        SISR.UPDATE_PG                     updateUserPg                      <!--更新プログラム-->
+      FROM
+        TT_SQ_SPT_INS_SPEED_RESULT SISR
+      LEFT JOIN
+        TT_SQ_SPT_INS_ITEM_RESULT SIIR ON (SIIR.MODEL_CD = SISR.MODEL_CD AND SIIR.SERIAL_NUMBER = SISR.SERIAL_NUMBER AND SIIR.INSPECTION_SEQ = SISR.INSPECTION_SEQ)
+      WHERE
+        <!-- [機番検索](modelCd/serial6メンバを含む) -->
+        (SISR.MODEL_CD, SISR.SERIAL_NUMBER) IN ((#paramSerial.productModelCd#, #paramSerial.serial6#)) AND
+        <!-- [測定日検索 (PIIR.INSPECTION_END_DATETIME) ] -->
+        SISR.INSPECTION_END_DATETIME BETWEEN #paramInspectionDtFrom# AND #paramInspectionDtTo#
+      ORDER BY
+        SISR.INSPECTION_SEQ
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程詳細:チェックシートイメージ]                                              -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectTractorCheckSheetDetail">
+      SELECT
+        CHK.ステーション     stationCd,
+        CHK.IDNO             idno,
+        CHK.枝番             seq,
+        CHK.型式コード       productModelCd,
+        CHK.国コード         countryCd,
+        CHK.型式名           productModelNm,
+        CHK.機番             serial6,
+        CHK.イメージ         image,
+        CHK.ファイル名       fileNm,
+        CHK.作成日時         createDt,
+        CHK.作成者           createUserId,
+        CHK.作成プログラム   createUserPg,
+        CHK.更新日時         updateDt,
+        CHK.更新者           updateUserId,
+        CHK.更新プログラム   updateUserPg
+      FROM
+        TBL_チェックシートイメージ CHK
+      WHERE
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        (CHK.型式コード, CHK.機番) IN ((#paramSerial.productModelCd#, #paramSerial.serial6#))
+      ORDER BY
+        CHK.枝番
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:電子チェックシート検索(一覧画面)]                                    -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectTractorELCheckList">
+      SELECT
+        RES.MDL_CD                  productModelCd,     <!--型式コード-->
+        RES.SERIAL_NO               serial6,            <!--機番-->
+        RES.LINE_CD                 lineCd,
+        CC.LINE_NM                  lineNm,             <!--ライン名-->
+        CASE
+          WHEN RES.PASS_STATUS = '1' THEN '合格'
+          WHEN RES.PASS_STATUS = '2' THEN '不合格'
+          ELSE '検査中'
+        END result,                                     <!--結果-->
+        TO_CHAR(MAX(RES.CREATE_DT),'YYYY/MM/DD HH24:MI:SS')          inspectionDt,      <!--測定日-->
+        CASE
+          WHEN RES.PASS_STATUS = '1' THEN RES.PASS_EMPLOYEE_CD
+          ELSE null
+        END        judgeEmpCd,
+        null      lastProc
+      FROM
+        TT_SQ_SIS_INS_RESULT RES
+      LEFT JOIN TM_CC_LINE CC ON (
+        RES.LINE_CD = CC.LINE_CD AND
+        CC.PLANT_CD ='28'
+      )
+      <dynamic prepend="WHERE">
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (RES.MDL_CD, RES.SERIAL_NO) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          RES.MDL_CD like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+        <isNotEmpty property="paramProductModelCdList" prepend="AND">
+          RES.MDL_CD IN
+          <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+            #paramProductModelCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <!-- [測定日(FROM)検索] -->
+        <isNotEmpty property="paramInspectionDtFrom" prepend="AND">
+          RES.CREATE_DT <![CDATA[>=]]> #paramInspectionDtFrom#
+        </isNotEmpty>
+        <!-- [測定日(TO)検索] -->
+        <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+          RES.CREATE_DT <![CDATA[<=]]> #paramInspectionDtTo#
+        </isNotEmpty>
+      </dynamic>
+      GROUP BY
+        RES.MDL_CD,
+        RES.SERIAL_NO,
+        RES.LINE_CD,
+        CC.LINE_NM,
+        RES.PASS_STATUS,
+        RES.PASS_EMPLOYEE_CD
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:電子チェックシート検索]                                          -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectELCheckHeader">
+      SELECT
+      RES.LINE_CD,
+      RES.LINE_CD || '：' || CC.LINE_NM  LINE_NM,
+      CASE
+        WHEN RES.PASS_STATUS = '1' THEN '合格'
+        WHEN RES.PASS_STATUS = '2' THEN '不合格'
+        ELSE '検査中'
+      END PASS_STATUS,
+      CASE
+        WHEN RES.PASS_STATUS = '1' THEN RES.PASS_EMPLOYEE_CD
+        ELSE NULL
+      END  PASS_EMPLOYEE_CD,
+      TO_CHAR(RES.CREATE_DT,'YYYY/MM/DD HH24:MI:SS') INS_START_DT,
+      CASE
+        WHEN RES.PASS_STATUS = '1' THEN TO_CHAR(RES.PASS_DT,'YYYY/MM/DD HH24:MI:SS')
+        ELSE NULL
+      END INS_END_DT,
+      SUBSTR(RES.ORDER_NO,1,6) || '-' || SUBSTR(RES.ORDER_NO,7,5)  ORDER_NO,
+      NULL        lastProc,
+      RES.REMARKS REMARKS
+      FROM
+        TT_SQ_SIS_INS_RESULT RES
+      LEFT JOIN TM_CC_LINE CC ON (RES.LINE_CD = CC.LINE_CD AND CC.PLANT_CD ='28' AND RES.CREATE_DT <![CDATA[>=]]> CC.APPLY_START_DT AND RES.CREATE_DT <![CDATA[<=]]> CC.APPLY_END_DT)
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          RES.MDL_CD = #paramProductModelCd#
+        </isNotEmpty>
+        <isNotEmpty property="paramSerial" prepend="AND">
+          RES.SERIAL_NO = #paramSerial#
+        </isNotEmpty>
+        <isNotEmpty property="paramLineCd" prepend="AND">
+          RES.LINE_CD = #paramLineCd#
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+        RES.CREATE_DT DESC,
+        RES.LINE_CD
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:電子チェックシート 検査情報取得]                                     -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectELCheckInfo">
+      WITH
+      MAX_DTL AS (
+        SELECT
+          LINE_CD,
+          MDL_CD,
+          SERIAL_NO,
+          IDNO,
+          PROD_PROC_CD,
+          GUARANTEE_NO,
+          MAX(RECORD_NO)    RECORD_NO
+        FROM
+          TT_SQ_SIS_INS_RESULT_DTL
+        <dynamic prepend="WHERE">
+          <isNotEmpty property="paramProductModelCd" prepend="AND">
+            MDL_CD = #paramProductModelCd#
+          </isNotEmpty>
+          <isNotEmpty property="paramSerial" prepend="AND">
+            SERIAL_NO = #paramSerial#
+          </isNotEmpty>
+          <isNotEmpty property="paramLineCd" prepend="AND">
+            LINE_CD = #paramLineCd#
+          </isNotEmpty>
+        </dynamic>
+        GROUP BY
+          LINE_CD,
+          MDL_CD,
+          SERIAL_NO,
+          IDNO,
+          PROD_PROC_CD,
+          GUARANTEE_NO
+      ),
+      CHK_INFO AS (
+        SELECT DISTINCT
+          ITEM.PROD_PROC_CD,
+          PRO.PROD_PROC_SHORT_NM       PROD_PROC,
+          ITEM.DISPLAY_ORDER           GUARANTEE_NO,
+          ITEM.CRIT_KIND,
+          ITEM.GUARANTEE_ITEM_NM  GUARANTEE_ITEM_NM,
+          CASE
+            WHEN RDT.INPUT_VALUE1 IS NOT NULL THEN RDT.INPUT_VALUE1 || ITEM.COMMENT1
+          END INPUT_VALUE1,
+          CASE
+            WHEN RDT.INPUT_VALUE2 IS NOT NULL THEN RDT.INPUT_VALUE2 || ITEM.COMMENT2
+          END INPUT_VALUE2,
+          CASE
+            WHEN DECISION = '1' THEN 'OK'
+            WHEN DECISION = '2' THEN 'NG'
+          END PASS_STATUS,
+          RDT.INS_DT    INS_DT,
+          RDT.EMPLOYEE_CD EMPLOYEE_CD,
+          DTL.RECORD_NO,
+          PRO.DISPLAY_ORDER1  DISPLAY_ORDER1
+        FROM
+          TT_SQ_SIS_INS_RESULT   RES
+        LEFT JOIN TM_SQ_SIS_GUARANTEE_ITEM    ITEM ON (
+          ITEM.LINE_CD = RES.LINE_CD          AND
+          ITEM.GUARANTEE_GRP_CD = RES.GUARANTEE_GRP_CD   AND
+          ITEM.REVISION_NO = RES.REVISION_NO
+        )
+        LEFT JOIN TT_SQ_SIS_INS_RESULT_PROC PRC   ON (
+          RES.LINE_CD = PRC.LINE_CD           AND
+          RES.MDL_CD  = PRC.MDL_CD            AND
+          RES.SERIAL_NO   = PRC.SERIAL_NO     AND
+          RES.IDNO   = PRC.IDNO               AND
+          ITEM.LINE_CD      = PRC.LINE_CD     AND
+          ITEM.PROD_PROC_CD = PRC.PROD_PROC_CD
+        )
+        LEFT JOIN MAX_DTL DTL   ON (
+          PRC.LINE_CD = DTL.LINE_CD           AND
+          PRC.MDL_CD  = DTL.MDL_CD            AND
+          PRC.SERIAL_NO   = DTL.SERIAL_NO     AND
+          PRC.IDNO   = DTL.IDNO               AND
+          PRC.PROD_PROC_CD = DTL.PROD_PROC_CD AND
+          ITEM.DISPLAY_ORDER = DTL.GUARANTEE_NO
+        )
+        LEFT JOIN TT_SQ_SIS_INS_RESULT_DTL RDT    ON  (
+          DTL.LINE_CD = RDT.LINE_CD           AND
+          DTL.MDL_CD  = RDT.MDL_CD            AND
+          DTL.SERIAL_NO   = RDT.SERIAL_NO     AND
+          DTL.IDNO   = RDT.IDNO               AND
+          DTL.PROD_PROC_CD = RDT.PROD_PROC_CD AND
+          DTL.GUARANTEE_NO = RDT.GUARANTEE_NO AND
+          DTL.RECORD_NO = RDT.RECORD_NO
+        )
+        LEFT JOIN TM_CC_PROCESS PRO ON (
+          PRO.PLANT_CD = '28'                 AND
+          ITEM.LINE_CD  = PRO.LINE_CD         AND
+          ITEM.PROD_PROC_CD = PRO.PROD_PROC_CD AND
+          RES.CREATE_DT <![CDATA[>=]]> PRO.APPLY_START_DT AND
+          RES.CREATE_DT <![CDATA[<=]]> PRO.APPLY_END_DT
+        )
+        <dynamic prepend="WHERE">
+          <isNotEmpty property="paramProductModelCd" prepend="AND">
+            RES.MDL_CD = #paramProductModelCd#
+          </isNotEmpty>
+          <isNotEmpty property="paramSerial" prepend="AND">
+            RES.SERIAL_NO = #paramSerial#
+          </isNotEmpty>
+          <isNotEmpty property="paramLineCd" prepend="AND">
+            RES.LINE_CD = #paramLineCd#
+          </isNotEmpty>
+        </dynamic>
+      )
+      SELECT
+        PROD_PROC,
+        GUARANTEE_NO,
+        CRIT_KIND,
+        GUARANTEE_ITEM_NM,
+        INPUT_VALUE1,
+        INPUT_VALUE2,
+        PASS_STATUS,
+        CASE
+        WHEN PASS_STATUS IS NOT NULL THEN TO_CHAR(INS_DT,'YYYY/MM/DD HH24:MI:SS')
+        END INS_DT,
+        CASE
+        WHEN PASS_STATUS IS NOT NULL THEN EMPLOYEE_CD
+        END EMPLOYEE_CD
+      FROM
+        CHK_INFO
+      ORDER BY
+        DISPLAY_ORDER1,
+        PROD_PROC_CD,
+        GUARANTEE_NO
+    </statement>
+
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:電子チェックシート 不具合一覧取得]                                   -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectNGList">
+      WITH IMG_CNT AS (
+        SELECT
+          LINE_CD         ,
+          MDL_CD          ,
+          SERIAL_NO       ,
+          PROD_PROC_CD    ,
+          GUARANTEE_NO    ,
+          NG_KIND         ,
+          NG_SEQ_NO       ,
+          COUNT(CASE WHEN IMG_KIND = '1' THEN 1 END) KIND1_CNT,
+          COUNT(CASE WHEN IMG_KIND = '2' THEN 1 END) KIND2_CNT
+        FROM 
+          TT_SQ_SIS_INS_RESULT_IMG
+        <dynamic prepend="WHERE">
+          <isNotEmpty property="paramProductModelCd" prepend="AND">
+            MDL_CD = #paramProductModelCd#
+          </isNotEmpty>
+          <isNotEmpty property="paramSerial" prepend="AND">
+            SERIAL_NO = #paramSerial#
+          </isNotEmpty>
+          <isNotEmpty property="paramLineCd" prepend="AND">
+            LINE_CD = #paramLineCd#
+          </isNotEmpty>
+        </dynamic>
+        GROUP BY
+          LINE_CD         ,
+          MDL_CD          ,
+          SERIAL_NO       ,
+          PROD_PROC_CD    ,
+          GUARANTEE_NO    ,
+          NG_KIND       ,
+          NG_SEQ_NO
+      ),
+      NG_MAX AS (
+      SELECT
+        LINE_CD                        ,
+        MDL_CD                         ,
+        SERIAL_NO                      ,
+        PROD_PROC_CD                   ,
+        GUARANTEE_NO                   ,
+        NG_KIND                        ,
+        NG_SEQ_NO                      ,
+        MAX(RECORD_NO)  RECORD_NO
+      FROM
+        TT_SQ_SIS_INS_NG
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          MDL_CD = #paramProductModelCd#
+        </isNotEmpty>
+        <isNotEmpty property="paramSerial" prepend="AND">
+          SERIAL_NO = #paramSerial#
+        </isNotEmpty>
+        <isNotEmpty property="paramLineCd" prepend="AND">
+          LINE_CD = #paramLineCd#
+        </isNotEmpty>
+      </dynamic>
+      GROUP BY
+        LINE_CD,
+        MDL_CD,
+        SERIAL_NO,
+        PROD_PROC_CD,
+        GUARANTEE_NO,
+        NG_KIND,
+        NG_SEQ_NO
+      ),
+      DTL_MIN AS (
+      SELECT
+        LINE_CD,
+        MDL_CD,
+        SERIAL_NO,
+        PROD_PROC_CD,
+        GUARANTEE_NO,
+        MIN(RECORD_NO)  RECORD_NO
+      FROM
+        TT_SQ_SIS_INS_RESULT_DTL
+      WHERE
+        DECISION = '2'
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          MDL_CD = #paramProductModelCd#
+        </isNotEmpty>
+        <isNotEmpty property="paramSerial" prepend="AND">
+          SERIAL_NO = #paramSerial#
+        </isNotEmpty>
+        <isNotEmpty property="paramLineCd" prepend="AND">
+          LINE_CD = #paramLineCd#
+        </isNotEmpty>
+      GROUP BY
+        LINE_CD,
+        MDL_CD,
+        SERIAL_NO,
+        PROD_PROC_CD,
+        GUARANTEE_NO
+      ),
+      DTL_BASE AS (
+        SELECT DTL.*
+        FROM
+          TT_SQ_SIS_INS_RESULT_DTL DTL
+        INNER JOIN DTL_MIN ON (
+          DTL.LINE_CD       = DTL_MIN.LINE_CD      AND
+          DTL.MDL_CD        = DTL_MIN.MDL_CD       AND
+          DTL.SERIAL_NO     = DTL_MIN.SERIAL_NO    AND
+          DTL.PROD_PROC_CD  = DTL_MIN.PROD_PROC_CD AND
+          DTL.GUARANTEE_NO  = DTL_MIN.GUARANTEE_NO AND
+          DTL.RECORD_NO     = DTL_MIN.RECORD_NO
+        )
+      )
+      SELECT
+        PRO.PROD_PROC_SHORT_NM    PROD_PROC,
+        NVL(ITEM.DISPLAY_ORDER,0) GUARANTEE_NO,
+        NG.NG_SEQ_NO              RECORD_NO,
+        ITEM.CRIT_KIND,
+        CASE
+          WHEN ITEM.DISPLAY_ORDER IS NULL THEN N'追加不具合'
+          ELSE ITEM.GUARANTEE_ITEM_NM
+        END    GUARANTEE_NM,
+        CASE
+          WHEN NG.CONFIRM_STATUS = '1' THEN '確認済み'
+          ELSE '未確認'
+        END   CONFIRM_STATUS,
+        NG.NG_PRTS,
+        NG.NG_DTL,
+        NG.NG_PL_QTY,
+        DTL.INPUT_VALUE1 || ITEM.COMMENT1 INPUT_VALUE1,
+        DTL.INPUT_VALUE2 || ITEM.COMMENT2 INPUT_VALUE2,
+        CASE
+          WHEN DTL.INPUT_VALUE2 IS NOT NULL THEN DTL.INPUT_VALUE1 || ITEM.COMMENT1 || '／' || DTL.INPUT_VALUE2 || ITEM.COMMENT2
+          WHEN DTL.INPUT_VALUE1 IS NOT NULL THEN DTL.INPUT_VALUE1 || ITEM.COMMENT1
+        END NG_VALUE,
+        TO_CHAR(NG.NG_UPDATE_DT,'YYYY/MM/DD HH24:MI:SS') NG_UPDATE_DT,
+        NG.NG_UPDATE_EMPL_CD,
+        CASE
+          WHEN IMG.KIND1_CNT > 0 THEN IMG.KIND1_CNT
+          ELSE 0
+        END    NG_IMG_CNT,
+        CAT.ADJUST_CATEGORY_NM ADJUST_STATUS,
+        NG.ADJUST_DTL,
+        CASE
+          WHEN NG.NG_CAUSED_LINE_CD IS NOT NULL THEN NG.NG_CAUSED_LINE_CD || '：' || CAU.MINOR_SHORT_NM
+        END NG_CAUSED_LINE_CD,
+        NG.NG_CAUSED_LINE,
+        TO_CHAR(NG.ADJUST_DT,'YYYY/MM/DD HH24:MI:SS') ADJUST_DT,
+        NG.ADJUST_EMPL_CD,
+        CASE
+          WHEN IMG.KIND2_CNT > 0 THEN IMG.KIND2_CNT
+          ELSE 0
+        END   ADJUST_IMG_CNT,
+        TO_CHAR(NG.CONFIRM_DT,'YYYY/MM/DD HH24:MI:SS') CONFIRM_DT,
+        NG.CONFIRM_EMPL_CD
+      FROM
+        TT_SQ_SIS_INS_NG    NG
+        INNER JOIN NG_MAX ON (
+          NG.LINE_CD       = NG_MAX.LINE_CD      AND
+          NG.MDL_CD        = NG_MAX.MDL_CD       AND
+          NG.SERIAL_NO     = NG_MAX.SERIAL_NO    AND
+          NG.PROD_PROC_CD  = NG_MAX.PROD_PROC_CD AND
+          NG.GUARANTEE_NO  = NG_MAX.GUARANTEE_NO AND
+          NG.RECORD_NO     = NG_MAX.RECORD_NO    AND
+          NG.NG_KIND       = NG_MAX.NG_KIND      AND
+          NG.NG_SEQ_NO     = NG_MAX.NG_SEQ_NO
+        )
+        INNER JOIN TT_SQ_SIS_INS_RESULT RES ON (
+          NG.LINE_CD  = RES.LINE_CD  AND
+          NG.MDL_CD  = RES.MDL_CD  AND
+          NG.SERIAL_NO  = RES.SERIAL_NO
+        )
+        LEFT JOIN TM_SQ_SIS_GUARANTEE_ITEM ITEM ON (
+          RES.LINE_CD      = ITEM.LINE_CD   AND
+          RES.GUARANTEE_GRP_CD  = ITEM.GUARANTEE_GRP_CD  AND
+          RES.REVISION_NO  = ITEM.REVISION_NO  AND
+          NG.PROD_PROC_CD  = ITEM.PROD_PROC_CD  AND
+          NG.GUARANTEE_NO  = ITEM.GUARANTEE_NO
+        )
+        LEFT JOIN DTL_BASE DTL ON (
+          NG.LINE_CD       = DTL.LINE_CD      AND
+          NG.MDL_CD        = DTL.MDL_CD       AND
+          NG.SERIAL_NO     = DTL.SERIAL_NO    AND
+          NG.PROD_PROC_CD  = DTL.PROD_PROC_CD AND
+          NG.GUARANTEE_NO  = DTL.GUARANTEE_NO
+        )
+        LEFT JOIN   IMG_CNT IMG ON (
+          NG.LINE_CD       = IMG.LINE_CD      AND
+          NG.MDL_CD        = IMG.MDL_CD       AND
+          NG.SERIAL_NO     = IMG.SERIAL_NO    AND
+          NG.PROD_PROC_CD  = IMG.PROD_PROC_CD AND
+          NG.GUARANTEE_NO  = IMG.GUARANTEE_NO AND
+          NG.NG_KIND       = IMG.NG_KIND      AND
+          NG.NG_SEQ_NO     = IMG.NG_SEQ_NO
+        )
+        LEFT JOIN TM_SQ_SIS_NG_CAUSE CAU ON (
+          NG.LINE_CD = CAU.LINE_CD  AND
+          NG.NG_CAUSED_LINE_CD = CAU.MINOR_CD AND
+          NG.ADJUST_DT >= CAU.APPLY_START_DT  AND
+          CAU.APPLY_END_DT >= NG.ADJUST_DT
+        )
+        LEFT JOIN TM_CC_PROCESS PRO ON (
+          PRO.PLANT_CD = '28' AND
+          NG.LINE_CD  = PRO.LINE_CD  AND
+          NG.PROD_PROC_CD = PRO.PROD_PROC_CD AND
+          NG.NG_UPDATE_DT <![CDATA[>=]]> PRO.APPLY_START_DT AND
+          NG.NG_UPDATE_DT <![CDATA[<=]]> PRO.APPLY_END_DT
+          )
+          LEFT JOIN TM_SQ_SIS_ADJUST_CATEGORY CAT ON(
+          NG.LINE_CD = CAT.LINE_CD AND
+          NG.ADJUST_STATUS = CAT.ADJUST_CATEGORY_CD
+        )
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          NG.MDL_CD = #paramProductModelCd#
+        </isNotEmpty>
+        <isNotEmpty property="paramSerial" prepend="AND">
+          NG.SERIAL_NO = #paramSerial#
+        </isNotEmpty>
+        <isNotEmpty property="paramLineCd" prepend="AND">
+          NG.LINE_CD = #paramLineCd#
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+        NG.PROD_PROC_CD,
+        ITEM.DISPLAY_ORDER,
+        NG.NG_SEQ_NO
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:電子チェックシート検索]                                          -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectELNGImg">
+      WITH NG_MAX AS (
+        SELECT
+          LINE_CD                        ,
+          MDL_CD                         ,
+          SERIAL_NO                      ,
+          IDNO                           ,
+          PROD_PROC_CD                   ,
+          GUARANTEE_NO                   ,
+          NG_KIND                        ,
+          NG_SEQ_NO                      ,
+          MAX(RECORD_NO)  RECORD_NO
+        FROM
+          TT_SQ_SIS_INS_NG
+        <dynamic prepend="WHERE">
+          <isNotEmpty property="paramProductModelCd" prepend="AND">
+            MDL_CD = #paramProductModelCd#
+          </isNotEmpty>
+          <isNotEmpty property="paramSerial" prepend="AND">
+            SERIAL_NO = #paramSerial#
+          </isNotEmpty>
+          <isNotEmpty property="paramLineCd" prepend="AND">
+            LINE_CD = #paramLineCd#
+          </isNotEmpty>
+        </dynamic>
+        GROUP BY
+          LINE_CD,
+          MDL_CD,
+          SERIAL_NO,
+          IDNO,
+          PROD_PROC_CD,
+          GUARANTEE_NO,
+          IDNO,
+          NG_KIND,
+          NG_SEQ_NO
+      )
+      SELECT
+        CASE
+          WHEN NG.GUARANTEE_NO IS NULL THEN  NULL
+          WHEN NG.GUARANTEE_NO = 0 THEN PRO.PROD_PROC_SHORT_NM || '-' || NG.NG_SEQ_NO
+          ELSE PRO.PROD_PROC_SHORT_NM || '-' || NG.GUARANTEE_NO || '-' || NG.NG_SEQ_NO
+        END PROD_PROC_INFO,
+        NG.NG_PRTS,
+        NG.NG_DTL,
+        NG.NG_PL_QTY,
+        IMG.IMAGE_DATA
+      FROM
+        TT_SQ_SIS_INS_RESULT_IMG IMG
+        INNER JOIN TT_SQ_SIS_INS_NG NG ON (
+        IMG.LINE_CD       = NG.LINE_CD AND
+        IMG.MDL_CD        = NG.MDL_CD AND
+        IMG.SERIAL_NO     = NG.SERIAL_NO AND
+        IMG.IDNO          = NG.IDNO AND
+        IMG.PROD_PROC_CD  = NG.PROD_PROC_CD AND
+        IMG.GUARANTEE_NO  = NG.GUARANTEE_NO AND
+        IMG.NG_KIND       = NG.NG_KIND AND
+        IMG.NG_SEQ_NO     = NG.NG_SEQ_NO
+      )
+      INNER JOIN NG_MAX ON (
+        NG.LINE_CD       = NG_MAX.LINE_CD      AND
+        NG.MDL_CD        = NG_MAX.MDL_CD       AND
+        NG.SERIAL_NO     = NG_MAX.SERIAL_NO    AND
+        NG.PROD_PROC_CD  = NG_MAX.PROD_PROC_CD AND
+        NG.GUARANTEE_NO  = NG_MAX.GUARANTEE_NO AND
+        NG.RECORD_NO     = NG_MAX.RECORD_NO    AND
+        NG.NG_KIND       = NG_MAX.NG_KIND      AND
+        NG.NG_SEQ_NO     = NG_MAX.NG_SEQ_NO
+      )
+      LEFT JOIN TM_CC_PROCESS PRO ON (
+        PRO.PLANT_CD = '28' AND
+        IMG.LINE_CD  = PRO.LINE_CD  AND
+        IMG.PROD_PROC_CD = PRO.PROD_PROC_CD AND
+        NG.NG_UPDATE_DT <![CDATA[>=]]> PRO.APPLY_START_DT AND
+        NG.NG_UPDATE_DT <![CDATA[<=]]> PRO.APPLY_END_DT
+      )
+      WHERE
+        IMG.IMG_KIND IN ('1','2')
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          IMG.MDL_CD = #paramProductModelCd#
+        </isNotEmpty>
+        <isNotEmpty property="paramSerial" prepend="AND">
+          IMG.SERIAL_NO = #paramSerial#
+        </isNotEmpty>
+        <isNotEmpty property="paramLineCd" prepend="AND">
+          IMG.LINE_CD = #paramLineCd#
+        </isNotEmpty>
+      ORDER BY
+        IMG.PROD_PROC_CD,
+        DECODE(IMG.GUARANTEE_NO,0,999,IMG.GUARANTEE_NO),
+        IMG.NG_SEQ_NO
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:電子チェックシート検索]                                          -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectELChkImg">
+      SELECT
+        PRO.PROD_PROC_SHORT_NM  PROD_PROC_INFO,
+        IMG.IMAGE_TITLE,
+        IMG.IMAGE_DATA
+      FROM
+        TT_SQ_SIS_INS_RESULT_IMG IMG
+        LEFT JOIN TM_CC_PROCESS PRO ON (
+          PRO.PLANT_CD = '28' AND
+          IMG.LINE_CD  = PRO.LINE_CD  AND
+          IMG.PROD_PROC_CD = PRO.PROD_PROC_CD AND
+          IMG.CREATE_DT <![CDATA[>=]]> PRO.APPLY_START_DT AND
+          IMG.CREATE_DT <![CDATA[<=]]> PRO.APPLY_END_DT
+        )
+      WHERE
+        IMG.IMG_KIND = '3'
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          IMG.MDL_CD = #paramProductModelCd#
+        </isNotEmpty>
+        <isNotEmpty property="paramSerial" prepend="AND">
+          IMG.SERIAL_NO = #paramSerial#
+        </isNotEmpty>
+        <isNotEmpty property="paramLineCd" prepend="AND">
+          IMG.LINE_CD = #paramLineCd#
+        </isNotEmpty>
+      ORDER BY
+        IMG.PROD_PROC_CD,
+        IMG.IMG_SEQ_NO
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:電子チェックシート検索(最終工程)]                                    -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectELCheckLastProc">
+      WITH
+        MAXDTL AS (
+        SELECT
+          MAX(UPDATE_DT) UPDATE_DT
+        FROM
+          TT_SQ_SIS_INS_RESULT_DTL
+        <dynamic prepend="WHERE">
+          <isNotEmpty property="paramProductModelCd" prepend="AND">
+            MDL_CD = #paramProductModelCd#
+          </isNotEmpty>
+          <isNotEmpty property="paramSerial" prepend="AND">
+            SERIAL_NO = #paramSerial#
+          </isNotEmpty>
+          <isNotEmpty property="paramLineCd" prepend="AND">
+            LINE_CD = #paramLineCd#
+          </isNotEmpty>
+        </dynamic>
+        ),
+      MAXNG AS (
+      SELECT
+        MAX(UPDATE_DT) UPDATE_DT
+      FROM
+        TT_SQ_SIS_INS_NG
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          MDL_CD = #paramProductModelCd#
+        </isNotEmpty>
+        <isNotEmpty property="paramSerial" prepend="AND">
+          SERIAL_NO = #paramSerial#
+        </isNotEmpty>
+        <isNotEmpty property="paramLineCd" prepend="AND">
+          LINE_CD = #paramLineCd#
+        </isNotEmpty>
+      </dynamic>
+      ),
+      MAXIMG AS (
+      SELECT
+        MAX(UPDATE_DT) UPDATE_DT
+      FROM
+        TT_SQ_SIS_INS_RESULT_IMG
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          MDL_CD = #paramProductModelCd#
+        </isNotEmpty>
+        <isNotEmpty property="paramSerial" prepend="AND">
+          SERIAL_NO = #paramSerial#
+        </isNotEmpty>
+        <isNotEmpty property="paramLineCd" prepend="AND">
+          LINE_CD = #paramLineCd#
+        </isNotEmpty>
+      </dynamic>
+      ),
+      WRK AS (
+        SELECT DISTINCT
+        DTL.LINE_CD,
+        DTL.MDL_CD,
+        DTL.SERIAL_NO,
+        DTL.COUNTRY_CD,
+        DTL.IDNO,
+        DTL.PROD_PROC_CD,
+        DTL.UPDATE_DT
+      FROM
+        TT_SQ_SIS_INS_RESULT_DTL DTL
+      INNER JOIN MAXDTL ON ( DTL.UPDATE_DT = MAXDTL.UPDATE_DT)
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          DTL.MDL_CD = #paramProductModelCd#
+        </isNotEmpty>
+        <isNotEmpty property="paramSerial" prepend="AND">
+          DTL.SERIAL_NO = #paramSerial#
+        </isNotEmpty>
+        <isNotEmpty property="paramLineCd" prepend="AND">
+          DTL.LINE_CD = #paramLineCd#
+        </isNotEmpty>
+      </dynamic>
+      UNION
+      SELECT DISTINCT
+        NG.LINE_CD,
+        NG.MDL_CD,
+        NG.SERIAL_NO,
+        NG.COUNTRY_CD,
+        NG.IDNO,
+        NG.PROD_PROC_CD,
+        NG.UPDATE_DT
+      FROM
+        TT_SQ_SIS_INS_NG NG
+      INNER JOIN MAXNG ON ( NG.UPDATE_DT = MAXNG.UPDATE_DT)
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          NG.MDL_CD = #paramProductModelCd#
+        </isNotEmpty>
+        <isNotEmpty property="paramSerial" prepend="AND">
+          NG.SERIAL_NO = #paramSerial#
+        </isNotEmpty>
+        <isNotEmpty property="paramLineCd" prepend="AND">
+          NG.LINE_CD = #paramLineCd#
+        </isNotEmpty>
+      </dynamic>
+      UNION
+      SELECT DISTINCT
+        IMG.LINE_CD,
+        IMG.MDL_CD,
+        IMG.SERIAL_NO,
+        IMG.COUNTRY_CD,
+        IMG.IDNO,
+        IMG.PROD_PROC_CD,
+        IMG.UPDATE_DT
+      FROM
+        TT_SQ_SIS_INS_RESULT_IMG IMG
+      INNER JOIN MAXIMG ON ( IMG.UPDATE_DT = MAXIMG.UPDATE_DT)
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          IMG.MDL_CD = #paramProductModelCd#
+        </isNotEmpty>
+        <isNotEmpty property="paramSerial" prepend="AND">
+          IMG.SERIAL_NO = #paramSerial#
+        </isNotEmpty>
+        <isNotEmpty property="paramLineCd" prepend="AND">
+          IMG.LINE_CD = #paramLineCd#
+        </isNotEmpty>
+      </dynamic>
+      ),
+      BASE AS (
+      SELECT
+        WRK.LINE_CD,
+        WRK.MDL_CD,
+        WRK.SERIAL_NO,
+        WRK.COUNTRY_CD,
+        WRK.IDNO,
+        PRO.PROD_PROC_SHORT_NM lastProc
+      FROM
+        WRK
+      LEFT JOIN TM_CC_PROCESS PRO ON (
+        PRO.PLANT_CD = '28' AND
+        WRK.LINE_CD  = PRO.LINE_CD  AND
+        WRK.PROD_PROC_CD = PRO.PROD_PROC_CD AND
+        #paramInspectDt# <![CDATA[>=]]> PRO.APPLY_START_DT AND
+        #paramInspectDt# <![CDATA[<=]]> PRO.APPLY_END_DT
+      )
+      ORDER BY WRK.UPDATE_DT DESC  NULLS LAST
+      )
+      SELECT
+        LINE_CD,
+        MDL_CD,
+        SERIAL_NO,
+        COUNTRY_CD,
+        lastPRoc
+      FROM
+        BASE
+      WHERE
+        ROWNUM = 1
+    </statement>
+
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:刻印検索(一覧用)]                                                    -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectPrintSheelList">
+      WITH
+      MAX_DT AS (
+        SELECT
+          MODEL_CD,
+          SERIAL_NO,
+          PRINT_TYPE,
+          MAX(PRINT_DT)  PRINT_DT
+        FROM
+          TT_SQ_PRINTOUT_RECORD
+        WHERE
+          PRINT_TYPE IN ('02','03','04')
+          GROUP BY
+          MODEL_CD,
+          SERIAL_NO,
+          PRINT_TYPE
+      ),
+      TYPE02 AS(
+      SELECT
+        PRI.MODEL_CD,
+        PRI.SERIAL_NO,
+        PRI.PRINT_CONTENTS_1,
+        PRI.PRINT_CONTENTS_3,
+        DT.PRINT_DT
+      FROM
+        TT_SQ_PRINTOUT_RECORD PRI
+      INNER JOIN MAX_DT DT ON
+        (PRI.MODEL_CD = DT.MODEL_CD     AND
+        PRI.SERIAL_NO = DT.SERIAL_NO   AND
+        PRI.PRINT_DT = DT.PRINT_DT
+        )
+      WHERE
+        PRI.PRINT_TYPE = '02'
+      GROUP BY
+        PRI.MODEL_CD,
+        PRI.SERIAL_NO,
+        PRI.PRINT_CONTENTS_1,
+        PRI.PRINT_CONTENTS_3,
+        DT.PRINT_DT
+      ),
+      TYPE03 AS(
+      SELECT
+        PRI.MODEL_CD,
+        PRI.SERIAL_NO,
+        PRI.PRINT_CONTENTS_1,
+        DT.PRINT_DT
+      FROM
+        TT_SQ_PRINTOUT_RECORD PRI
+      INNER JOIN MAX_DT DT ON
+        (PRI.MODEL_CD = DT.MODEL_CD     AND
+        PRI.SERIAL_NO = DT.SERIAL_NO   AND
+        PRI.PRINT_DT = DT.PRINT_DT
+        )
+      WHERE
+        PRI.PRINT_TYPE = '03'
+      GROUP BY
+        PRI.MODEL_CD,
+        PRI.SERIAL_NO,
+        PRI.PRINT_CONTENTS_1,
+        DT.PRINT_DT
+      ),
+      TYPE04 AS(
+      SELECT
+        PRI.MODEL_CD,
+        PRI.SERIAL_NO,
+        PRI.PRINT_CONTENTS_1,
+        DT.PRINT_DT
+      FROM
+        TT_SQ_PRINTOUT_RECORD PRI
+      INNER JOIN MAX_DT DT ON
+        (PRI.MODEL_CD = DT.MODEL_CD     AND
+        PRI.SERIAL_NO = DT.SERIAL_NO   AND
+        PRI.PRINT_DT = DT.PRINT_DT
+        )
+      WHERE
+        PRI.PRINT_TYPE = '04'
+      GROUP BY
+        PRI.MODEL_CD,
+        PRI.SERIAL_NO,
+        PRI.PRINT_CONTENTS_1,
+        DT.PRINT_DT
+      ),
+      BASE AS (
+      SELECT DISTINCT
+        MODEL_CD,
+        SERIAL_NO,
+        IDNO
+      FROM
+        TT_SQ_PRINTOUT_RECORD
+      WHERE
+        PRINT_TYPE IN ('02','03','04')
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (MODEL_CD, SERIAL_NO) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          MODEL_CD like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+        <isNotEmpty property="paramProductModelCdList" prepend="AND">
+          MODEL_CD IN
+          <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+            #paramProductModelCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <!-- [測定日(FROM)検索] -->
+        <isNotEmpty property="paramInspectionDtFrom" prepend="AND">
+          CREATE_DT <![CDATA[>=]]> #paramInspectionDtFrom#
+        </isNotEmpty>
+        <!-- [測定日(TO)検索] -->
+        <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+          CREATE_DT <![CDATA[<=]]> #paramInspectionDtTo#
+        </isNotEmpty>
+        )
+      SELECT DISTINCT
+        PRI.MODEL_CD              productModelCd,
+        PRI.SERIAL_NO             serial6,
+        CASE
+          WHEN TYPE02.PRINT_CONTENTS_3 = '1' THEN '対象'
+          ELSE NULL
+        END                       pin_kbn,
+        TYPE02.PRINT_CONTENTS_1   type02_contents_1,
+        TO_CHAR(TYPE02.PRINT_DT,'yyyy/MM/dd')        inspectionDt,
+        TYPE03.PRINT_CONTENTS_1   type03_contents_1,
+        TO_CHAR(TYPE03.PRINT_DT,'yyyy/MM/dd')        type03_printDt,
+        TYPE04.PRINT_CONTENTS_1   type04_contents_1,
+        TO_CHAR(TYPE04.PRINT_DT,'yyyy/MM/dd')        type04_printDt
+      FROM
+        BASE PRI
+        LEFT JOIN TYPE02 ON (PRI.MODEL_CD = TYPE02.MODEL_CD AND PRI.SERIAL_NO = TYPE02.SERIAL_NO)
+        LEFT JOIN TYPE03 ON (PRI.MODEL_CD = TYPE03.MODEL_CD AND PRI.SERIAL_NO = TYPE03.SERIAL_NO)
+        LEFT JOIN TYPE04 ON (PRI.MODEL_CD = TYPE04.MODEL_CD AND PRI.SERIAL_NO = TYPE04.SERIAL_NO)
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:刻印検索]                                          -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectPrintSheel">
+      SELECT
+        PRI.STATION_CD          STATION_CD,
+        PRI.PRINT_CONTENTS_1    CONTENTS_1,
+        PRI.PRINT_CONTENTS_2    CONTENTS_2,
+        CASE
+          WHEN PRI.PRINT_CONTENTS_3 = '1' THEN '対象'
+          ELSE NULL
+        END PIN_KBN,
+        CASE
+          WHEN PRI.AUTO_FLAG ='0' THEN '手動'
+          WHEN PRI.AUTO_FLAG ='1' THEN '自動'
+          END AUTO,
+        PRI.PRINT_DT           PRINT_DT
+      FROM
+      TT_SQ_PRINTOUT_RECORD PRI
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="printKbn" prepend="AND">
+          PRI.PRINT_TYPE = #printKbn#
+        </isNotEmpty>
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          PRI.MODEL_CD = #paramProductModelCd#
+        </isNotEmpty>
+        <isNotEmpty property="paramSerial" prepend="AND">
+          PRI.SERIAL_NO = #paramSerial#
+        </isNotEmpty>
+        <isNotEmpty property="stationCd" prepend="AND">
+          PRI.STATION_CD = #stationCd#
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+      PRI.PRINT_DT DESC
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:MA_SAGYO_KEEP検索]                                          -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectSagyoKeepList">
+      WITH EXC_CNT AS (
+      SELECT
+      <isEqual property="productKind" compareValue="10">
+        エンジン型式コード         MODEL_CD,
+        エンジン機番               SERIAL,
+        COUNT(エンジン型式コード)  DATA_CNT
+      </isEqual>
+      <isEqual property="productKind" compareValue="30">
+        トラクタ型式コード         MODEL_CD,
+        トラクタ機番               SERIAL,
+        COUNT(トラクタ型式コード)  DATA_CNT
+      </isEqual>
+      FROM
+        TBL_DPF機番情報
+      <isEqual property="productKind" compareValue="10">
+        INNER JOIN TT_DI_SERIAL7 SERIAL7 ON (
+        TBL_DPF機番情報.エンジン型式コード = SERIAL7.MODEL_CD   AND
+        TBL_DPF機番情報.エンジン機番 = SERIAL7.SERIAL6
+        )
+      </isEqual>
+      WHERE
+        工場コード = '28' AND
+        部品区分 IS NOT NULL
+      <!-- エンジン -->
+      <isEqual property="productKind" compareValue="10">
+        <isNotEmpty property="modelCd" prepend="AND">
+          エンジン型式コード LIKE CONCAT(#modelCd#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="serial" prepend="AND">
+          SERIAL7.SERIAL7 LIKE CONCAT(#serial#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="idno" prepend="AND">
+          エンジンIDNO = #idno#
+        </isNotEmpty>
+      </isEqual>
+      <!-- トラクタ -->
+      <isEqual property="productKind" compareValue="30">
+        <isNotEmpty property="modelCd" prepend="AND">
+          トラクタ型式コード LIKE CONCAT(#modelCd#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="serial" prepend="AND">
+          トラクタ機番 LIKE CONCAT(#serial#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="idno" prepend="AND">
+          トラクタIDNO = #idno#
+        </isNotEmpty>
+      </isEqual>
+      GROUP BY
+      <isEqual property="productKind" compareValue="10">
+        エンジン型式コード,エンジン機番
+      </isEqual>
+      <isEqual property="productKind" compareValue="30">
+        トラクタ型式コード,トラクタ機番
+      </isEqual>
+      )
+      SELECT
+        KEP.MS_JUN_YYMM || '-' || LPAD(KEP.MS_JUN_NO,5,0) JUN_NO,
+        TO_CHAR(KEP.MS_KAN_YYMMDD,'YYYY/MM/DD') KAN_YO_YM,
+        <isEqual property="productKind" compareValue="10">
+          TMP.MS_IDNO              TRC_IDNO,
+          TMP.MS_B_KATA_C          TRC_MODEL_CD,
+          TMP.MS_B_KATA_N          TRC_MODEL_NM,
+          TMP.MS_KIBAN             TRC_SERIAL_NO,
+          TRIM(TMP.MS_B_KUNI_C)    TRC_COUNTRY,
+          KEP.MS_IDNO              ENG_IDNO,
+          KEP.MS_B_KATA_C          ENG_MODEL_CD,
+          KEP.MS_B_KATA_N          ENG_MODEL_NM,
+          NVL(SERIAL7.SERIAL7,KEP.MS_KIBAN)                ENG_SERIAL_NO,
+          TRIM(KEP.MS_B_KUNI_C)    ENG_COUNTRY,
+        </isEqual>
+        <isEqual property="productKind" compareValue="30">
+          KEP.MS_IDNO              TRC_IDNO,
+          KEP.MS_B_KATA_C          TRC_MODEL_CD,
+          KEP.MS_B_KATA_N          TRC_MODEL_NM,
+          KEP.MS_KIBAN             TRC_SERIAL_NO,
+          TRIM(KEP.MS_B_KUNI_C)    TRC_COUNTRY,
+          TMP.MS_IDNO              ENG_IDNO,
+          KEP.MS_E_KATA_C          ENG_MODEL_CD,
+          KEP.MS_E_KATA_N          ENG_MODEL_NM,
+          NVL(SERIAL7.SERIAL7,KEP.MS_E_KIBAN)                ENG_SERIAL_NO,
+          TRIM(KEP.MS_E_KUNI_C)    ENG_COUNTRY,
+        </isEqual>
+        #st#                     ST,
+        #lineCd#                 LINE_CD,
+        null                     DPF_MODEL_CD,
+        null                     DPF_SERIAL_NO,
+        null                     ATTACHMENT_DT,
+        null                     SAMPLE_CHECK,
+        CASE
+        WHEN EXC.DATA_CNT > 0 THEN '有'
+        ELSE '無'
+        END DATA_CNT,
+        #productKind#               PTN_CD
+      FROM
+        MS_SAGYO_KEEP   KEP
+      <isEqual property="productKind" compareValue="30">
+        LEFT JOIN MS_SAGYO_KEEP TMP ON (
+        TMP.MS_SIJI_LVL IN ('3','7')  AND
+        TMP.MS_B_KATA_C = KEP.MS_E_KATA_C    AND
+        TMP.MS_KIBAN    = KEP.MS_E_KIBAN
+        )
+      </isEqual>
+      <isEqual property="productKind" compareValue="10">
+        LEFT JOIN MS_SAGYO_KEEP TMP ON (
+        TMP.MS_SIJI_LVL IN ('2')  AND
+        TMP.MS_E_KATA_C = KEP.MS_B_KATA_C    AND
+        TMP.MS_E_KIBAN    = KEP.MS_KIBAN
+        )
+      </isEqual>
+      INNER JOIN TT_DI_SERIAL7 SERIAL7 ON (
+      <isEqual property="productKind" compareValue="10">
+        KEP.MS_B_KATA_C = SERIAL7.MODEL_CD   AND
+        KEP.MS_KIBAN = SERIAL7.SERIAL6
+      </isEqual>
+      <isEqual property="productKind" compareValue="30">
+        KEP.MS_E_KATA_C = SERIAL7.MODEL_CD   AND
+        KEP.MS_E_KIBAN = SERIAL7.SERIAL6
+      </isEqual>
+      )
+      LEFT JOIN EXC_CNT EXC ON (
+        KEP.MS_B_KATA_C = EXC.MODEL_CD   AND
+        KEP.MS_KIBAN = EXC.SERIAL
+      )
+      <dynamic prepend="WHERE">
+        <!-- エンジン -->
+        <isEqual property="productKind" compareValue="10" prepend="AND">
+          KEP.MS_SIJI_LVL IN ('3','7')
+        </isEqual>
+        <!-- トラクタ -->
+        <isEqual property="productKind" compareValue="30" prepend="AND">
+          KEP.MS_SIJI_LVL IN ('2')
+        </isEqual>
+        <isNotEmpty property="modelCd" prepend="AND">
+          KEP.MS_B_KATA_C LIKE CONCAT(#modelCd#,'%')
+        </isNotEmpty>
+        <isNotEmpty property="modelNm" prepend="AND">
+          KEP.MS_B_KATA_N LIKE CONCAT(#modelNm#,'%')
+        </isNotEmpty>
+        <isEqual property="productKind" compareValue="10">
+          <isNotEmpty property="serial" prepend="AND">
+            SERIAL7.SERIAL7 LIKE CONCAT(#serial#,'%')
+          </isNotEmpty>
+        </isEqual>
+        <isEqual property="productKind" compareValue="30">
+          <isNotEmpty property="serial" prepend="AND">
+            KEP.MS_KIBAN LIKE CONCAT(#serial#,'%')
+          </isNotEmpty>
+        </isEqual>
+        <isNotEmpty property="idno" prepend="AND">
+          KEP.MS_IDNO = #idno#
+        </isNotEmpty>
+        <isNotEmpty property="dtCompFrom" prepend=" AND ">
+          TO_DATE(KEP.MS_KAN_YYMMDD) <![CDATA[>=]]> #dtCompFrom#
+        </isNotEmpty>
+        <isNotEmpty property="dtCompTo" prepend=" AND ">
+          TO_DATE(KEP.MS_KAN_YYMMDD) <![CDATA[<=]]> #dtCompTo#
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+        KEP.MS_JUN_YYMM,KEP.MS_JUN_NO
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:課情報検索]                                                          -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectSection">
+      SELECT
+        SEC.SECTION_CD,
+        SEC.SECTION_NM,
+        SEC.SECTION_SHORT_NM,
+        LINE.LINE_CD,
+        LINE.LINE_NM,
+        LINE.LINE_SHORT_NM
+      FROM
+        TM_CC_SECTION  SEC
+      INNER JOIN TM_CC_LINE LINE ON (
+        LINE.SECTION_CD = SEC.SECTION_CD    AND
+        LINE.PLANT_CD = '28'
+      )
+      WHERE
+      SEC.PLANT_CD = '28'
+      <isNotEmpty property="lineCd" prepend=" AND ">
+        LINE.LINE_CD = #lineCd#
+      </isNotEmpty>
+      　<isNotEmpty property="insStartDate" prepend=" AND ">
+        #insStartDate# <![CDATA[>=]]> LINE.APPLY_START_DT
+        AND
+        #insStartDate# <![CDATA[<=]]> LINE.APPLY_END_DT
+      </isNotEmpty>
+      ORDER BY
+      SEC.SECTION_CD,LINE.LINE_CD
+    </statement>
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:光軸検査検索]                                                        -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectOptaxisList">
+      SELECT
+        OPT.MODEL_CD                   productModelCd,
+        OPT.SERIAL_NUMBER              serial6,
+        OPT.CREATE_DT                  inspectionDt,
+        CASE
+          WHEN OPT.ALL_INSPECTION_COMPLETE_FLAG = '1' THEN 'OK'
+          ELSE 'NG'
+        END  result
+      FROM
+        TT_SQ_SPT_INS_OPTAXIS_RESULT OPT
+      INNER JOIN
+      (
+      SELECT
+        MODEL_CD,
+        SERIAL_NUMBER,
+        MAX(CREATE_DT) CREATE_DT
+      FROM
+        TT_SQ_SPT_INS_OPTAXIS_RESULT
+      WHERE
+        TRIM(PIN_CD) IS NOT NULL
+      GROUP BY
+        MODEL_CD,
+        SERIAL_NUMBER
+      ) OPT_G ON
+      OPT.MODEL_CD = OPT_G.MODEL_CD AND
+      OPT.SERIAL_NUMBER = OPT_G.SERIAL_NUMBER AND
+      OPT.CREATE_DT = OPT_G.CREATE_DT
+      <dynamic prepend="WHERE">
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (OPT.MODEL_CD, OPT.SERIAL_NUMBER) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          OPT.MODEL_CD like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+        <isNotEmpty property="paramProductModelCdList" prepend="AND">
+          OPT.MODEL_CD IN
+          <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+            #paramProductModelCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <!-- [測定日(FROM)検索] -->
+        <isNotEmpty property="paramInspectionDtFrom" prepend="AND">
+          OPT.CREATE_DT <![CDATA[>=]]> #paramInspectionDtFrom#
+        </isNotEmpty>
+        <!-- [測定日(TO)検索] -->
+        <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+          OPT.CREATE_DT <![CDATA[<=]]> #paramInspectionDtTo#
+        </isNotEmpty>
+      </dynamic>
+    </statement>
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:光軸検査詳細検索]                                                    -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectOptaxisDetail">
+      SELECT
+        OPT.MODEL_CD                   modelCd,
+        OPT.COUNTRY_CD                 countryCd,
+        OPT.SERIAL_NUMBER              serialNumber,
+        OPT.INSPECTION_SEQ             inspectionSeq,
+        OPT.IDNO                       idno,
+        OPT.YM || '-' || LPAD(OPT.SEQUENCE_NUM,'5','0') sequenceNum,
+        OPT.PIN_CD                     pinCd,
+        CASE
+          WHEN OPT.RT_OPTICAL_AXIS_ST_CD = 3 THEN '光軸ST(ETR)'
+          ELSE ''
+        END optAxisStationCd,
+        CASE
+          WHEN OPT.ALL_INSPECTION_COMPLETE_FLAG = '1' THEN 'OK'
+          ELSE 'NG'
+        END  result,
+        OPT.INSPECTION_GROUP           inspectionGroup,
+        CASE
+          WHEN OPT.OPTICAL_AXIS_INS_FLAG = '1' THEN '光軸'
+          ELSE '無'
+        END optaxisInsFlag,
+        OPT.OPTICAL_AXIS_LIFTUP        optaxisLiftup,
+        OPT.OPTICAL_AXIS_SCREEN        optaxisScreen,
+        CASE
+          WHEN OPT.RT_OPTICAL_AXIS_INS_FLAG_L = '0' THEN '無'
+          WHEN OPT.RT_OPTICAL_AXIS_INS_FLAG_L = '1' THEN 'OK'
+          WHEN OPT.RT_OPTICAL_AXIS_INS_FLAG_L = '2' THEN 'NG'
+          ELSE '未実施'
+        END rtOptaxisInsFlagL,
+        CASE
+          WHEN OPT.RT_OPTICAL_AXIS_INS_FLAG_R = '0' THEN '無'
+          WHEN OPT.RT_OPTICAL_AXIS_INS_FLAG_R = '1' THEN 'OK'
+          WHEN OPT.RT_OPTICAL_AXIS_INS_FLAG_R = '2' THEN 'NG'
+          ELSE '未実施'
+        END rtOptaxisInsFlagR,
+        OPT.CREATE_DT                  inspectionDt,
+        OPT.IMG_L                      imageL,
+        OPT.IMG_R                      imageR,
+        NVL(LENGTH(OPT.IMG_L),0)       imageLSize,
+        NVL(LENGTH(OPT.IMG_R),0)       imageRSize
+      FROM
+        TT_SQ_SPT_INS_OPTAXIS_RESULT OPT
+      WHERE
+        OPT.MODEL_CD = #paramProductModelCd# AND
+        OPT.SERIAL_NUMBER = #paramSerial# AND
+        TRIM(OPT.PIN_CD) IS NOT NULL
+      ORDER BY
+        OPT.CREATE_DT DESC,
+        OPT.INSPECTION_SEQ DESC
+    </statement>
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:トラクタ走行検査検索]                                                -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectTractorAllList">
+      SELECT
+        INS.MODEL_CD                   productModelCd,
+        INS.SERIAL_NUMBER              serial6,
+        INS.CREATE_DT  inspectionDt,
+        CASE
+          WHEN INS.ALL_INSPECTION_COMPLETE_FLAG = '1' THEN 'OK'
+          ELSE 'NG'
+        END  result
+      FROM
+        TT_SQ_SPT_INS_ITEM_RESULT INS
+        INNER JOIN
+        (
+        SELECT
+          MODEL_CD,
+          SERIAL_NUMBER,
+          MAX(CREATE_DT) CREATE_DT
+        FROM
+          TT_SQ_SPT_INS_ITEM_RESULT
+        WHERE
+          TRIM(PIN_CD) IS NOT NULL
+        GROUP BY
+          MODEL_CD,
+          SERIAL_NUMBER
+        ) INS_G ON
+          INS.MODEL_CD = INS_G.MODEL_CD AND
+          INS.SERIAL_NUMBER = INS_G.SERIAL_NUMBER AND
+          INS.CREATE_DT = INS_G.CREATE_DT
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (INS.MODEL_CD, INS.SERIAL_NUMBER) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          INS.MODEL_CD like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="paramProductModelCdList" prepend="AND">
+          INS.MODEL_CD IN
+          <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+            #paramProductModelCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <isNotEmpty property="paramInspectionDtFrom" prepend="AND">
+          INS.CREATE_DT <![CDATA[>=]]> #paramInspectionDtFrom#
+        </isNotEmpty>
+        <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+          INS.CREATE_DT <![CDATA[<=]]> #paramInspectionDtTo#
+        </isNotEmpty>
+      </dynamic>
+    </statement>
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:トラクタ走行検査詳細検索]                                            -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectTractorAllDetail">
+      SELECT
+        SIIR.MODEL_CD                       modelCd,
+        SIIR.COUNTRY_CD                     countryCd,
+        SIIR.SERIAL_NUMBER                  serialNumber,
+        SIIR.INSPECTION_SEQ                 inspectionSeq,
+        SIIR.IDNO                           idno,
+        SIIR.YM || '-' || LPAD(SIIR.SEQUENCE_NUM,'5','0') seqenceNum,
+        SIIR.PIN_CD                         pinCd,
+        CASE
+          WHEN SIIR.ALL_INSPECTION_COMPLETE_FLAG = '1' THEN 'OK'
+          ELSE 'NG'
+        END  result,
+        SIIR.FINAL_INSPECTION_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.FINAL_INSPECTION_EMPL_CD) inspectionEmplCd,
+        SIIR.FINAL_INSPECTION_END_TIME      inspectionDt,
+        SIIR.INSPECTION_GROUP               inspectionGroup,
+        CASE
+          WHEN SIIR.MAX_SPEED_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.MAX_SPEED_INS_FLAG = '1' THEN '有'
+        END maxSpeedFlagDetail,
+        CASE                                                            <!--走行検査ステーションコード-->
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END maxspeedStationCdDetail,
+        CASE
+          WHEN SIIR.WHEEL_DRIVE = '2' THEN '2WD'
+          WHEN SIIR.WHEEL_DRIVE = '4' THEN '4WD'
+        END wheelDrive,
+        SIIR.LASHING_HOOK_F                 lashingHookF,
+        SIIR.LASHING_HOOK_R                 lashingHookR,
+        SIIR.JIG_COEFFICIENT_COM_F          jigComF,
+        SIIR.JIG_COEFFICIENT_COM_R          jigComR,
+        CASE
+          WHEN SIIR.NOISE_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.NOISE_INS_FLAG = '1' THEN '有'
+        END noiseFlag,
+        CASE
+          WHEN SIIR.NOISE_SUB_TRANSMISSION = '1' THEN '低'
+          WHEN SIIR.NOISE_SUB_TRANSMISSION = '2' THEN '高'
+          WHEN SIIR.NOISE_SUB_TRANSMISSION = '3' THEN '最速'
+        END subTransmission,
+        CASE
+          WHEN SIIR.NOISE_MAIN_TRANSMISSION = 'H' THEN '最高速'
+          WHEN SIIR.NOISE_MAIN_TRANSMISSION = 'L' THEN '最低速'
+          ELSE SIIR.NOISE_MAIN_TRANSMISSION
+        END mainTransmission,
+        SIIR.NOISE_SPEED_FRONT_WHEEL_MIN    noiseFrontWheelMin,
+        SIIR.NOISE_SPEED_FRONT_WHEEL_MAX    noiseFrontWheelMax,
+        SIIR.NOISE_SPEED_REAR_WHEEL_MIN     noiseRearWheelMin,
+        SIIR.NOISE_SPEED_REAR_WHEEL_MAX     noiseRearWheelMax,
+        SIIR.NOISE_SPEED_RANGE_HOLD_TIME    noiseRangeHoldTime,
+        SIIR.NOISE_SPEED_CLOSE_TIME         noiseCloseTime,
+        SIIR.NOISE_THRESHOLD                noiseThreshold,
+        SIIR.NOISE_THRESHOLD_MIN            noiseThresholdMin,
+        CASE
+          WHEN SIIR.RT_NOISE_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_NOISE_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_NOISE_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_NOISE_INS_FLAG = '3' THEN '未実施'
+        END rtNoiseFlag,
+        SIIR.RT_NOISE_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_NOISE_INS_EMPL_CD) rtNoiseEmplCd,
+        SIIR.RT_NOISE_INS_END_TIME          rtNoiseEndTime,
+        CASE                                                            <!--非B検査ステーションコード-->
+          WHEN SIIR.RT_NOISE_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_NOISE_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_NOISE_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_NOISE_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_NOISE_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_NOISE_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END noiseStationCd,
+        SIIR.RT_NOISE_SP_FRONT_WHEEL_L      rtNoiseFrontWheelL,
+        SIIR.RT_NOISE_SP_FRONT_WHEEL_R      rtNoiseFrontWheelR,
+        SIIR.RT_NOISE_SP_REAR_WHEEL_L       rtNoiseRearWheelL,
+        SIIR.RT_NOISE_SP_REAR_WHEEL_R       rtNoiseRearWheelR,
+        SIIR.RT_NOISE_SP_FRONT_WHEEL_L_CV   rtNoiseFrontWheelLCv,
+        SIIR.RT_NOISE_SP_FRONT_WHEEL_R_CV   rtNoiseFrontWheelRCv,
+        SIIR.RT_NOISE_SP_REAR_WHEEL_L_CV    rtNoiseRearWheelLCv,
+        SIIR.RT_NOISE_SP_REAR_WHEEL_R_CV    rtNoiseRearWheelRCv,
+        SIIR.RT_NOISE_MAX                   rtNoiseMax,
+        CASE
+          WHEN SIIR.SIS_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.SIS_INS_FLAG = '1' THEN '有'
+        END abnormalNoiseFlag,
+        CASE
+          WHEN SIIR.RT_SIS_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_SIS_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_SIS_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_SIS_INS_FLAG = '3' THEN '未実施'
+        END rtAbnormalNoiseFlag,
+        SIIR.RT_SIS_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_SIS_INS_EMPL_CD)  rtAbnormalNoiseEmplCd,
+        SIIR.RT_SIS_INS_END_TIME       rtAbnormalNoiseEndTime,
+        CASE                                                            <!--電子チェックシート検査ステーションコード-->
+          WHEN SIIR.RT_SIS_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_SIS_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_SIS_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_SIS_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_SIS_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_SIS_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END sisStationCd,
+        SIIR.MAX_ALLOW_WEIGHT               maxAllowWeight,
+        SIIR.BRAKING_COM_CLOSE_TIME         brakingComCloseTime,
+        SIIR.BRAKING_FORCE_LRDIFF           brakingForceLRDiff,
+        CASE
+          WHEN SIIR.BRAKING_B_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.BRAKING_B_INS_FLAG = '1' THEN '有'
+        END brakingBFlag,
+        SIIR.BRAKING_B_PEDAL_FORCE_MIN      brakingBForceMin,
+        SIIR.BRAKING_B_PEDAL_FORCE_MAX      brakingBForceMax,
+        SIIR.BRAKING_B_THRESHOLD            brakingBThreshold,
+        SIIR.BRAKING_B_THRESHOLD_MAX        brakingBThresholdMax,
+        CASE
+          WHEN SIIR.BRAKING_P_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.BRAKING_P_INS_FLAG = '1' THEN '有'
+        END brakingPFlag,
+        SIIR.BRAKING_P_THRESHOLD            brakingPThreshold,
+        SIIR.BRAKING_P_THRESHOLD_MAX        brakingPThresholdMax,
+        CASE
+          WHEN SIIR.BRAKING_E_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.BRAKING_E_INS_FLAG = '1' THEN '有'
+        END brakingEFlag,
+        SIIR.BRAKING_E_THRESHOLD            brakingEThreshold,
+        SIIR.BRAKING_E_THRESHOLD_MAX        brakingEThresholdMax,
+        CASE
+          WHEN SIIR.RT_BRK_B_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_BRK_B_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_BRK_B_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_BRK_B_INS_FLAG = '3' THEN '未実施'
+        END rtBrkBFlag,
+        SIIR.RT_BRK_B_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_BRK_B_INS_EMPL_CD) rtBrkBEmplCd,
+        SIIR.RT_BRK_B_INS_END_TIME          rtBrkBEndTime,
+        CASE                                                            <!--主B検査ステーションコード-->
+          WHEN SIIR.RT_BRK_B_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_BRK_B_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_BRK_B_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_BRK_B_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_BRK_B_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_BRK_B_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END brkbStationCd,
+        SIIR.RT_BRK_B_MAX_FORCE_REAR_L      rtBrkBMaxForceRearL,
+        SIIR.RT_BRK_B_MAX_FORCE_REAR_R      rtBrkBMaxForceRearR,
+        SIIR.RT_BRK_B_MAX_FORCE_REAR_L_CV   rtBrkBMaxForceRearLCv,
+        SIIR.RT_BRK_B_MAX_FORCE_REAR_R_CV   rtBrkBMaxForceRearRCv,
+        SIIR.RT_BRK_B_MAX_PEDAL_FORCE_MAX   rtBrkBMaxPedalForceMax,
+        CASE
+          WHEN SIIR.RT_BRK_P_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_BRK_P_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_BRK_P_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_BRK_P_INS_FLAG = '3' THEN '未実施'
+        END rtBrkPFlag,
+        SIIR.RT_BRK_P_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_BRK_P_INS_EMPL_CD) rtBrkPEmplCd,
+        SIIR.RT_BRK_P_INS_END_TIME          rtBrkPEndTime,
+        CASE                                                            <!--駐B検査ステーションコード-->
+          WHEN SIIR.RT_BRK_P_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_BRK_P_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_BRK_P_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_BRK_P_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_BRK_P_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_BRK_P_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END brkpStationCd,
+        SIIR.RT_BRK_P_MAX_FORCE_REAR_L      rtBrkPMaxForceRearL,
+        SIIR.RT_BRK_P_MAX_FORCE_REAR_R      rtBrkPMaxForceRearR,
+        SIIR.RT_BRK_P_MAX_FORCE_REAR_L_CV   rtBrkPMaxForceRearLCv,
+        SIIR.RT_BRK_P_MAX_FORCE_REAR_R_CV   rtBrkPMaxForceRearRCv,
+        CASE
+          WHEN SIIR.RT_BRK_E_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_BRK_E_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_BRK_E_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_BRK_E_INS_FLAG = '3' THEN '未実施'
+        END rtBrkEFlag,
+        SIIR.RT_BRK_E_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_BRK_E_INS_EMPL_CD) rtBrkEEmplCd,
+        SIIR.RT_BRK_E_INS_END_TIME          rtBrkEEndTime,
+        CASE                                                            <!--非B検査ステーションコード-->
+          WHEN SIIR.RT_BRK_E_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_BRK_E_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_BRK_E_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_BRK_E_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_BRK_E_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_BRK_E_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END brkeStationCd,
+        SIIR.RT_BRK_E_MAX_FORCE_REAR_L      rtBrkEMaxForceRearL,
+        SIIR.RT_BRK_E_MAX_FORCE_REAR_R      rtBrkEMaxForceRearR,
+        SIIR.RT_BRK_E_MAX_FORCE_REAR_L_CV   rtBrkEMaxForceRearLCv,
+        SIIR.RT_BRK_E_MAX_FORCE_REAR_R_CV   rtBrkEMaxForceRearRCv,
+        CASE
+          WHEN SIIR.MONROE_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.MONROE_INS_FLAG = '1' THEN '有'
+        END monroeFlag,
+        CASE
+          WHEN SIIR.RT_MONROE_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_MONROE_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_MONROE_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_MONROE_INS_FLAG = '3' THEN '未実施'
+        END rtMonroeFlag,
+        SIIR.RT_MONROE_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_MONROE_INS_EMPL_CD) rtMonroeEmplCd,
+        SIIR.RT_MONROE_INS_END_TIME         rtMonroeEndTime,
+        CASE                                                            <!--モンロー検査ステーションコード-->
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END monroeStationCd,
+        CASE
+          WHEN SIIR.PTO_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.PTO_INS_FLAG = '1' THEN '有'
+        END ptoFlag,
+        CASE
+          WHEN SIIR.RT_PTO_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_PTO_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_PTO_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_PTO_INS_FLAG = '3' THEN '未実施'
+        END rtPtoFlag,
+        SIIR.RT_PTO_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_PTO_INS_EMPL_CD) rtPtoEmplCd,
+        SIIR.RT_PTO_INS_END_TIME            rtPtoEndTime,
+        CASE                                                            <!--PTO検査ステーションコード-->
+          WHEN SIIR.RT_PTO_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_PTO_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_PTO_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_PTO_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_PTO_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_PTO_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END ptoStationCd,
+        CASE
+          WHEN SIIR.HYDRAULIC_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.HYDRAULIC_INS_FLAG = '1' THEN '有'
+        END hydraulicFlag,
+        CASE
+          WHEN SIIR.HYDRAULIC_WEIGHT = 500 THEN '500kg'
+          WHEN SIIR.HYDRAULIC_WEIGHT = 1000 THEN '1000kg'
+          WHEN SIIR.HYDRAULIC_WEIGHT = 9999 THEN 'EC'
+          ELSE ''
+        END hydraulicWeight,
+        SIIR.HYDRAULIC_SLING                hydraulicSling,
+        SIIR.HYDRAULIC_LOWER_LINK           hydraulicLowerLink,
+        CASE
+          WHEN SIIR.RT_HYDRAULIC_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_HYDRAULIC_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_HYDRAULIC_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_HYDRAULIC_INS_FLAG = '3' THEN '未実施'
+        END rtHydraulicFlag,
+        SIIR.RT_HYDRAULIC_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_HYDRAULIC_INS_EMPL_CD) rtHydraulicEmplCd,
+        SIIR.RT_HYDRAULIC_INS_END_TIME      rtHydraulicEndTime,
+        CASE                                                            <!--油圧検査ステーションコード-->
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END hydraulicStationCd,
+        CASE
+          WHEN SIIR.HEADLIGHT_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.HEADLIGHT_INS_FLAG = '1' THEN '有'
+        END headlightFlag,
+        CASE
+          WHEN SIIR.RT_HEADLIGHT_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_HEADLIGHT_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_HEADLIGHT_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_HEADLIGHT_INS_FLAG = '3' THEN '未実施'
+        END rtHeadlightFlag,
+        SIIR.RT_HEADLIGHT_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_HEADLIGHT_INS_EMPL_CD) rtHeadlightEmplCd,
+        SIIR.RT_HEADLIGHT_INS_END_TIME      rtHeadlightEndTime,
+        CASE                                                            <!--ヘッドライト検査ステーションコード-->
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END headlightStationCd,
+        CASE
+          WHEN SIIR.KEY_STOP_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.KEY_STOP_INS_FLAG = '1' THEN '有'
+        END keyStopFlag,
+        CASE
+          WHEN SIIR.RT_KEY_STOP_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_KEY_STOP_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_KEY_STOP_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_KEY_STOP_INS_FLAG = '3' THEN '未実施'
+        END rtKeyStopFlag,
+        SIIR.RT_KEY_STOP_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_KEY_STOP_INS_EMPL_CD) rtKeyStopEmplCd,
+        SIIR.RT_KEY_STOP_INS_END_TIME       rtKeyStopEmplEndTime,
+        CASE                                                            <!--キーストップ検査ステーションコード-->
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END keystopStationCd,
+        CASE
+          WHEN SIIR.STEERING_TIGHTEN_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.STEERING_TIGHTEN_INS_FLAG = '1' THEN '有'
+        END steeringTightenFlag,
+        CASE
+          WHEN SIIR.RT_STG_TIGHTEN_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_FLAG = '3' THEN '未実施'
+        END rtSteeringTightenFlag,
+        SIIR.RT_STG_TIGHTEN_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_STG_TIGHTEN_INS_EMPL_CD) rtSteeringTightenEmplCd,
+        SIIR.RT_STG_TIGHTEN_INS_END_TIME    rtSteeringTightenEndTime,
+        CASE                                                            <!--ハンドル締付検査ステーションコード-->
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END stgtightenStationCd
+      FROM
+        TT_SQ_SPT_INS_ITEM_RESULT SIIR
+      WHERE
+        SIIR.MODEL_CD = #paramProductModelCd# AND
+        SIIR.SERIAL_NUMBER = #paramSerial#
+      ORDER BY
+        SIIR.CREATE_DT DESC,
+        SIIR.INSPECTION_SEQ DESC
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:トラクタ走行検査詳細検索(最高速度検査リスト)]                        -->
+    <!-- ************************************************************************************** -->
+
+    <statement id ="MaxSpeedInsList">
+      SELECT
+        CASE
+          WHEN SIIR.MAX_SPEED_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.MAX_SPEED_INS_FLAG = '1' THEN '有'
+        END maxSpeedFlag,
+        SISR.SPEED_INSPECTION_SEQ speedInspectionSeq,
+        SISR.INSPECTION_END_DATETIME speedInspectionEndDatetime,
+        SISR.SP_SPEED_FRONT_WHEEL_MIN       frontWheelMin,
+        SISR.SP_SPEED_FRONT_WHEEL_MAX       frontWheelMax,
+        SISR.SP_SPEED_REAR_WHEEL_MIN        rearWheelMin,
+        SISR.SP_SPEED_REAR_WHEEL_MAX        rearWheelMax,
+        SISR.SP_SPEED_RANGE_HOLD_TIME       rangeHoldTime,
+        SISR.SP_SPEED_CLOSE_TIME            closeTime,
+        CASE
+          WHEN SIIR.RT_MAX_SPEED_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_MAX_SPEED_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_MAX_SPEED_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_MAX_SPEED_INS_FLAG = '3' THEN '未実施'
+        END rtMaxSpeedFlag,
+        SIIR.RT_MAX_SPEED_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_MAX_SPEED_INS_EMPL_CD)  rtMaxSpeedemplCd,
+        SIIR.RT_MAX_SPEED_INS_END_TIME      rtMaxSpeedEndTime,
+        SISR.RT_SP_SPEED_FRONT_WHEEL_L      rtFrontWheelL,
+        SISR.RT_SP_SPEED_FRONT_WHEEL_R      rtFrontWheelR,
+        SISR.RT_SP_SPEED_REAR_WHEEL_L       rtRearWheelL,
+        SISR.RT_SP_SPEED_REAR_WHEEL_R       rtRearWheelR,
+        SISR.RT_SP_SPEED_FRONT_WHEEL_L_CV   rtFrontWheelLCv,
+        SISR.RT_SP_SPEED_FRONT_WHEEL_R_CV   rtFrontWheelRCv,
+        SISR.RT_SP_SPEED_REAR_WHEEL_L_CV    rtRearWheelLCv,
+        SISR.RT_SP_SPEED_REAR_WHEEL_R_CV    rtRearWheelRCv,
+        CASE                                                            <!--走行検査ステーションコード-->
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END maxspeedStationCd
+      FROM
+        TT_SQ_SPT_INS_ITEM_RESULT SIIR
+      LEFT JOIN
+        TT_SQ_SPT_INS_SPEED_RESULT SISR ON (SIIR.MODEL_CD = SISR.MODEL_CD AND SIIR.SERIAL_NUMBER = SISR.SERIAL_NUMBER AND SIIR.INSPECTION_SEQ = SISR.INSPECTION_SEQ )
+      WHERE
+        SIIR.MODEL_CD = #paramProductModelCd# AND
+        SIIR.SERIAL_NUMBER = #paramSerial# AND
+        SIIR.INSPECTION_SEQ = #inspectionSeq#
+      ORDER BY
+        SISR.INSPECTION_END_DATETIME ASC
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:トラクタ走行検査詳細検索(Excel出力用)]                               -->
+    <!-- ************************************************************************************** -->
+    <statement id ="ExcelList">
+      SELECT
+        SIIR.MODEL_CD                       modelCd,
+        SIIR.COUNTRY_CD                     countryCd,
+        SIIR.SERIAL_NUMBER                  serialNumber,
+        SIIR.INSPECTION_SEQ                 inspectionSeq,
+        SIIR.IDNO                           idno,
+        SIIR.YM || '-' || LPAD(SIIR.SEQUENCE_NUM,'5','0') seqenceNum,
+        SIIR.PIN_CD                         pinCd,
+        CASE
+          WHEN SIIR.ALL_INSPECTION_COMPLETE_FLAG = '1' THEN 'OK'
+          ELSE 'NG'
+        END  result,
+        SIIR.FINAL_INSPECTION_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.FINAL_INSPECTION_EMPL_CD) inspectionEmplCd,
+        SIIR.FINAL_INSPECTION_END_TIME      inspectionDt,
+        SIIR.INSPECTION_GROUP               inspectionGroup,
+        CASE
+          WHEN SIIR.WHEEL_DRIVE = '2' THEN '2WD'
+          WHEN SIIR.WHEEL_DRIVE = '4' THEN '4WD'
+        END wheelDrive,
+        SIIR.LASHING_HOOK_F                 lashingHookF,
+        SIIR.LASHING_HOOK_R                 lashingHookR,
+        SIIR.JIG_COEFFICIENT_COM_F          jigComF,
+        SIIR.JIG_COEFFICIENT_COM_R          jigComR,
+        CASE
+          WHEN SIIR.NOISE_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.NOISE_INS_FLAG = '1' THEN '有'
+        END noiseFlag,
+        CASE
+          WHEN SIIR.NOISE_SUB_TRANSMISSION = '1' THEN '低'
+          WHEN SIIR.NOISE_SUB_TRANSMISSION = '2' THEN '高'
+          WHEN SIIR.NOISE_SUB_TRANSMISSION = '3' THEN '最速'
+        END subTransmission,
+        CASE
+          WHEN SIIR.NOISE_MAIN_TRANSMISSION = 'H' THEN '最高速'
+          WHEN SIIR.NOISE_MAIN_TRANSMISSION = 'L' THEN '最低速'
+          ELSE SIIR.NOISE_MAIN_TRANSMISSION
+        END mainTransmission,
+        SIIR.NOISE_SPEED_FRONT_WHEEL_MIN    noiseFrontWheelMin,
+        SIIR.NOISE_SPEED_FRONT_WHEEL_MAX    noiseFrontWheelMax,
+        SIIR.NOISE_SPEED_REAR_WHEEL_MIN     noiseRearWheelMin,
+        SIIR.NOISE_SPEED_REAR_WHEEL_MAX     noiseRearWheelMax,
+        SIIR.NOISE_SPEED_RANGE_HOLD_TIME    noiseRangeHoldTime,
+        SIIR.NOISE_SPEED_CLOSE_TIME         noiseCloseTime,
+        SIIR.NOISE_THRESHOLD                noiseThreshold,
+        SIIR.NOISE_THRESHOLD_MIN            noiseThresholdMin,
+        CASE
+          WHEN SIIR.RT_NOISE_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_NOISE_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_NOISE_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_NOISE_INS_FLAG = '3' THEN '未実施'
+        END rtNoiseFlag,
+        SIIR.RT_NOISE_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_NOISE_INS_EMPL_CD) rtNoiseEmplCd,
+        SIIR.RT_NOISE_INS_END_TIME          rtNoiseEndTime,
+        CASE
+          WHEN SIIR.RT_NOISE_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_NOISE_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_NOISE_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_NOISE_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_NOISE_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_NOISE_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END noiseStationCd,
+        SIIR.RT_NOISE_SP_FRONT_WHEEL_L      rtNoiseFrontWheelL,
+        SIIR.RT_NOISE_SP_FRONT_WHEEL_R      rtNoiseFrontWheelR,
+        SIIR.RT_NOISE_SP_REAR_WHEEL_L       rtNoiseRearWheelL,
+        SIIR.RT_NOISE_SP_REAR_WHEEL_R       rtNoiseRearWheelR,
+        SIIR.RT_NOISE_SP_FRONT_WHEEL_L_CV   rtNoiseFrontWheelLCv,
+        SIIR.RT_NOISE_SP_FRONT_WHEEL_R_CV   rtNoiseFrontWheelRCv,
+        SIIR.RT_NOISE_SP_REAR_WHEEL_L_CV    rtNoiseRearWheelLCv,
+        SIIR.RT_NOISE_SP_REAR_WHEEL_R_CV    rtNoiseRearWheelRCv,
+        SIIR.RT_NOISE_MAX                   rtNoiseMax,
+        CASE
+          WHEN SIIR.SIS_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.SIS_INS_FLAG = '1' THEN '有'
+        END abnormalNoiseFlag,
+        CASE
+          WHEN SIIR.RT_SIS_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_SIS_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_SIS_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_SIS_INS_FLAG = '3' THEN '未実施'
+        END rtAbnormalNoiseFlag,
+        SIIR.RT_SIS_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_SIS_INS_EMPL_CD)  rtAbnormalNoiseEmplCd,
+        SIIR.RT_SIS_INS_END_TIME       rtAbnormalNoiseEndTime,
+        CASE
+          WHEN SIIR.RT_SIS_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_SIS_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_SIS_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_SIS_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_SIS_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_SIS_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END sisStationCd,
+        SIIR.MAX_ALLOW_WEIGHT               maxAllowWeight,
+        SIIR.BRAKING_COM_CLOSE_TIME         brakingComCloseTime,
+        SIIR.BRAKING_FORCE_LRDIFF           brakingForceLRDiff,
+        CASE
+          WHEN SIIR.BRAKING_B_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.BRAKING_B_INS_FLAG = '1' THEN '有'
+        END brakingBFlag,
+        SIIR.BRAKING_B_PEDAL_FORCE_MIN      brakingBForceMin,
+        SIIR.BRAKING_B_PEDAL_FORCE_MAX      brakingBForceMax,
+        SIIR.BRAKING_B_THRESHOLD            brakingBThreshold,
+        SIIR.BRAKING_B_THRESHOLD_MAX        brakingBThresholdMax,
+        CASE
+          WHEN SIIR.BRAKING_P_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.BRAKING_P_INS_FLAG = '1' THEN '有'
+        END brakingPFlag,
+        SIIR.BRAKING_P_THRESHOLD            brakingPThreshold,
+        SIIR.BRAKING_P_THRESHOLD_MAX        brakingPThresholdMax,
+        CASE
+          WHEN SIIR.BRAKING_E_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.BRAKING_E_INS_FLAG = '1' THEN '有'
+        END brakingEFlag,
+        SIIR.BRAKING_E_THRESHOLD            brakingEThreshold,
+        SIIR.BRAKING_E_THRESHOLD_MAX        brakingEThresholdMax,
+        CASE
+          WHEN SIIR.RT_BRK_B_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_BRK_B_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_BRK_B_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_BRK_B_INS_FLAG = '3' THEN '未実施'
+        END rtBrkBFlag,
+        SIIR.RT_BRK_B_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_BRK_B_INS_EMPL_CD) rtBrkBEmplCd,
+        SIIR.RT_BRK_B_INS_END_TIME          rtBrkBEndTime,
+        CASE
+          WHEN SIIR.RT_BRK_B_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_BRK_B_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_BRK_B_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_BRK_B_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_BRK_B_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_BRK_B_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END brkbStationCd,
+        SIIR.RT_BRK_B_MAX_FORCE_REAR_L      rtBrkBMaxForceRearL,
+        SIIR.RT_BRK_B_MAX_FORCE_REAR_R      rtBrkBMaxForceRearR,
+        SIIR.RT_BRK_B_MAX_FORCE_REAR_L_CV   rtBrkBMaxForceRearLCv,
+        SIIR.RT_BRK_B_MAX_FORCE_REAR_R_CV   rtBrkBMaxForceRearRCv,
+        SIIR.RT_BRK_B_MAX_PEDAL_FORCE_MAX   rtBrkBMaxPedalForceMax,
+        CASE
+          WHEN SIIR.RT_BRK_P_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_BRK_P_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_BRK_P_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_BRK_P_INS_FLAG = '3' THEN '未実施'
+        END rtBrkPFlag,
+        SIIR.RT_BRK_P_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_BRK_P_INS_EMPL_CD) rtBrkPEmplCd,
+        SIIR.RT_BRK_P_INS_END_TIME          rtBrkPEndTime,
+        CASE
+          WHEN SIIR.RT_BRK_P_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_BRK_P_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_BRK_P_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_BRK_P_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_BRK_P_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_BRK_P_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END brkpStationCd,
+        SIIR.RT_BRK_P_MAX_FORCE_REAR_L      rtBrkPMaxForceRearL,
+        SIIR.RT_BRK_P_MAX_FORCE_REAR_R      rtBrkPMaxForceRearR,
+        SIIR.RT_BRK_P_MAX_FORCE_REAR_L_CV   rtBrkPMaxForceRearLCv,
+        SIIR.RT_BRK_P_MAX_FORCE_REAR_R_CV   rtBrkPMaxForceRearRCv,
+        CASE
+          WHEN SIIR.RT_BRK_E_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_BRK_E_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_BRK_E_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_BRK_E_INS_FLAG = '3' THEN '未実施'
+        END rtBrkEFlag,
+        SIIR.RT_BRK_E_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_BRK_E_INS_EMPL_CD) rtBrkEEmplCd,
+        SIIR.RT_BRK_E_INS_END_TIME          rtBrkEEndTime,
+        CASE
+          WHEN SIIR.RT_BRK_E_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_BRK_E_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_BRK_E_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_BRK_E_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_BRK_E_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_BRK_E_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+        ELSE ''
+        END brkeStationCd,
+        SIIR.RT_BRK_E_MAX_FORCE_REAR_L      rtBrkEMaxForceRearL,
+        SIIR.RT_BRK_E_MAX_FORCE_REAR_R      rtBrkEMaxForceRearR,
+        SIIR.RT_BRK_E_MAX_FORCE_REAR_L_CV   rtBrkEMaxForceRearLCv,
+        SIIR.RT_BRK_E_MAX_FORCE_REAR_R_CV   rtBrkEMaxForceRearRCv,
+        CASE
+          WHEN SIIR.MONROE_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.MONROE_INS_FLAG = '1' THEN '有'
+        END monroeFlag,
+        CASE
+          WHEN SIIR.RT_MONROE_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_MONROE_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_MONROE_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_MONROE_INS_FLAG = '3' THEN '未実施'
+        END rtMonroeFlag,
+        SIIR.RT_MONROE_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_MONROE_INS_EMPL_CD) rtMonroeEmplCd,
+        SIIR.RT_MONROE_INS_END_TIME         rtMonroeEndTime,
+        CASE
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_MONROE_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END monroeStationCd,
+        CASE
+          WHEN SIIR.PTO_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.PTO_INS_FLAG = '1' THEN '有'
+        END ptoFlag,
+        CASE
+          WHEN SIIR.RT_PTO_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_PTO_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_PTO_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_PTO_INS_FLAG = '3' THEN '未実施'
+        END rtPtoFlag,
+        SIIR.RT_PTO_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_PTO_INS_EMPL_CD) rtPtoEmplCd,
+        SIIR.RT_PTO_INS_END_TIME            rtPtoEndTime,
+        CASE
+          WHEN SIIR.RT_PTO_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_PTO_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_PTO_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_PTO_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_PTO_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_PTO_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END ptoStationCd,
+        CASE
+          WHEN SIIR.HYDRAULIC_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.HYDRAULIC_INS_FLAG = '1' THEN '有'
+        END hydraulicFlag,
+        CASE
+          WHEN SIIR.HYDRAULIC_WEIGHT = 500 THEN '500kg'
+          WHEN SIIR.HYDRAULIC_WEIGHT = 1000 THEN '1000kg'
+          WHEN SIIR.HYDRAULIC_WEIGHT = 9999 THEN 'EC'
+          ELSE ''
+        END hydraulicWeight,
+        SIIR.HYDRAULIC_SLING                hydraulicSling, 
+        SIIR.HYDRAULIC_LOWER_LINK           hydraulicLowerLink,
+        CASE
+          WHEN SIIR.RT_HYDRAULIC_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_HYDRAULIC_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_HYDRAULIC_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_HYDRAULIC_INS_FLAG = '3' THEN '未実施'
+        END rtHydraulicFlag,
+        SIIR.RT_HYDRAULIC_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_HYDRAULIC_INS_EMPL_CD) rtHydraulicEmplCd,
+        SIIR.RT_HYDRAULIC_INS_END_TIME      rtHydraulicEndTime,
+        CASE
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_HYDRAULIC_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END hydraulicStationCd,
+        CASE
+          WHEN SIIR.HEADLIGHT_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.HEADLIGHT_INS_FLAG = '1' THEN '有'
+        END headlightFlag,
+        CASE
+          WHEN SIIR.RT_HEADLIGHT_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_HEADLIGHT_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_HEADLIGHT_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_HEADLIGHT_INS_FLAG = '3' THEN '未実施'
+        END rtHeadlightFlag,
+        SIIR.RT_HEADLIGHT_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_HEADLIGHT_INS_EMPL_CD) rtHeadlightEmplCd,
+        SIIR.RT_HEADLIGHT_INS_END_TIME      rtHeadlightEndTime,
+        CASE
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_HEADLIGHT_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+        ELSE ''
+        END headlightStationCd,
+        CASE
+          WHEN SIIR.KEY_STOP_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.KEY_STOP_INS_FLAG = '1' THEN '有'
+        END keyStopFlag,
+        CASE
+          WHEN SIIR.RT_KEY_STOP_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_KEY_STOP_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_KEY_STOP_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_KEY_STOP_INS_FLAG = '3' THEN '未実施'
+        END rtKeyStopFlag,
+        SIIR.RT_KEY_STOP_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_KEY_STOP_INS_EMPL_CD) rtKeyStopEmplCd,
+        SIIR.RT_KEY_STOP_INS_END_TIME       rtKeyStopEmplEndTime,
+        CASE
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_KEY_STOP_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END keystopStationCd,
+        CASE
+          WHEN SIIR.STEERING_TIGHTEN_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.STEERING_TIGHTEN_INS_FLAG = '1' THEN '有'
+        END steeringTightenFlag,
+        CASE
+          WHEN SIIR.RT_STG_TIGHTEN_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_FLAG = '3' THEN '未実施'
+        END rtSteeringTightenFlag,
+        SIIR.RT_STG_TIGHTEN_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_STG_TIGHTEN_INS_EMPL_CD) rtSteeringTightenEmplCd,
+        SIIR.RT_STG_TIGHTEN_INS_END_TIME    rtSteeringTightenEndTime,
+        CASE
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_STG_TIGHTEN_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END stgtightenStationCd,
+        
+        CASE
+          WHEN SIIR.MAX_SPEED_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.MAX_SPEED_INS_FLAG = '1' THEN '有'
+        END maxSpeedFlag,
+        SISR.SPEED_INSPECTION_SEQ speedInspectionSeq,
+        SISR.INSPECTION_END_DATETIME speedInspectionEndDatetime,
+        SISR.SP_SPEED_FRONT_WHEEL_MIN       frontWheelMin,
+        SISR.SP_SPEED_FRONT_WHEEL_MAX       frontWheelMax,
+        SISR.SP_SPEED_REAR_WHEEL_MIN        rearWheelMin,
+        SISR.SP_SPEED_REAR_WHEEL_MAX        rearWheelMax,
+        SISR.SP_SPEED_RANGE_HOLD_TIME       rangeHoldTime,
+        SISR.SP_SPEED_CLOSE_TIME            closeTime,
+        CASE
+          WHEN SIIR.RT_MAX_SPEED_INS_FLAG = '0' THEN '無'
+          WHEN SIIR.RT_MAX_SPEED_INS_FLAG = '1' THEN 'OK'
+          WHEN SIIR.RT_MAX_SPEED_INS_FLAG = '2' THEN 'NG'
+          WHEN SIIR.RT_MAX_SPEED_INS_FLAG = '3' THEN '未実施'
+        END rtMaxSpeedFlag,
+        SIIR.RT_MAX_SPEED_INS_EMPL_CD || '　' || (select 氏名漢字 from VIW_社員情報 where 従業員番号 = SIIR.RT_MAX_SPEED_INS_EMPL_CD)  rtMaxSpeedemplCd,
+        SIIR.RT_MAX_SPEED_INS_END_TIME      rtMaxSpeedEndTime,
+        SISR.RT_SP_SPEED_FRONT_WHEEL_L      rtFrontWheelL,
+        SISR.RT_SP_SPEED_FRONT_WHEEL_R      rtFrontWheelR,
+        SISR.RT_SP_SPEED_REAR_WHEEL_L       rtRearWheelL,
+        SISR.RT_SP_SPEED_REAR_WHEEL_R       rtRearWheelR,
+        SISR.RT_SP_SPEED_FRONT_WHEEL_L_CV   rtFrontWheelLCv,
+        SISR.RT_SP_SPEED_FRONT_WHEEL_R_CV   rtFrontWheelRCv,
+        SISR.RT_SP_SPEED_REAR_WHEEL_L_CV    rtRearWheelLCv,
+        SISR.RT_SP_SPEED_REAR_WHEEL_R_CV    rtRearWheelRCv,
+        CASE
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 1 THEN 'ST1(ETR)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 2 THEN 'ST2(ETR)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 4 THEN 'ST1(ホイール走行)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 5 THEN 'ST2(ホイール走行)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 6 THEN 'ST1(パワクロ)'
+          WHEN SIIR.RT_MAX_SPEED_INS_ST_CD = 7 THEN 'ST2(パワクロ)'
+          ELSE ''
+        END maxspeedStationCd
+      FROM
+        TT_SQ_SPT_INS_ITEM_RESULT SIIR
+          LEFT JOIN TT_SQ_SPT_INS_SPEED_RESULT SISR ON (SIIR.MODEL_CD = SISR.MODEL_CD AND SIIR.SERIAL_NUMBER = SISR.SERIAL_NUMBER AND SIIR.INSPECTION_SEQ = SISR.INSPECTION_SEQ )
+      WHERE
+        SIIR.MODEL_CD = #paramProductModelCd# AND
+        SIIR.SERIAL_NUMBER = #paramSerial#
+      ORDER BY
+        SIIR.CREATE_DT DESC,
+        SIIR.INSPECTION_SEQ DESC,
+        SISR.INSPECTION_END_DATETIME ASC
+    </statement>
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:関所検索_型式機番(一覧画面)]                                         -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectWorkResultModelList">
+      SELECT
+        MODEL_CD productModelCd,
+        SERIAL serial6
+      FROM(
+        SELECT
+          MODEL_CD,
+          SERIAL
+        FROM
+          TT_SI_PSP_WORK_RESULT
+        WHERE
+          LATEST_FLG = '1' AND
+          LINE_CD = #lineCd# AND
+          LINE_SUB_CD = '0'
+          <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+          <isNotEmpty property="paramSerialList" prepend="AND">
+            (MODEL_CD, SERIAL) IN
+            <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+              (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+            </iterate>
+          </isNotEmpty>
+          <!-- [生産型式コード検索] -->
+          <isNotEmpty property="paramProductModelCd" prepend="AND">
+            MODEL_CD like #paramProductModelCd# || '%'
+          </isNotEmpty>
+          <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+          <isNotEmpty property="paramProductModelCdList" prepend="AND">
+            MODEL_CD IN
+            <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+              #paramProductModelCdList[]#
+            </iterate>
+          </isNotEmpty>
+          <!-- [測定日検索] -->
+          <isNotEmpty property="paramInspectionDtFrom">
+            <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+              ( WORK_START_DT BETWEEN #paramInspectionDtFrom# AND #paramInspectionDtTo# OR
+                WORK_END_DT BETWEEN #paramInspectionDtFrom# AND #paramInspectionDtTo# )
+            </isNotEmpty>
+          </isNotEmpty>
+        GROUP BY
+          MODEL_CD,
+          SERIAL
+        UNION
+        SELECT
+          MODEL_CD,
+          SERIAL
+        FROM
+          TT_SI_PSP_WORK_RESULT_KEEP
+        WHERE
+          LATEST_FLG = '1' AND
+          LINE_CD = #lineCd# AND
+          LINE_SUB_CD = '0'
+          <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+          <isNotEmpty property="paramSerialList" prepend="AND">
+            (MODEL_CD, SERIAL) IN
+            <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+              (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+            </iterate>
+          </isNotEmpty>
+          <!-- [生産型式コード検索] -->
+          <isNotEmpty property="paramProductModelCd" prepend="AND">
+            MODEL_CD like #paramProductModelCd# || '%'
+          </isNotEmpty>
+          <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+          <isNotEmpty property="paramProductModelCdList" prepend="AND">
+            MODEL_CD IN
+            <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+              #paramProductModelCdList[]#
+            </iterate>
+          </isNotEmpty>
+          <!-- [測定日検索] -->
+          <isNotEmpty property="paramInspectionDtFrom">
+            <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+              ( WORK_START_DT BETWEEN #paramInspectionDtFrom# AND #paramInspectionDtTo# OR
+                WORK_END_DT BETWEEN #paramInspectionDtFrom# AND #paramInspectionDtTo# )
+            </isNotEmpty>
+          </isNotEmpty>
+        GROUP BY
+          MODEL_CD,
+          SERIAL
+      )
+    </statement>
+        <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:関所検索(一覧画面)]                                                  -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectWorkResultList">
+      SELECT
+        MODEL_CD productModelCd,
+        SERIAL serial6,
+        WORK_START_DT inspectionDt,
+        WORK_END_DT workEndDt
+      FROM(
+        SELECT
+          R1.MODEL_CD,
+          R1.SERIAL,
+          MIN(R1.WORK_START_DT) WORK_START_DT,
+          CASE
+            WHEN MAX(R1.WORK_START_DT) <![CDATA[<]]> MAX(R1.WORK_END_DT) THEN MAX(R1.WORK_END_DT)
+            ELSE MAX(R1.WORK_START_DT)
+          END WORK_END_DT
+        FROM
+          TT_SI_PSP_WORK_RESULT R1
+        INNER JOIN (
+          SELECT
+            MODEL_CD,
+            SERIAL,
+            MIN(WORK_START_DT) WORK_START_DT
+          FROM
+            TT_SI_PSP_WORK_RESULT
+          WHERE
+            LATEST_FLG = '1' AND
+            LINE_CD = #lineCd# AND
+            LINE_SUB_CD = '0'
+            <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+            <isNotEmpty property="paramSerialList" prepend="AND">
+              (MODEL_CD, SERIAL) IN
+              <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+                (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+              </iterate>
+            </isNotEmpty>
+            <!-- [生産型式コード検索] -->
+            <isNotEmpty property="paramProductModelCd" prepend="AND">
+              MODEL_CD like #paramProductModelCd# || '%'
+            </isNotEmpty>
+            <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+            <isNotEmpty property="paramProductModelCdList" prepend="AND">
+              MODEL_CD IN
+              <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+                #paramProductModelCdList[]#
+              </iterate>
+            </isNotEmpty>
+            <!-- [測定日検索] -->
+            <isNotEmpty property="paramInspectionDtFrom">
+              <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+                ( WORK_START_DT BETWEEN #paramInspectionDtFrom# AND #paramInspectionDtTo# OR
+                  WORK_END_DT BETWEEN #paramInspectionDtFrom# AND #paramInspectionDtTo# )
+              </isNotEmpty>
+            </isNotEmpty>
+          GROUP BY
+            MODEL_CD,
+            SERIAL
+        ) R2 ON 
+          R1.MODEL_CD = R2.MODEL_CD AND
+          R1.SERIAL = R2.SERIAL
+        WHERE
+          R1.LATEST_FLG = '1' AND
+          R1.LINE_CD = #lineCd# AND
+          R1.LINE_SUB_CD = '0'
+        GROUP BY
+          R1.MODEL_CD,
+          R1.SERIAL
+        UNION
+        SELECT
+          RK1.MODEL_CD,
+          RK1.SERIAL,
+          MIN(RK1.WORK_START_DT) WORK_START_DT,
+          CASE
+            WHEN MAX(RK1.WORK_START_DT) <![CDATA[<]]> MAX(RK1.WORK_END_DT) THEN MAX(RK1.WORK_END_DT)
+            ELSE MAX(RK1.WORK_START_DT)
+          END WORK_END_DT
+        FROM
+          TT_SI_PSP_WORK_RESULT_KEEP RK1
+        INNER JOIN (
+          SELECT
+            MODEL_CD,
+            SERIAL,
+            MIN(WORK_START_DT) WORK_START_DT
+          FROM
+            TT_SI_PSP_WORK_RESULT_KEEP
+          WHERE
+            LATEST_FLG = '1' AND
+            LINE_CD = #lineCd# AND
+            LINE_SUB_CD = '0'
+            <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+            <isNotEmpty property="paramSerialList" prepend="AND">
+              (MODEL_CD, SERIAL) IN
+              <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+                (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+              </iterate>
+            </isNotEmpty>
+            <!-- [生産型式コード検索] -->
+            <isNotEmpty property="paramProductModelCd" prepend="AND">
+              MODEL_CD like #paramProductModelCd# || '%'
+            </isNotEmpty>
+            <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+            <isNotEmpty property="paramProductModelCdList" prepend="AND">
+              MODEL_CD IN
+              <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+                #paramProductModelCdList[]#
+              </iterate>
+            </isNotEmpty>
+            <!-- [測定日検索] -->
+            <isNotEmpty property="paramInspectionDtFrom">
+              <isNotEmpty property="paramInspectionDtTo" prepend="AND">
+                ( WORK_START_DT BETWEEN #paramInspectionDtFrom# AND #paramInspectionDtTo# OR
+                  WORK_END_DT BETWEEN #paramInspectionDtFrom# AND #paramInspectionDtTo# )
+              </isNotEmpty>
+            </isNotEmpty>
+          GROUP BY
+            MODEL_CD,
+            SERIAL
+        ) RK2 ON 
+          RK1.MODEL_CD = RK2.MODEL_CD AND
+          RK1.SERIAL = RK2.SERIAL
+        WHERE
+          RK1.LATEST_FLG = '1' AND
+          RK1.LINE_CD = #lineCd# AND
+          RK1.LINE_SUB_CD = '0'
+        GROUP BY
+          RK1.MODEL_CD,
+          RK1.SERIAL
+      )
+    </statement>
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:関所検索_工程情報(詳細画面)]                                         -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectCheckPointHeader">
+      SELECT
+        LINE_ORDER,
+        STATION_CD,
+        STATION_NM,
+        MIN(WORK_START_DT) WORK_START_DT,
+        MAX(WORK_END_DT) WORK_END_DT,
+        CASE
+          WHEN MAX(FLG_DIFFERENCE) = 1 THEN '1'
+          ELSE ''
+        END RESULT_DIFFERENCE_FLG,
+        CASE
+          WHEN MAX(CHECK_POINT_FLG) = '1' AND MAX(FLG_DIFFERENCE) = 1 THEN '手直し'
+          WHEN MAX(CHECK_POINT_FLG) = '1' THEN '○'
+          ELSE ''
+        END CHECK_POINT,
+        CASE
+          WHEN MAX(PLC_NEXT_PAGE) = '1' THEN '○'
+          ELSE ''
+        END PLC_NEXT_PAGE,
+        CASE
+          WHEN MAX(PLC_PREV) = '1' THEN '○'
+          ELSE ''
+        END PLC_PREV,
+        CASE
+          WHEN MAX(PLC_NEXT) = '1' THEN '○'
+          ELSE ''
+        END PLC_NEXT,
+        CASE
+          WHEN MAX(PLC_MISSING) = '1' THEN '○'
+          ELSE ''
+        END PLC_MISSING,
+        CASE
+          WHEN MAX(PLC_REPAIR) = '1' THEN '○'
+          ELSE ''
+        END PLC_REPAIR
+      FROM(
+        SELECT
+          LINE_ORDER,
+          STATION_CD,
+          STATION_NM,
+          WORK_START_DT,
+          WORK_END_DT,
+          CHECK_POINT_FLG,
+          PLC_NEXT_PAGE,
+          PLC_PREV,
+          PLC_NEXT,
+          PLC_MISSING,
+          PLC_REPAIR,
+          CASE
+            WHEN INSTRUCT_CNT != RESULT_CNT THEN 1
+            ELSE 0
+          END FLG_DIFFERENCE
+        FROM
+          TT_SI_PSP_WORK_RESULT
+        WHERE
+          LATEST_FLG = '1' AND
+          LINE_CD = #paramLineCd# AND
+          LINE_SUB_CD = '0' AND
+          MODEL_CD = #paramProductModelCd# AND
+          SERIAL = #paramSerial#
+        UNION
+        SELECT
+          LINE_ORDER,
+          STATION_CD,
+          STATION_NM,
+          WORK_START_DT,
+          WORK_END_DT,
+          CHECK_POINT_FLG,
+          PLC_NEXT_PAGE,
+          PLC_PREV,
+          PLC_NEXT,
+          PLC_MISSING,
+          PLC_REPAIR,
+          CASE
+            WHEN INSTRUCT_CNT != RESULT_CNT THEN 1
+            ELSE 0
+          END FLG_DIFFERENCE
+        FROM
+          TT_SI_PSP_WORK_RESULT_KEEP
+        WHERE
+          LATEST_FLG = '1' AND
+          LINE_CD = #paramLineCd# AND
+          LINE_SUB_CD = '0' AND
+          MODEL_CD = #paramProductModelCd# AND
+          SERIAL = #paramSerial#
+      )
+      GROUP BY
+          LINE_ORDER,
+          STATION_CD,
+          STATION_NM
+      ORDER BY
+        LINE_ORDER
+    </statement>
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:関所検索_工程作業実績情報(詳細画面)]                                 -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectCheckPoint">
+      SELECT
+        PSP.INSTRUCT_ORDER,
+        PSP.INSTRUCT_CONTENT,
+        PSP.PLC_DISPLAY_NM TOOL_NM,
+        NVL(PSP.INSTRUCT_CNT, 0) INSTRUCT_CNT,
+        NVL(PSP.RESULT_CNT, 0) RESULT_CNT
+      FROM(
+        SELECT
+          INSTRUCT_ORDER,
+          INSTRUCT_CONTENT,
+          PLC_INSTRUCT_CD,
+          PLC_DISPLAY_NM,
+          INSTRUCT_CNT,
+          RESULT_CNT
+        FROM
+          TT_SI_PSP_WORK_RESULT
+        WHERE
+          LATEST_FLG = '1' AND
+          INSTRUCT_CONTENT IS NOT NULL AND
+          MODEL_CD = #paramProductModelCd# AND
+          SERIAL = #paramSerial# AND
+          STATION_CD = #paramStationCd#
+        UNION
+        SELECT
+          INSTRUCT_ORDER,
+          INSTRUCT_CONTENT,
+          PLC_INSTRUCT_CD,
+          PLC_DISPLAY_NM,
+          INSTRUCT_CNT,
+          RESULT_CNT
+        FROM
+          TT_SI_PSP_WORK_RESULT_KEEP
+        WHERE
+          LATEST_FLG = '1' AND
+          INSTRUCT_CONTENT IS NOT NULL AND
+          MODEL_CD = #paramProductModelCd# AND
+          SERIAL = #paramSerial# AND
+          STATION_CD = #paramStationCd#
+      ) PSP
+      INNER JOIN TM_SI_PSP_PLC_INSTRUCT PI ON
+        PSP.PLC_INSTRUCT_CD = PI.PLC_INSTRUCT_CD
+      WHERE
+        PI.PLC_INSTRUCT_TYP = '1'
+      ORDER BY
+        PSP.INSTRUCT_ORDER
+    </statement>
+      <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:関所検索_工程作業実績情報(Excel出力用)]                               -->
+    <!-- ************************************************************************************** -->
+    <statement id ="SelectCheckPointForExcel">
+      SELECT
+        STATION_CD,
+        STATION_NM,
+        INSTRUCT_ORDER,
+        INSTRUCT_CONTENT,
+        NVL(INSTRUCT_CNT, 0) INSTRUCT_CNT,
+        NVL(RESULT_CNT, 0) RESULT_CNT,
+        PLC_DISPLAY_NM,
+        MIN(WORK_START_DT) WORK_START_DT,
+        MAX(WORK_END_DT) WORK_END_DT,
+        CASE
+          WHEN MAX(CHECK_POINT_FLG) = '1' AND INSTRUCT_CNT != RESULT_CNT THEN '手直し'
+          WHEN MAX(CHECK_POINT_FLG) = '1' THEN '○'
+          ELSE ''
+        END CHECK_POINT,
+        CASE
+          WHEN MAX(PLC_NEXT_PAGE) = '1' THEN '○'
+          ELSE ''
+        END PLC_NEXT_PAGE,
+        CASE
+          WHEN MAX(PLC_PREV) = '1' THEN '○'
+          ELSE ''
+        END PLC_PREV,
+        CASE
+          WHEN MAX(PLC_NEXT) = '1' THEN '○'
+          ELSE ''
+        END PLC_NEXT,
+        CASE
+          WHEN MAX(PLC_MISSING) = '1' THEN '○'
+          ELSE ''
+        END PLC_MISSING,
+        CASE
+          WHEN MAX(PLC_REPAIR) = '1' THEN '○'
+          ELSE ''
+        END PLC_REPAIR
+      FROM(
+        SELECT
+          PSP.LINE_ORDER,
+          PSP.STATION_CD,
+          PSP.STATION_NM,
+          PSP.INSTRUCT_ORDER,
+          PSP.INSTRUCT_CONTENT,
+          PSP.PLC_INSTRUCT_CD,
+          PSP.PLC_DISPLAY_NM,
+          PSP.WORK_START_DT,
+          PSP.WORK_END_DT,
+          PSP.CHECK_POINT_FLG,
+          PSP.PLC_NEXT_PAGE,
+          PSP.PLC_PREV,
+          PSP.PLC_NEXT,
+          PSP.PLC_MISSING,
+          PSP.PLC_REPAIR,
+          PSP.INSTRUCT_CNT,
+          PSP.RESULT_CNT
+        FROM
+          TT_SI_PSP_WORK_RESULT PSP
+        INNER JOIN TM_SI_PSP_PLC_INSTRUCT PI ON
+          PSP.PLC_INSTRUCT_CD = PI.PLC_INSTRUCT_CD
+        WHERE
+          PSP.LATEST_FLG = '1' AND
+          PI.PLC_INSTRUCT_TYP = '1' AND
+          PSP.INSTRUCT_CONTENT IS NOT NULL AND
+          PSP.LINE_CD = #paramLineCd# AND
+          PSP.LINE_SUB_CD = '0' AND
+          PSP.MODEL_CD = #paramProductModelCd# AND
+          PSP.SERIAL = #paramSerial#
+        UNION
+        SELECT
+          PSP.LINE_ORDER,
+          PSP.STATION_CD,
+          PSP.STATION_NM,
+          PSP.INSTRUCT_ORDER,
+          PSP.INSTRUCT_CONTENT,
+          PSP.PLC_INSTRUCT_CD,
+          PSP.PLC_DISPLAY_NM,
+          PSP.WORK_START_DT,
+          PSP.WORK_END_DT,
+          PSP.CHECK_POINT_FLG,
+          PSP.PLC_NEXT_PAGE,
+          PSP.PLC_PREV,
+          PSP.PLC_NEXT,
+          PSP.PLC_MISSING,
+          PSP.PLC_REPAIR,
+          PSP.INSTRUCT_CNT,
+          PSP.RESULT_CNT
+        FROM
+          TT_SI_PSP_WORK_RESULT_KEEP PSP
+        INNER JOIN TM_SI_PSP_PLC_INSTRUCT PI ON
+          PSP.PLC_INSTRUCT_CD = PI.PLC_INSTRUCT_CD
+        WHERE
+          PSP.LATEST_FLG = '1' AND
+          PI.PLC_INSTRUCT_TYP = '1' AND
+          PSP.INSTRUCT_CONTENT IS NOT NULL AND
+          PSP.LINE_CD = #paramLineCd# AND
+          PSP.LINE_SUB_CD = '0' AND
+          PSP.MODEL_CD = #paramProductModelCd# AND
+          PSP.SERIAL = #paramSerial#
+      )
+      GROUP BY
+        STATION_CD,
+        STATION_NM,
+        INSTRUCT_ORDER,
+        INSTRUCT_CONTENT,
+        INSTRUCT_CNT,
+        RESULT_CNT,
+        PLC_DISPLAY_NM,
+        LINE_ORDER
+      ORDER BY
+        LINE_ORDER,
+        INSTRUCT_ORDER
+    </statement>
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ工程一覧:検査ベンチ検索]                                                      -->
+    <!-- ************************************************************************************** -->
+    <statement id ="SelectTractorTestBenchDetail">
+      WITH RESULT AS (
+        SELECT
+        INSP_NO,HISTORY_NO,BENCH_NO
+      FROM
+        TT_SF_MAF_BENCH_INSP_RESULT
+      WHERE
+        PRO_CODE = #paramProductModelCd#
+        AND SERIAL = #paramSerial#
+      )
+      SELECT
+        RESULT.BENCH_NO,RESULT.HISTORY_NO,DETAIL.FILE_NAME,DETAIL.DISPLAY_FLAG,DETAIL.UNIQUE_NAME
+      FROM
+        RESULT
+      INNER JOIN
+        TT_SF_MAF_BENCH_INSP_DETAIL DETAIL ON RESULT.INSP_NO = DETAIL.INSP_NO
+      ORDER BY
+        RESULT.HISTORY_NO DESC,DETAIL.DISPLAY_FLAG DESC,DETAIL.FILE_NAME
+    </statement>
+  </statements>
+</sqlMap>

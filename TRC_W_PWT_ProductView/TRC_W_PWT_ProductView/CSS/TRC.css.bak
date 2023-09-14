@@ -1,0 +1,1264 @@
+﻿/*------------------------------------------------------------------------------
+    テーブル
+-------------------------------------------------------------------------------*/
+/* 基本テーブルスタイル */
+.table-layout {
+    position: static;
+    table-layout: fixed;
+    border-collapse: collapse;
+    border-spacing: 0px 0px !important;
+    height:100%;
+    width:100%;
+    font-family: 'MS Gothic';
+    font-size: small;
+}
+/* ボーダー有りテーブルスタイル */
+.table-border-layout {
+    position: static;
+    table-layout: fixed;
+    border-collapse: collapse;
+    height:100%;
+}
+
+/* ボーダー有りテーブルスタイル TR */
+.table-border-layout tr {
+    border: 1px solid black;
+    vertical-align:middle;
+}
+/* ボーダー有りテーブルスタイル TH */
+.table-border-layout th {
+    border: 1px solid black;
+    vertical-align:middle;
+}
+/* ボーダー有りテーブルスタイル TD */
+.table-border-layout tr td {
+    border: 1px solid black;
+}
+/* 検索用テーブルヘッダー */
+.tr-condition-header {
+    text-align: center;
+    /*height:19px;*/
+    height:30px;
+    white-space:nowrap;
+    font-family: 'MS Gothic';
+    font-size: medium;
+    font-weight:bold;
+}
+/* 検索用テーブルボディ(データ部) */
+.tr-condition-body {
+    height:100px;
+}
+/* 検索用テーブル内テーブルスタイル */
+.table-condition-sub {
+    position: static;
+    table-layout: fixed;
+    border-collapse: collapse;
+    border-spacing: 0px 0px !important;
+    width:100%;
+}
+/* 検索用テーブル内テーブルスタイル TR */
+.table-condition-sub tr {
+    border: 0px solid transparent;
+    vertical-align:middle;
+}
+/* 検索用テーブル内テーブルスタイル TD */
+.table-condition-sub tr td {
+    height:24px;
+    border: 0px solid transparent;
+}
+/* 詳細用テーブルヘッダー(カテゴリー) */
+.tr-category-header {
+    box-sizing: border-box;
+    background: #ffffff url(../Images/category_header_bar_h30.png) top repeat-x;
+    -moz-box-shadow: inset 0 1px 0 #fff;
+    text-align: center;
+    /*height:19px;*/
+    height:30px;
+    white-space:nowrap;
+    font-family: 'MS Gothic';
+    font-size: medium;
+    font-weight:bold;
+}
+/* 詳細用テーブルヘッダー(項目) */
+.tr-content-header {
+    box-sizing: border-box;
+    background: #ffffff url(../Images/content_header_bar_h30.png) top repeat-x;
+    -moz-box-shadow: inset 0 1px 0 #fff;
+    text-align: center;
+    /*height:19px;*/
+    height:30px;
+    white-space:nowrap;
+    font-family: 'MS Gothic';
+    font-size: medium;
+    font-weight:bold;
+}
+/* 幅指定用 非表示行 */
+.tr-fix-zero-height {
+    height: 0px;
+    border: 0px solid transparent !important;
+    padding:0px;
+}
+/* 幅指定用 非表示行 セル */
+.tr-fix-zero-height td {
+    height: 0px;
+    border: 0px solid transparent !important;
+    padding:0px;
+}
+/* コントロール(マージン込み) 高さ TR */
+.tr-ctrl-height {
+    height:19px;
+}
+/* 枠線なし 行 */
+.tr-no-border{
+    border: 0px solid transparent !important;
+}
+/* 枠線なし セル */
+.tr-no-border td {
+    border: 0px solid transparent !important;
+}
+.table-layout-fix {
+    position: static;
+    /*table-layout: fixed;*/
+    border-collapse: collapse;
+    border-spacing: 0px 0px !important;
+    font-family: 'MS Gothic';
+    font-size: small;
+    margin:0px;
+    padding:0px;
+}
+.table-layout-fix tr td{
+    margin:0px;
+    padding:0px;
+}
+/*------------------------------------------------------------------------------
+    DIV指定
+-------------------------------------------------------------------------------*/
+/* 検索条件ボタンエリア */
+.condition-button-area {
+    width:100%;
+    box-sizing: border-box;
+    margin-bottom:3px;
+    text-align:right;
+    padding-top:5px;
+    padding-right:10px;
+}
+/* 検索欄格納 */
+.condition-box {
+    position: static;
+    box-sizing: border-box;
+    font-size: small;
+    border:solid 0px transparent;
+    width:100%;
+}
+/* 検索コントロール格納 */
+.condition-in-box {
+    position: static;
+    float: left;
+    box-sizing: border-box;
+    font-size: small;
+    height:111px;
+    margin-top:5px;
+    margin-left:1px;
+    margin-right:-1px;
+    vertical-align:middle;
+}
+
+
+/* 検索コントロール格納 */
+.condition-in-box-main {
+    position: static;
+    float: left;
+    box-sizing: border-box;
+    font-size: small;
+    height:111px;
+    /*margin-top:5px;*/
+    margin-left:1px;
+    margin-right:-1px;
+    vertical-align:middle;
+}
+
+/* 検索コントロール 表示位置調整 */
+.condition-in-box-main-adjusted {
+    position: static;
+    float: left;
+    box-sizing: border-box;
+    font-size: small;
+    height:111px;
+    margin-top:-1.8px;
+    margin-left:-1px;
+    margin-right:-1px;
+    vertical-align:middle;
+}
+
+/* 検索コントロール TR Height */
+.condition-tr-height {
+    height: 25px;
+}
+/* 検索結果タイトル 格納DIV */
+.div-result-title {
+    width:100%;
+    height:30px;
+    vertical-align:middle;
+    box-sizing: border-box;
+    color: #1e395b;
+    -moz-box-shadow: inset 0 1px 0 #fff;
+}
+/* ページャー表示用 */
+.div-result-pager {
+    vertical-align:middle;
+    float:left;
+    font-family:'MS Gothic';
+    font-size:medium;
+    display:inline-block;
+}
+/* 検索件数表示用 */
+.div-result-count {
+    vertical-align:middle;
+    float:right;
+    font-family:'MS Gothic';
+    font-size:medium;
+    display:inline-block;
+}
+/* グリッド結果 ページャー、件数欄*/
+.div-grid-results {
+    height:20px;
+    vertical-align:middle;
+}
+/* スクロールバー表示DIV */
+.div-auto-scroll {
+    overflow-x:auto;
+    overflow-y:auto;
+}
+/* スクロールバー常時表示DIV */
+.div-visible-scroll {
+    overflow-x:scroll;
+    overflow-y:scroll;
+}
+/* 自動サイズ スクロールなしDIV */
+.div-fix-scroll {
+    overflow-x:hidden;
+    overflow-y:hidden;
+}
+/* 自動サイズ 回り込み スクロールなしDIV */
+.div-fix-scroll-flt {
+    overflow-x:hidden;
+    overflow-y:hidden;
+    float: left;
+}
+/* 自動サイズ 回り込み スクロールX常時表示DIV 高さ固定 */
+.div-fix-x-scroll-flt {
+    overflow-x:visible;
+    overflow-y:hidden;
+    float: left;
+}
+/* 自動サイズ 回り込み スクロールY常時表示DIV 幅固定 */
+.div-fix-y-scroll-flt {
+    overflow-x:hidden;
+    overflow-y:visible;
+    float: left;
+}
+/* 自動サイズ 回り込み スクロールバー表示DIV X */
+.div-x-scroll-flt {
+    overflow-x:auto;
+    overflow-y:hidden;
+    float: left;
+}
+/* 自動サイズ 回り込み スクロールバー表示DIV Y */
+.div-y-scroll-flt {
+    overflow-x:hidden;
+    overflow-y:auto;
+    float: left;
+}
+/* 自動サイズ ヘッダ用(右上) スクロールバー表示DIV */
+.div-scroll-right-top {
+    overflow-x:hidden;
+    overflow-y:scroll;
+}
+/* 自動サイズ データ行用(左下) スクロールバー表示DIV */
+.div-scroll-left-bottom {
+    overflow-x:scroll;
+    overflow-y:hidden;
+}
+/* ヘッダ固定用 */
+.div-y-scroll-flt2 {
+    overflow-x:hidden;
+    overflow-y:auto;
+}
+.div-x-scroll-flt2 {
+    overflow-x:auto;
+    overflow-y:hidden;
+}
+/* 項目タイトル 格納DIV */
+.div-content-title {
+    width:100%;
+    height:22px;
+    vertical-align:middle;
+    text-align:center;
+    border:solid 1px black;
+    box-sizing: border-box;
+    background: #ffffff url(../Images/detail_header_bar_h22.png) top repeat-x;
+    -moz-box-shadow: inset 0 1px 0 #fff;
+}
+/* 項目タイトル 格納DIV 右用 */
+.div-content-title-r {
+    width:100%;
+    height:22px;
+    vertical-align:middle;
+    text-align:center;
+    border-top:solid 1px black;
+    border-right:solid 1px black;
+    border-bottom:solid 1px black;
+    box-sizing: border-box;
+    background: #ffffff url(../Images/detail_header_bar_h22.png) top repeat-x;
+    -moz-box-shadow: inset 0 1px 0 #fff;
+}
+/* 項目ボディ部 格納DIV */
+.div-content-body {
+    width:100%;
+    height:100px;
+    border-left:solid 1px black;
+    border-right:solid 1px black;
+    border-bottom:solid 1px black;
+    box-sizing: border-box;
+}
+/* 項目ボディ部 格納DIV */
+.div-content-body-r {
+    width:100%;
+    height:100px;
+    border-right:solid 1px black;
+    border-bottom:solid 1px black;
+    box-sizing: border-box;
+}
+/* 詳細型式情報欄マージン */
+.div-detail-info-margin {
+    box-sizing: border-box;
+    margin-top:5px;
+    margin-left:5px;
+    margin-right:0px;
+    margin-bottom:5px;
+    float: left;
+}
+/* 詳細 リストビュー項目 */
+.div-list-view-item {
+    box-sizing: border-box;
+    border:solid 2px transparent;
+}
+/* 詳細 リストビュー項目 マウスオーバー */
+.div-list-view-item:hover {
+    cursor:pointer;
+}
+/* 詳細 リストビュー選択済 */
+.div-item-selected {
+    box-sizing: border-box;
+    border:solid 2px red;
+}
+/* 詳細 一覧項目(選択済) マウスオーバー */
+.div-item-selected:hover {
+    cursor:default;
+}
+/* 画面下ボタンエリア */
+.div-bottom-button-area {
+    box-sizing: border-box;
+    margin-bottom:3px;
+    text-align:right;
+    padding-top:5px;
+    padding-right:10px;
+}
+/* 画面下ボタンエリア */
+.div-top-button-area {
+    box-sizing: border-box;
+    margin-bottom:0px;
+    text-align:right;
+    padding-top:0px;
+    padding-right:10px;
+    height:30px;
+}
+/* 詳細 各種情報テーブル(Main/Sub)用タイトル*/
+.div-detail-table-title {
+    font-size : medium;
+    font-weight : bold;
+    margin-top : 10px;
+    /*padding-bottom : 2px;*/
+    margin-bottom : 2px;
+}
+
+/* 詳細 各種情報テーブル(Main/Sub)用サブ領域*/
+.div-detail-table-subarea {
+    /*padding-left:6px;*/
+    margin-left:6px;
+}
+
+/* 詳細 各種情報テーブル(Main/Sub)用サブタイトル(大見出し)*/
+.div-detail-table-sub-title {
+    font-size : medium;
+    font-weight : bold;
+    margin-top : 10px;
+    /*padding-bottom : 2px;*/
+    margin-bottom : 2px;
+}
+
+/* 詳細 各種情報テーブル(Main/Sub)用サブタイトル(小見出し)*/
+.div-detail-table-sub-item {
+    font-size : medium;
+    font-weight : bold;
+    margin-top : 10px;
+    margin-left : 10px;
+    /*padding-bottom : 2px;*/
+    margin-bottom : 2px;
+}
+
+/* ログイン画面 ログイン項目情報テーブル*/
+.div-login-table {
+    /*
+    position:relative;
+    display:table-cell;
+    vertical-align: middle;
+    */
+    position: absolute;
+    top:50%;
+    left:50%;
+    width:400px;
+    height:166px;
+    margin-top:-83px;
+    margin-left:-200px;
+}
+/* グリッド用DIV(左) 位置補正 */
+.div-left-grid {
+    position: relative;
+    left:1px;
+/*
+    z-index:1;
+    */
+}
+/* グリッド用DIV(右) 位置補正 */
+.div-right-grid {
+    position: relative;
+    left:1px;
+/*
+        z-index:0;
+*/
+}
+/* 項目タイトル/グリッド用DIV マージン */
+.div-top-margin {
+    margin-top : 10px;
+    margin-bottom : 10px;
+}
+.div-listview-subtitle {
+    font-size : medium;
+    font-weight : bold;
+    margin-top : 10px;
+    /*padding-bottom : 2px;*/
+    margin-bottom : 2px;
+}
+.div-table-subtitle {
+    font-size : small;
+    font-weight : bold;
+    vertical-align:bottom;
+}
+
+/*------------------------------------------------------------------------------
+    ボタン
+-------------------------------------------------------------------------------*/
+/* 標準サイズボタン */
+.btn-icon {
+    height:20px;
+    width:20px;
+    display:inline-block;
+}
+/* 標準サイズボタン */
+.btn-middle {
+    height:30px;
+    width:100px;
+}
+/* 標準サイズボタン */
+.btn-long {
+    height:30px;
+    width:140px;
+}
+/* 詳細 一覧項目 */
+.btn-list-content {
+    width:200px;
+    height:20px;
+    background: #ccecff url(../Images/list_content_bar_h20.png) top repeat-x;
+    -moz-box-shadow: inset 0 1px 0 #fff;
+    text-decoration: none;
+    box-shadow:none;
+    border:solid 1px black;
+    margin:2px;
+    cursor: pointer;
+}
+/* 詳細 一覧項目(選択済) */
+.btn-list-content-selected {
+    background: #93cedd url(../Images/list_selected_bar_h20.png) top repeat-x;
+    border:solid 2px red;
+    font-weight:bold;
+}
+/* 詳細 一覧項目 マウスオーバー */
+.btn-list-content:hover {
+    border:solid 2px blue;
+    cursor: pointer;
+}
+/* 詳細 一覧項目(選択済) マウスオーバー */
+.btn-list-content-selected:hover {
+    cursor:default;
+}
+/* 詳細 (本機/搭載エンジン)切替ボタン */
+.btn-model-transfer {
+    width:100%;/*386px;*/
+    height:27px;
+    background-color:transparent;
+    box-shadow:none;
+    border:none;
+    margin:0px;
+    cursor: pointer;
+    text-decoration: underline;
+    color: #0000ff;
+    cursor: pointer;
+    font-family: 'MS Gothic';
+    font-size: medium;
+    font-weight:bold;
+}
+.btn-current-pager {
+    padding-left:4px;
+    padding-right:4px;
+    position:relative;
+    top:1px;
+}
+.btn-link-pager {
+    padding-left:4px;
+    padding-right:4px;
+    position:relative;
+    top:3px;
+}
+/* 使用不可リストボタン */
+.btn-list-content-none {
+    width:200px;
+    height:20px;
+    background: #EEEEEE;
+    -moz-box-shadow: inset 0 1px 0 #fff;
+    text-decoration: none;
+    box-shadow:none;
+    border:solid 1px black;
+    margin:2px;
+    cursor:default;
+}
+/*荻野追加部分 -start- */
+/* ラインアコーディオンコントロールボタン */
+.btn-list-line {
+    text-align:center;
+    vertical-align:middle;
+    width:200px;
+    height:20px;
+    line-height:20px;
+    background-color:#FFFF99;
+    box-sizing: border-box;
+    -moz-box-shadow: inset 0 1px 0 #fff;
+    text-decoration: none;
+    box-shadow:none;
+    border:solid 1px black;
+    margin:2px;
+    display:block;
+    font-weight:bold;
+}
+/*荻野追加部分 -end- */
+
+/*------------------------------------------------------------------------------
+    テキストボックス
+-------------------------------------------------------------------------------*/
+/* 標準テキストボックス */
+.txt-default {
+    height:15px;
+    line-height:15px;
+    border-color:black;
+    border-width:1px;
+    vertical-align: middle;
+    text-indent:4px;
+}
+/* 狭幅 */
+.txt-width-short {
+    width:80px;
+}
+/* 標準幅 */
+.txt-width-middle {
+    width:120px;
+}
+/* 時刻幅 */
+.txt-width-ymdhms {
+    width:140px;
+}
+/* 広め幅 */
+.txt-width-long {
+    width:160px;
+}
+/* PINコード */
+.txt-width-pincd {
+    width:135px;
+}
+/* 自動幅 */
+.txt-width-auto {
+    width:auto;
+}
+/* 100%幅 */
+.txt-width-full {
+    width:100%;
+}
+/* 数値 */
+.txt-numeric {
+    text-align:right;
+    ime-mode:disabled;
+}
+/* 数値(AutoSize中央) 件数表示使用 */
+.txt-center-num {
+    width:auto;
+    text-align:center;
+    ime-mode:disabled;
+    font-size:medium;
+    text-indent:0px;
+}
+/* テキストコントロール 非活性時背景色 */
+input[type="text"][disabled="disabled"] {
+    background-color:#eeeeee;
+}
+/* マルチライン設定 */
+.txt-multiline {
+    overflow: hidden;
+    border-style:none;
+    font-family: 'MS Gothic';
+    background-color:transparent;
+
+    height:auto;
+    border-color:transparent !important;
+    border-width:0px !important;
+    vertical-align: middle;
+    text-overflow: clip;
+    white-space:normal;
+
+}
+
+/*------------------------------------------------------------------------------
+    ラジオボタン
+-------------------------------------------------------------------------------*/
+/* ラジオボタン ベース */
+.rbl-default {
+    position: initial;
+    table-layout:initial;
+    border-collapse: initial;
+}
+/* ラジオボタンスタイル TR */
+.rbl-default tr {
+    border: 0px solid transparent;
+}
+/* ラジオボタンスタイル TD */
+.rbl-default tr td {
+    border: 0px solid transparent;
+}
+/* アイテム方向 水平 */
+.rbl-horizontal {
+    height:19px;
+}
+/*------------------------------------------------------------------------------
+    ドロップダウンリスト
+-------------------------------------------------------------------------------*/
+/* ドロップダウン ベース */
+.ddl-default {
+    height:19px;
+}
+/* 狭幅 */
+.ddl-width-short {
+    width:80px;
+}
+/* 標準幅 */
+.ddl-width-middle {
+    width:160px;
+}
+/* 広め幅 */
+.ddl-width-long {
+}
+
+/*------------------------------------------------------------------------------
+    カレンダー
+-------------------------------------------------------------------------------*/
+/* 年月日 */
+.cld-ymd {
+    width:80px;
+    ime-mode:disabled;
+}
+/*------------------------------------------------------------------------------
+    ラベル
+-------------------------------------------------------------------------------*/
+/* 詳細 一覧項目タイトル */
+.lbl-list-title {
+    text-align:center;
+    vertical-align:middle;
+    width:200px;
+    height:20px;
+    line-height:20px;
+    /*background-color:azure;*/
+    background-color:#FFFFCC;
+    box-sizing: border-box;
+    background: #ffffff url(../Images/list_title_bar_h20.png) top repeat-x;
+    -moz-box-shadow: inset 0 1px 0 #fff;
+    text-decoration: none;
+    box-shadow:none;
+    border:solid 1px black;
+    margin:2px;
+    display:block;
+    font-weight:bold;
+}
+/* KTControl用 ReadOnly(Label変換)表示補正 */
+.readonly {
+    height:auto;
+    border-color:transparent !important;
+    border-width:0px !important;
+    vertical-align: middle;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space:pre;
+    word-wrap: normal;
+}
+/* パスワードチェック */
+.lbl-check-pw {
+    text-align: center;
+    vertical-align:bottom;
+    font-size:large;
+    font-family:'MS Gothic';
+    color : red;
+}
+/*------------------------------------------------------------------------------
+    Image
+-------------------------------------------------------------------------------*/
+/* サムネイル格納エリア(3:4) */
+.thumbnail-area {
+    height:150px;
+    width:200px;
+}
+/* サムネイル格納エリア(A4) */
+.thumbnail-area-a4 {
+    height:282px;
+    width:200px;
+}
+/*------------------------------------------------------------------------------
+    SPAN等、HTMLテキスト
+-------------------------------------------------------------------------------*/
+/* 検索結果用タイトル */
+.result-title {
+    font-size:x-large;
+    font-family:'MS Gothic';
+    font-weight:600;
+    position:relative;
+    top: 2px;
+    left:25px;
+}
+/* 項目タイトル */
+.content-title {
+    font-size: large;
+    font-weight:bold;
+    font-family:'MS Gothic';
+    color:white;
+    position:static;
+}
+/*------------------------------------------------------------------------------
+    グリッド、リストビュー
+-------------------------------------------------------------------------------*/
+.grid-layout {
+    position: static;
+    table-layout: fixed;
+    border-collapse: collapse;
+    border-spacing: 0px 0px !important;
+    margin-top:0px;
+}
+/* ヘッダ */
+.grid-layout .grid-header {
+    height:30px;
+}
+/* ヘッダ セル */
+.grid-layout .grid-header th {
+    padding-top: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-bottom: 0px;
+    border: 1px solid black;
+    white-space:nowrap;
+    font-family: 'MS Gothic';
+    font-size: medium;
+}
+/* 行 */
+.grid-layout .grid-row {
+    height:24px;
+    vertical-align:middle;
+}
+/* 行 セル */
+.grid-layout .grid-row td {
+    border-top: 1px solid black;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
+    white-space:nowrap;
+    font-family: 'MS Gothic';
+    font-size: small;
+    padding-left:4px;
+    padding-right:4px;
+}
+/* 行(リストビュー) */
+.grid-layout .listview-row {
+    height:24px;
+    vertical-align:middle;
+}
+/* リストビュー ヘッダ */
+.grid-layout .listview-header {
+    height:30px;
+}
+/* リストビュー ヘッダ 2行 */
+.grid-layout .listview-header_2r {
+    height:42px;
+}
+.grid-layout .listview-header_3r {
+    height:0px;
+}
+/* リストビュー ヘッダ セル */
+.grid-layout .listview-header th {
+    padding-top: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-bottom: 0px;
+    border: 1px solid black;
+    white-space:nowrap;
+    font-family: 'MS Gothic';
+    font-size: medium;
+}
+/* リストビュー ヘッダ 2行 セル */
+.grid-layout .listview-header_2r th {
+    padding-top: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-bottom: 0px;
+    border: 1px solid black;
+    white-space:nowrap;
+    font-family: 'MS Gothic';
+    font-size: medium;
+}
+.grid-layout .listview-header_3r th {
+    padding-top: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-bottom: 0px;
+    border: 1px solid black;
+    white-space:nowrap;
+    font-family: 'MS Gothic';
+    font-size: medium;
+}
+/* 行(リストビュー)  セル */
+.grid-layout .listview-row td {
+    border-top: 1px solid black;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
+    white-space:nowrap;
+    font-family: 'MS Gothic';
+    font-size: small;
+    padding-left:4px;
+    padding-right:4px;
+}
+.grid-layout2 {
+    position: static;
+    table-layout: fixed;
+    border-collapse: collapse;
+    border-spacing: 0px 0px !important;
+}
+/* ヘッダ */
+.grid-layout2 .grid-header {
+    height:30px;
+    margin-bottom:-1px;
+}
+/* ヘッダ セル */
+.grid-layout2 .grid-header th {
+    padding-top: 10px;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-bottom: 10px;
+    border: 1px solid black;
+    white-space:nowrap;
+    font-family: 'MS Gothic';
+    font-size: medium;
+}
+/* ヘッダ セル(固定ヘッダのタイトル改行用) */
+.grid-layout2 .grid-header-newline th {
+    padding-top: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-bottom: 4px;
+    border: 1px solid black;
+    white-space:nowrap;
+    font-family: 'MS Gothic';
+    font-size: medium;
+}
+/* 行 */
+.grid-layout2 .grid-row {
+    height:24px;
+    vertical-align:middle;
+}
+/* 行 セル */
+.grid-layout2 .grid-row td {
+    border-top: 0px solid black;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
+    white-space:nowrap;
+    font-family: 'MS Gothic';
+    font-size: small;
+    padding-left:4px;
+    padding-right:4px;
+}
+
+/*------------------------------------------------------------------------------
+    明細テーブル
+-------------------------------------------------------------------------------*/
+/* リストビュー ヘッダ 2行 セル */
+tr.detailtable-header {
+    height : 30px;
+}
+
+/* リストビュー ヘッダ 2行 セル */
+td.detailtable-header {
+    padding-left: 4px;
+    white-space:nowrap;
+    font-family: 'MS Gothic';
+    font-size: medium;
+    font-weight:bold;
+}
+
+/*------------------------------------------------------------------------------
+    位置指定
+-------------------------------------------------------------------------------*/
+/* サイズ100% ボックス内中央 */
+.box-in-center {
+    width:100%;
+    text-align:center;
+}
+/* サイズ100% ボックス内右寄せ */
+.box-in-right {
+    width:100%;
+    text-align:right;
+}
+/* 幅100% ボックス内マージン 小 */
+.box-in-margin-small {
+    margin-left:2px;
+    margin-right:2px;
+}
+/*------------------------------------------------------------------------------
+    ローディング共通定義
+-------------------------------------------------------------------------------*/
+/* 背景指定 */
+.loading-back-ground {
+    position : fixed;
+    width : 100%;
+    height : 100%;
+    z-index: 2147483646;
+    pointer-events:none;
+    display:block;
+}
+/* イメージ、文字列定義 */
+.loading-content {
+    position : fixed;
+    z-index: 2147483647;
+    top : 50%;
+    left : 50%;
+    pointer-events:none;
+}
+/*------------------------------------------------------------------------------
+    ローディング個別定義
+-------------------------------------------------------------------------------*/
+/* (標準)背景 */
+.loading-bg-default {
+    background-color: black;
+    filter : alpha(opacity = 40);
+    opacity : 0.4;
+}
+/* (標準)文字列 */
+.loading-char-default {
+    color : gainsboro;
+    font-family : 'Meiryo UI';
+    font-size : 48px;
+    text-align : center;
+    background-color : transparent;
+    vertical-align:middle;
+    line-height:48px;
+    display:block;
+}
+/* (透過)背景 */
+.loading-bg-transparent {
+    /*background-color: transparent;*/
+    background-color: #e8e8e8;
+    filter : alpha(opacity = 30);
+    opacity : 0.3;
+}
+/* (終了)背景 */
+.loading-bg-exit {
+    background-color: black;
+    filter : alpha(opacity = 70);
+    opacity : 0.7;
+}
+/* (終了)文字列 */
+.loading-char-exit {
+    color : gainsboro;
+    font-family : 'Meiryo UI';
+    font-size : 48px;
+    text-align : center;
+    background-color : transparent;
+    vertical-align:middle;
+    line-height:48px;
+    display:block;
+}
+/*------------------------------------------------------------------------------
+    電子チェックシート
+-------------------------------------------------------------------------------*/
+/* 表示領域全体 */
+div.tabbox {
+    margin: 0px;
+    padding: 0px;
+}
+/* タブ部分共通 */
+ul.tabs {
+    margin: 0px;
+    padding: 0px;
+    height: 19px;
+}
+ul.tabs li {
+    margin: 0px;
+    padding: 0px;
+    list-style-type: none;
+    float: left;
+    height: 10px;
+}
+ul.tabs a {
+   /* リンク部 */
+   display: block;
+   width: 5em;
+   float: left;
+   margin: 0px 0px 0px 0px;
+   padding: 3px;
+   text-align: center;
+   text-decoration: none;
+   border: 1px solid black;
+}
+/* 各タブの配色 */
+ul.tabs a.tabChkInfo {
+    color: black;
+}
+ul.tabs a.tabNGList {
+    color: black;
+}
+ul.tabs a.tabNGImg {
+    color: black;
+}
+ul.tabs a.tabChkImg {
+    color: black;
+}
+ul.tabs a:hover {
+    background-color: yellow;
+    color: black;
+}
+/* タブ中身のボックス */
+div.tabResult {
+/*    overflow: auto; */
+    clear: left;
+    border: 1px solid black;
+    background-color: white;
+}
+div.tabResult ul {
+    margin: 0.5em;
+}
+.selected-tab-color {
+    background-color:lightskyblue;
+}
+.unselected-tab-color {
+    background-color:#E0ECF8;
+}
+.unselected-tab-disp {
+    display:none;
+}
+.menu-header {
+    display: inline-block;
+    padding: 3px 0px 3px 0px;
+    width: 198px;
+    text-align: center;
+    font-size: medium !important;
+    font-weight: 700;
+}
+.print-div-disp {
+    position:fixed;
+    height:40px;
+}
+.print-div-list {
+    vertical-align:top;
+}
+.print-show {
+    display:none;
+}
+.print-div-view {
+    padding-top:40px;
+}
+/*------------------------------------------------------------------------------
+    メインメニュー画面用定義
+-------------------------------------------------------------------------------*/
+.menu-columns {
+    text-align:center;
+    margin-top: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+
+}
+.menu-button-area {
+    /*display: inline-block;*/
+    margin-top: 15px;
+    /*padding: 0px 5px 0px 300px;*/
+    /*width: 180px;*/
+}
+.menu-button {
+    height: 45px !important;
+    font-size: small !important;
+}
+.menu-button-short {
+    height: 30px !important;
+    font-size: small !important;
+}
+.menu-button-large {
+    width: 180px;
+}
+.menu-button-small-left {
+    width: 100px;
+}
+.menu-button-small-right {
+    float:right;
+    width: 76px;
+}
+.frame-area {
+    background-color:white;
+    position:static;
+    z-index:100;
+}
+.menu-column {
+    vertical-align:top;
+    width: 190px;
+}
+.menu-column-separator {
+    margin: 5px;
+    width: 1px;
+    height: 400px;
+    border-left: 1px solid gray;
+}
+.menu-button-separator {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    height: 0px;
+    width: 190px;
+    border-top: 1px solid gray;
+}
+
+/*------------------------------------------------------------------------------
+    製品別通過実績
+-------------------------------------------------------------------------------*/
+.grid-layout-imadoko {
+    position: static;
+    table-layout: fixed;
+    border-collapse: collapse;
+    border-spacing: 0px 0px !important;
+    margin-top:0px;
+    margin-left:0px;
+    font-family: 'MS Gothic';
+}
+/* ヘッダ */
+.grid-layout-imadoko .grid-header-imadoko {
+    height:20px;
+    font-size:x-small;
+}
+/* ヘッダ セル */
+.grid-layout-imadoko .grid-header-imadoko th{
+    padding-top: 0px;
+    padding-left: 2px;
+    padding-right: 2px;
+    padding-bottom: 0px;
+    border-top: 1px solid black;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
+    white-space:nowrap;
+    width:70px;
+    white-space:pre-wrap;
+}
+/* 行 */
+.grid-layout-imadoko .grid-row-imadoko {
+    height:20px;
+    font-size:small;
+    vertical-align:middle;
+}
+/* 行 セル */
+.grid-layout-imadoko .grid-row-imadoko td {
+    border-top: 1px solid black;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
+    white-space:nowrap;
+    padding-left:4px;
+    padding-right:4px;
+    width:70px;
+    white-space:pre-wrap;
+}
+/* テーブル */
+.condition-imadoko {
+    margin-top:-48px;
+    height:35px;
+    margin-bottom:20px;
+}
+/* チェック項目用font clolor */
+.font-ng-condition {
+    color:red;
+}
+
+/*------------------------------------------------------------------------------
+    順序情報検索
+-------------------------------------------------------------------------------*/
+/* ベース型式名用文字色 */
+.base-katashiki-name{
+    color:#777777;
+}
+/* 2行 セル */
+.grid-layout2 .grid-row-double-height{
+    height:30px;
+}
+
+/*------------------------------------------------------------------------------
+    アコーディオンコントロール
+-------------------------------------------------------------------------------*/
+.KTExpanderContent{
+    width:95% !important;
+    margin-left:5% !important;
+}
+.KTExpanderContent > *{
+    width:100% !important;
+}
+
+/*------------------------------------------------------------------------------
+    関所
+-------------------------------------------------------------------------------*/
+.cell-cnt-difference {
+    background-color: yellow;
+    color: black;
+}
+/*------------------------------------------------------------------------------
+    ブラウザ変更促し画面
+-------------------------------------------------------------------------------*/
+.browser-change-url-part {
+    text-indent: 1em;
+    background-color: #99ddee;
+    font-weight: bold;
+}
+.browser-change-h2 {
+    text-indent: 1em;
+    background-color: #ddffff;
+}
+.browser-change-ul {
+    text-indent: 2em;
+}

@@ -1,0 +1,1100 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="ProcessSearch"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン:噴射時期計測03検索]                                                            -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineInjection03List">
+      SELECT
+        INJ.生産型式コード         "modelCd",              <!--型式コード-->
+        INJ.生産型式名             "modelNm",              <!--型式名-->
+        INJ.機番                  "serial6",              <!--6桁機番-->
+        S7.SERIAL7                "serial7",              <!--7桁機番-->
+        INJ.生産国コード           "countryCd",            <!--生産国 -->
+        INJ.IDNO                  "idno",                 <!--IDNO-->
+        CASE INJ.総合判定
+          WHEN 0 THEN 'OK'
+          WHEN 1 THEN 'NG'
+          WHEN 2 THEN '再計測'
+        END                       "result",               <!--総合判定-->
+        INJ.測定日時               "inspectionDt",         <!--測定日-->
+        INJ.測定号機               "measurementTerminal",  <!--測定号機-->
+        SJ.MS_JYOHO_24            "integratedCd",         <!--統合コード-->
+        IPC.CC                    "cc",                   <!--CC-->
+        IPC.FCAM                  "fcam",                 <!--FCAM-->
+        IPC.FCAMギヤ              "fcamGear",             <!--FCAMギヤ-->
+        IPC.IN_P                  "inP"                  <!--IN_P-->
+      FROM
+        TBL噴射計測データ INJ
+      LEFT JOIN
+        MS_SETUBI_JYOHO SJ
+          ON INJ.生産型式コード = SJ.MS_B_KATA_C AND INJ.生産国コード = SJ.MS_B_KUNI_C AND SJ.MS_SETUBI = '302-FU' AND SJ.MS_STATION = '302302'
+      INNER JOIN
+        TBL_燃料噴射統合コード一覧 IIC
+          ON SJ.MS_JYOHO_24 = IIC.統合コード
+      INNER JOIN
+        TBL_燃料噴射部品コード一覧 IPC
+          ON IIC.部品コード = IPC.部品コード
+      LEFT JOIN
+        TT_DI_SERIAL7 S7
+          ON INJ.生産型式コード = S7.MODEL_CD AND INJ.機番 = S7.SERIAL6
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="modelCd" prepend="AND">
+          INJ.生産型式コード LIKE #modelCd# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="modelNm" prepend="AND">
+          INJ.生産型式名 LIKE #modelNm# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="serial6" prepend="AND">
+          INJ.機番 = #serial6#
+        </isNotEmpty>
+        <isNotEmpty property="idno" prepend="AND">
+          INJ.IDNO = #idno#
+        </isNotEmpty>
+        <isNotEmpty property="result" prepend="AND">
+          INJ.総合判定 = #result#
+        </isNotEmpty>
+        <isNotEmpty property="measurementTerminal" prepend="AND">
+          INJ.測定号機 = #measurementTerminal#
+        </isNotEmpty>
+        <isNotEmpty property="integratedCd" prepend="AND">
+          SJ.MS_JYOHO_24 LIKE #integratedCd# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="dtFrom" prepend="AND">
+          INJ.測定日時 <![CDATA[>=]]> #dtFrom#
+        </isNotEmpty>
+        <isNotEmpty property="dtTo" prepend="AND">
+          INJ.測定日時 <![CDATA[<=]]> #dtTo#
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+        INJ.測定日時
+    </statement>
+
+	<!-- ************************************************************************************** -->
+    <!-- [エンジン:噴射時期計測03Excel出力用詳細]                                                      -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineInjection03ForExcel">
+      SELECT
+        INJ.生産型式コード,
+	      INJ.生産国コード,
+        INJ.生産型式名,
+        INJ.機番,
+        INJ.IDNO,
+	      INJ.測定日時,
+	      INJ.エンジン刻印名,
+	      CASE INJ.総合判定
+          WHEN 0 THEN 'OK'
+          WHEN 1 THEN 'NG'
+          WHEN 2 THEN '再計測'
+        END 総合判定,
+	      INJ.気筒数,
+	      INJ.ストローク,
+	      INJ.ボア,
+	      INJ.燃焼方式,
+        INJ.進角調整,
+        INJ.ポンプネジ,
+        INJ.ラック位置,
+	      INJ.ラック寸法差,
+        INJ.測定パスフラグ,
+        INJ.ガスケット対象フラグ,
+	      INJ.標準ガスケット品番,
+        INJ.ガスケット寸法,
+	      INJ.選定ガスケット部品番号,
+        INJ.燃焼室リセス,
+        INJ.エラーメッセージ1,
+	      INJ.エラーメッセージ2,
+	      INJ.エラーメッセージ3,
+        INJ.ピストン出代上限,
+	      INJ.ピストン出代下限,
+        INJ.出代最大値,
+	      INJ.出代最小値,
+        INJ.出代平均値,
+        INJ.出代寸法バラツキ基準値,
+	      INJ.出代寸法誤差,
+        INJ.ピストン出代気筒1,
+	      INJ.ピストン出代気筒2,
+	      INJ.ピストン出代気筒3,
+	      INJ.ピストン出代気筒4,
+	      INJ.トップクリアランス上限,
+	      INJ.トップクリアランス下限,
+        INJ.トップクリアランス気筒1,
+	      INJ.トップクリアランス気筒2,
+	      INJ.トップクリアランス気筒3,
+	      INJ.トップクリアランス気筒4,
+	      INJ.燃料噴射時期上限,
+	      INJ.燃料噴射時期下限,
+        INJ.噴射時期補正値,
+        INJ.燃料噴射時期気筒1,
+	      INJ.燃料噴射時期気筒2,
+	      INJ.燃料噴射時期気筒3,
+	      INJ.燃料噴射時期気筒4,
+        INJ.基準ポンプシム寸法,
+	      INJ.セットシム量上限,
+	      INJ.セットシム量下限,       
+	      INJ.シム枚数175 "シム枚数(0.175mm)",
+	      INJ.シム枚数2 "シム枚数(0.200mm)",
+	      INJ.シム枚数25 "シム枚数(0.250mm)",
+	      INJ.シム枚数3 "シム枚数(0.300mm)",
+	      INJ.シム枚数35 "シム枚数(0.350mm)",    
+	      INJ.測定点数,
+        INJ.測定号機,
+	      INJ.測定方法気筒,
+	      INJ.測定方法方向,
+	      INJ.測定補正値,
+        INJ.治具補正1,
+	      INJ.治具補正2,
+	      INJ.治具補正3,       
+	      INJ.測定値生1気筒1,
+	      INJ.測定値生1気筒2,
+	      INJ.測定値生1気筒3,
+	      INJ.測定値生1気筒4,
+	      INJ.測定値生2気筒1,
+	      INJ.測定値生2気筒2,
+	      INJ.測定値生2気筒3,
+	      INJ.測定値生2気筒4,
+	      INJ.測定値生3気筒1,
+	      INJ.測定値生3気筒2,
+	      INJ.測定値生3気筒3,
+	      INJ.測定値生3気筒4,
+	      INJ.測定値生4気筒1,
+	      INJ.測定値生4気筒2,
+	      INJ.測定値生4気筒3,
+	      INJ.測定値生4気筒4,   
+	      INJ.測定補正値1気筒1,
+	      INJ.測定補正値1気筒2,
+	      INJ.測定補正値1気筒3,
+	      INJ.測定補正値1気筒4,
+	      INJ.測定補正値2気筒1,
+	      INJ.測定補正値2気筒2,
+	      INJ.測定補正値2気筒3,
+	      INJ.測定補正値2気筒4,
+	      INJ.測定補正値3気筒1,
+	      INJ.測定補正値3気筒2,
+	      INJ.測定補正値3気筒3,
+	      INJ.測定補正値3気筒4,
+	      INJ.測定補正値4気筒1,
+	      INJ.測定補正値4気筒2,
+	      INJ.測定補正値4気筒3,
+	      INJ.測定補正値4気筒4,	      
+	      INJ.ＦＩＴ補正値平均値,
+	      INJ.ＦＩＴ補正値1気筒,
+	      INJ.ＦＩＴ補正値2気筒,
+	      INJ.ＦＩＴ補正値3気筒,
+	      INJ.ＦＩＴ補正値4気筒,
+        SJ.MS_JYOHO_24  "統合コード",
+        IPC.CC,
+        IPC.FCAM,
+        IPC.FCAMギヤ,
+        IPC.IN_P
+      FROM
+	      TBL噴射計測データ INJ
+      LEFT JOIN
+        MS_SETUBI_JYOHO SJ
+          ON INJ.生産型式コード = SJ.MS_B_KATA_C AND INJ.生産国コード = SJ.MS_B_KUNI_C AND SJ.MS_SETUBI = '302-FU' AND SJ.MS_STATION = '302302'
+      INNER JOIN
+        TBL_燃料噴射統合コード一覧 IIC
+          ON SJ.MS_JYOHO_24 = IIC.統合コード
+      INNER JOIN
+        TBL_燃料噴射部品コード一覧 IPC
+          ON IIC.部品コード = IPC.部品コード
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="modelCd" prepend="AND">
+          INJ.生産型式コード LIKE #modelCd# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="modelNm" prepend="AND">
+          INJ.生産型式名 LIKE #modelNm# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="serial6" prepend="AND">
+          INJ.機番 = #serial6#
+        </isNotEmpty>
+        <isNotEmpty property="idno" prepend="AND">
+          INJ.IDNO = #idno#
+        </isNotEmpty>
+        <isNotEmpty property="result" prepend="AND">
+          INJ.総合判定 = #result#
+        </isNotEmpty>
+        <isNotEmpty property="measurementTerminal" prepend="AND">
+          INJ.測定号機 = #measurementTerminal#
+        </isNotEmpty>
+        <isNotEmpty property="integratedCd" prepend="AND">
+          SJ.MS_JYOHO_24 LIKE #integratedCd# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="dtFrom" prepend="AND">
+          INJ.測定日時 <![CDATA[>=]]> #dtFrom#
+        </isNotEmpty>
+        <isNotEmpty property="dtTo" prepend="AND">
+          INJ.測定日時 <![CDATA[<=]]> #dtTo#
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+        INJ.測定日時
+    </statement>
+    
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン:噴射時期計測03 NGリスト検索]                                                    -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineInjection03NGList">
+      SELECT
+        SGO.指示月度               "shijiTsuki",             <!--指示月度-->
+        SGO.指示連番               "shijiTsukiNo",           <!--順序連番-->
+        INJ.生産型式名              "modelNm",               <!--型式名-->
+        INJ.機番                   "serial6",                <!--6桁機番-->
+        INJ.測定号機                "measurementTerminal",   <!--測定号機-->
+        SJ.MS_JYOHO_6              "pistonBumpUpperLimit",  <!--ピストン出代上限-->
+        SJ.MS_JYOHO_7              "pistonBumpLowerLimit",  <!--ピストン出代下限-->
+        SUBSTR(INJ.選定ガスケット部品番号, 1, 5)   "selectedGasketNum",     <!--選定ガスケット部品番号-->
+        INJ.ガスケット寸法          "gasketSize",             <!--ガスケット寸法-->
+        INJ.ピストン出代気筒1       "piston01Bump",           <!--ピストン出代気筒1-->
+        INJ.ピストン出代気筒2       "piston02Bump",           <!--ピストン出代気筒2-->
+        INJ.ピストン出代気筒3       "piston03Bump",           <!--ピストン出代気筒3-->
+        INJ.ピストン出代気筒4       "piston04Bump"            <!--ピストン出代気筒4-->
+      FROM
+        TBL噴射計測データ INJ
+      INNER JOIN
+        (
+          SELECT
+            生産型式コード,
+            機番,
+            MAX(測定日時) 測定日時
+          FROM
+            TBL噴射計測データ
+          GROUP BY
+            生産型式コード,
+            機番
+        ) INJ_G
+          ON INJ.生産型式コード = INJ_G.生産型式コード AND INJ.機番 = INJ_G.機番 AND INJ.測定日時 = INJ_G.測定日時
+      INNER JOIN
+        TBL_作業指示保存 SGO
+          ON SGO.指示レベル = '3' AND INJ.生産型式コード = SGO.型式コード AND INJ.機番 = SGO.機番
+      LEFT JOIN
+        MS_SETUBI_JYOHO SJ
+          ON INJ.生産型式コード = SJ.MS_B_KATA_C AND INJ.生産国コード = SJ.MS_B_KUNI_C AND SJ.MS_SETUBI = '302-FU' AND SJ.MS_STATION = '302302'
+      WHERE
+        INJ.総合判定 = 1
+        <isNotEmpty property="modelCd" prepend="AND">
+          INJ.生産型式コード LIKE #modelCd# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="modelNm" prepend="AND">
+          INJ.生産型式名 LIKE #modelNm# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="serial6" prepend="AND">
+          INJ.機番 = #serial6#
+        </isNotEmpty>
+        <isNotEmpty property="idno" prepend="AND">
+          INJ.IDNO = #idno#
+        </isNotEmpty>
+        <!--OK選択時にNG報告書出力させない為に追加-->
+        <isNotEmpty property="result" prepend="AND">
+          INJ.総合判定 = #result#
+        </isNotEmpty>
+        <isNotEmpty property="measurementTerminal" prepend="AND">
+          INJ.測定号機 = #measurementTerminal#
+        </isNotEmpty>
+        <isNotEmpty property="integratedCd" prepend="AND">
+          SJ.MS_JYOHO_24 LIKE #integratedCd# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="dtFrom" prepend="AND">
+          INJ.測定日時 <![CDATA[>=]]> #dtFrom#
+        </isNotEmpty>
+        <isNotEmpty property="dtTo" prepend="AND">
+          INJ.測定日時 <![CDATA[<=]]> #dtTo#
+        </isNotEmpty>
+        <isNotEmpty property="errorMessages" prepend="AND">
+          (
+            <iterate property="errorMessages" open="(" close=")" conjunction ="OR">
+              INJ.エラーメッセージ1 LIKE #errorMessages[]# || '%'
+            </iterate>
+            <iterate property="errorMessages" prepend="OR" open="(" close=")" conjunction ="OR">
+              INJ.エラーメッセージ2 LIKE #errorMessages[]# || '%'
+            </iterate>
+            <iterate property="errorMessages" prepend="OR" open="(" close=")" conjunction ="OR">
+              INJ.エラーメッセージ3 LIKE #errorMessages[]# || '%'
+            </iterate>
+          )
+        </isNotEmpty>
+      ORDER BY
+        SGO.指示連番
+    </statement>
+    
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン:噴射時期計測03 詳細データ検索（詳細データPDF出力用）]                                                    -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineInjection03DetailForPdfOutput">
+      SELECT
+        測定日時                "MeasuringDate",
+        生産型式名              "ModelName",
+        エンジン刻印名          "EnginePrint",
+        機番                    "Serial",
+        IDNO                    "Idno",
+        総合判定                "Result",
+        CASE 総合判定
+          WHEN 0 THEN 'OK'
+          WHEN 1 THEN 'NG'
+          WHEN 2 THEN '再計測'
+        END                     "ResultDisplayString",
+        気筒数                  "NumberOfCylinder",
+        ストローク              "Stroke",
+        ボア                    "Bore",
+        燃焼方式                "CombustionSystem",
+        進角調整                "AdjustAdvance",
+        CASE 進角調整
+          WHEN 0 THEN '無し' 
+          WHEN 1 THEN '有り'
+        END                     "AdjustAdvanceDisplayString",
+        ラック位置              "LackPosition",
+        ラック寸法差            "LackSizeDifference",
+        ポンプネジ              "ScrewType",
+        噴射時期補正値          "InjectionTimingOffset", 
+        測定号機                "MeasuringTerminal",
+        測定方法気筒            "MethodCylinder",
+        CASE 測定方法気筒
+          WHEN 0 THEN '全気筒'
+          WHEN 1 THEN '1気筒のみ'
+        END                     "MethodCylinderDisplayString",
+        燃焼室リセス            "Recess",
+        CASE 燃焼室リセス
+          WHEN 1 THEN '有り'
+          ELSE '無し'
+        END                    "RecessDisplayString",
+        測定方法方向            "MethodDirection",
+        CASE 測定方法方向
+          WHEN 0 THEN ''
+          WHEN 1 THEN '正･逆転'
+          WHEN 2 THEN '1気筒のみ正逆'
+        END                     "MethodDirectionDisplayString",
+        測定号機                "MeasuringTerminal",
+        ピストン出代上限        "PistonBumpUpperLimit",
+        ピストン出代下限        "PistonBumpLowerLimit",
+        ピストン出代気筒1       "PistonBumpCylinder1",
+        ピストン出代気筒2       "PistonBumpCylinder2",
+        ピストン出代気筒3       "PistonBumpCylinder3",
+        ピストン出代気筒4       "PistonBumpCylinder4",
+        トップクリアランス上限  "TopClearanceUpperLimit",
+        トップクリアランス下限  "TopClearanceLowerLimit",
+        トップクリアランス気筒1 "TopClearanceCylinder1",
+        トップクリアランス気筒2 "TopClearanceCylinder2",
+        トップクリアランス気筒3 "TopClearanceCylinder3",
+        トップクリアランス気筒4 "TopClearanceCylinder4",
+        燃料噴射時期上限        "InjectionTimingUpperLimit",
+        燃料噴射時期下限        "InjectionTimingLowerLimit",
+        燃料噴射時期気筒1       "InjectionTimingCylinder1",
+        燃料噴射時期気筒2       "InjectionTimingCylinder2",
+        燃料噴射時期気筒3       "InjectionTimingCylinder3",
+        燃料噴射時期気筒4       "InjectionTimingCylinder4",
+        出代寸法バラツキ基準値  "BumpSizeVariableBase",
+        出代寸法誤差            "BumpSizeError",
+        標準ガスケット品番      "StandardGascketNumber",
+        ガスケット寸法          "GascketSize",
+        選定ガスケット部品番号  "SelectedGascketNumber",
+        基準ポンプシム寸法      "BasePumpShimSize",
+        シム枚数175 * 0.175 + シム枚数2 * 0.2 + シム枚数25 * 0.25 + シム枚数3 * 0.3 + シム枚数35 * 0.35 "TotalShimSize",
+        シム枚数175             "NumberOfShim0175",
+        シム枚数2               "NumberOfShim0200",
+        シム枚数25              "NumberOfShim0250",
+        シム枚数3               "NumberOfShim0300",
+        シム枚数35              "NumberOfShim0350",
+        シム枚数175 + シム枚数2 + シム枚数25 + シム枚数3 + シム枚数35 "TotalNumberOfShim",
+        治具補正1               "JigOffset1",
+        治具補正2               "JigOffset2",
+        治具補正3               "JigOffset3",
+        測定補正値              "MeasurementOffset",
+        ＦＩＴ補正値平均値      "FitOffsetCylinderAverage",
+        ＦＩＴ補正値1気筒       "FitOffsetCylinder1",
+        ＦＩＴ補正値2気筒       "FitOffsetCylinder2",
+        ＦＩＴ補正値3気筒       "FitOffsetCylinder3",
+        ＦＩＴ補正値4気筒       "FitOffsetCylinder4",
+        測定値生1気筒1          "MeasuringRow1Cylinder1",
+        測定値生1気筒2          "MeasuringRow1Cylinder2",
+        測定値生1気筒3          "MeasuringRow1Cylinder3",
+        測定値生1気筒4          "MeasuringRow1Cylinder4",
+        測定値生2気筒1          "MeasuringRow2Cylinder1",
+        測定値生2気筒2          "MeasuringRow2Cylinder2",
+        測定値生2気筒3          "MeasuringRow2Cylinder3",
+        測定値生2気筒4          "MeasuringRow2Cylinder4",
+        測定値生3気筒1          "MeasuringRow3Cylinder1",
+        測定値生3気筒2          "MeasuringRow3Cylinder2",
+        測定値生3気筒3          "MeasuringRow3Cylinder3",
+        測定値生3気筒4          "MeasuringRow3Cylinder4",
+        測定値生4気筒1          "MeasuringRow4Cylinder1",
+        測定値生4気筒2          "MeasuringRow4Cylinder2",
+        測定値生4気筒3          "MeasuringRow4Cylinder3",
+        測定値生4気筒4          "MeasuringRow4Cylinder4",
+        測定補正値1気筒1        "MeasuringOffset1Cylinder1",
+        測定補正値1気筒2        "MeasuringOffset1Cylinder2",
+        測定補正値1気筒3        "MeasuringOffset1Cylinder3",
+        測定補正値1気筒4        "MeasuringOffset1Cylinder4",
+        測定補正値2気筒1        "MeasuringOffset2Cylinder1",
+        測定補正値2気筒2        "MeasuringOffset2Cylinder2",
+        測定補正値2気筒3        "MeasuringOffset2Cylinder3",
+        測定補正値2気筒4        "MeasuringOffset2Cylinder4",
+        測定補正値3気筒1        "MeasuringOffset3Cylinder1",
+        測定補正値3気筒2        "MeasuringOffset3Cylinder2",
+        測定補正値3気筒3        "MeasuringOffset3Cylinder3",
+        測定補正値3気筒4        "MeasuringOffset3Cylinder4",
+        測定補正値4気筒1        "MeasuringOffset4Cylinder1",
+        測定補正値4気筒2        "MeasuringOffset4Cylinder2",
+        測定補正値4気筒3        "MeasuringOffset4Cylinder3",
+        測定補正値4気筒4        "MeasuringOffset4Cylinder4",
+        CASE 燃焼方式
+          WHEN 'CRS' THEN '※１・３番センサーは使用していません。'
+        END                    "Remark"
+      FROM
+        TBL噴射計測データ
+      WHERE
+        測定日時 = #MeasuringDate# AND
+        生産型式名 LIKE #ModelName# || '%' AND
+        機番 = #Serial#
+    </statement>
+    
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン:噴射時期計測07検索]                                                            -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineInjection07List">
+      SELECT
+	      INJ.生産型式コード    	          "modelCd",		      <!--型式コード-->
+        INJ.エンジン型式名               "modelNm",          <!--型式名-->
+	      INJ.機番                  	      "serial6",          <!--6桁機番-->
+	      S7.SERIAL7				              "serial7",		      <!--7桁機番-->
+        SGO.国コード                     "countryCd",        <!--生産国 -->
+        INJ.IDNO                        "idno",             <!--IDNO -->
+	      CASE INJ.噴射時期判定平均
+		      WHEN '0' THEN 'NG'
+		      WHEN '1' THEN 'OK'
+		      ELSE NULL
+	      END                             "result",			      <!--判定平均-->
+	      INJ.測定日時                     "inspectionDt"      <!--測定日-->
+      FROM
+	      TBL_07噴射時期計測データ INJ
+      INNER JOIN
+        TBL_作業指示保存 SGO
+          ON SGO.指示レベル = '7' AND INJ.生産型式コード = SGO.型式コード AND INJ.機番 = SGO.機番
+      LEFT JOIN
+        TT_DI_SERIAL7 S7
+          ON INJ.生産型式コード = S7.MODEL_CD AND INJ.機番 = S7.SERIAL6
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="modelCd" prepend="AND">
+          INJ.生産型式コード LIKE #modelCd# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="modelNm" prepend="AND">
+          INJ.エンジン型式名 LIKE #modelNm# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="serial6" prepend="AND">
+          INJ.機番 = #serial6#
+        </isNotEmpty>
+        <isNotEmpty property="idno" prepend="AND">
+          INJ.IDNO = #idno#
+        </isNotEmpty>
+        <isNotEmpty property="result" prepend="AND">
+          INJ.噴射時期判定平均 = #result#
+        </isNotEmpty>
+        <isNotEmpty property="dtFrom" prepend="AND">
+          INJ.測定日時 <![CDATA[>=]]> #dtFrom#
+        </isNotEmpty>
+        <isNotEmpty property="dtTo" prepend="AND">
+          INJ.測定日時 <![CDATA[<=]]> #dtTo#
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+        INJ.測定日時
+    </statement>
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン:噴射時期計測07Excel出力用詳細]                                                          -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineInjection07ForExcel">
+      SELECT
+        INJ.生産型式コード,
+	      SGO.国コード,
+        INJ.エンジン型式名,
+        INJ.機番,
+	      INJ.IDNO,
+        INJ.測定日時,
+	      INJ.計測端末ホスト名,
+	      INJ.検査担当コード,
+        INJ.伝送判定,
+        INJ.噴射ポンプ品番,
+        IEH.IPU機番 噴射ポンプ機番,
+        INJ.気温,
+        INJ.パルスタイミング角度,
+	      INJ.噴射時期気筒間誤差角度,
+        INJ.噴射時期上限,
+	      INJ.噴射時期下限,
+	      INJ.噴射時期実測値1,
+	      INJ.噴射時期判定1,
+	      INJ.噴射時期実測値2,
+	      INJ.噴射時期判定2,
+	      INJ.噴射時期実測値3,
+	      INJ.噴射時期判定3,
+	      INJ.噴射時期実測値4,
+	      INJ.噴射時期判定4,
+	      INJ.噴射時期実測値平均,
+	      CASE INJ.噴射時期判定平均
+		      WHEN '0' THEN 'NG'
+		      WHEN '1' THEN 'OK'
+	      END 噴射時期判定平均,
+        INJ.ピストン出代ランク上,
+	      INJ.ピストン出代ランク下,
+	      INJ.ピストン出代上限,
+	      INJ.ピストン出代下限,
+        INJ.ピストン出代ランク,
+	      INJ.ピストン出代実測値1,
+	      INJ.ピストン出代実測値2,
+	      INJ.ピストン出代実測値3,
+	      INJ.ピストン出代実測値4,
+	      INJ.ピストン出代実測値平均
+      FROM
+	      TBL_07噴射時期計測データ INJ
+      LEFT JOIN
+    		TBL_IPUエンジン紐付 IEH
+          ON INJ.IDNO = IEH.IDNO AND INJ.機番 = IEH.エンジン機番
+      INNER JOIN
+	      TBL_作業指示保存 SGO
+	        ON SGO.指示レベル = '7' AND INJ.生産型式コード = SGO.型式コード AND INJ.機番 = SGO.機番
+      <dynamic prepend="WHERE">
+	      <isNotEmpty property="modelCd" prepend="AND">
+	        INJ.生産型式コード LIKE #modelCd# || '%'
+	      </isNotEmpty>
+	      <isNotEmpty property="modelNm" prepend="AND">
+	        INJ.エンジン型式名 LIKE #modelNm# || '%'
+	      </isNotEmpty>
+	      <isNotEmpty property="serial6" prepend="AND">
+	        INJ.機番 = #serial6#
+	      </isNotEmpty>
+	      <isNotEmpty property="idno" prepend="AND">
+	        INJ.IDNO = #idno#
+	      </isNotEmpty>
+	      <isNotEmpty property="result" prepend="AND">
+	        INJ.噴射時期判定平均 = #result#
+	      </isNotEmpty>
+	      <isNotEmpty property="dtFrom" prepend="AND">
+	        INJ.測定日時 <![CDATA[>=]]> #dtFrom#
+	      </isNotEmpty>
+	      <isNotEmpty property="dtTo" prepend="AND">
+	        INJ.測定日時 <![CDATA[<=]]> #dtTo#
+	      </isNotEmpty>
+      </dynamic>
+      ORDER BY
+        INJ.測定日時
+    </statement>
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン:噴射時期計測07 詳細データ検索（詳細データPDF出力用）]                        -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineInjection07DetailForPdfOutput">
+      SELECT
+          INJ.測定日時                "MeasuringDate",
+          INJ.エンジン型式名          "ModelName",
+          INJ.機番                    "Serial",
+          INJ.IDNO                    "Idno",
+          INJ.噴射ポンプ品番          "PonpuPartNum",
+          IEH.IPU機番                 "PonpuSerial",
+          INJ.噴射時期判定平均        "Result",
+          CASE INJ.噴射時期判定平均
+              WHEN '0' THEN 'NG'
+              WHEN '1' THEN 'OK'
+          END                         "ResultDisplayString",
+          INJ.ピストン出代下限        "PistonBumpLowerLimit",
+          INJ.ピストン出代上限        "PistonBumpUpperLimit",
+          INJ.ピストン出代実測値1     "PistonBumpCylinder1",
+          INJ.ピストン出代実測値2     "PistonBumpCylinder2",
+          INJ.ピストン出代実測値3     "PistonBumpCylinder3",
+          INJ.ピストン出代実測値4     "PistonBumpCylinder4",
+          INJ.ピストン出代実測値平均  "PistonBumpAverage",
+          INJ.ピストン出代ランク下    "PistonBumpRankLowerLimit",
+          INJ.ピストン出代ランク上    "PistonBumpRankUpperLimit",
+          INJ.ピストン出代ランク      "PistonBumpRank",
+          INJ.噴射時期下限            "InjectionTimingLowerLimit",
+          INJ.噴射時期上限            "InjectionTimingUpperLimit",
+          INJ.噴射時期実測値1         "InjectionTimingCylinder1",
+          INJ.噴射時期実測値2         "InjectionTimingCylinder2",
+          INJ.噴射時期実測値3         "InjectionTimingCylinder3",
+          INJ.噴射時期実測値4         "InjectionTimingCylinder4",
+          INJ.噴射時期実測値平均      "InjectionTimingAverage",
+          INJ.気温                    "Temperature",
+          INJ.パルスタイミング角度    "PulseTimingAngle"
+      FROM
+          TBL_07噴射時期計測データ  INJ
+      LEFT JOIN
+          TBL_IPUエンジン紐付 IEH
+          ON  INJ.IDNO = IEH.IDNO
+          AND INJ.機番 = IEH.エンジン機番
+      WHERE
+          INJ.測定日時 = #MeasuringDate#
+      AND INJ.エンジン型式名 LIKE #ModelName# || '%'
+      AND INJ.機番     = #Serial#
+    </statement>
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン:フリクションロス検索]                                                        -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineFrictionList">
+      SELECT
+        FRQ.型式コード                   "modelCd",          <!--型式コード-->
+        SGO.型式名                       "modelNm",         <!--型式名-->
+        FRQ.機番                         "serial6",         <!--6桁機番-->
+        S7.SERIAL7		            		  "serial7",		      <!--7桁機番-->
+        SGO.国コード                     "countryCd",        <!--生産国 -->
+        FRQ.IDNO                        "idno",             <!--IDNO -->
+        FRQ.回転数                       "rpm",              <!--回転数-->
+        CASE FRQ.平均判定                            
+          WHEN '1' THEN 'OK'
+          WHEN '0' THEN 'NG'
+        END                             "result",            <!--結果-->
+        FRQ.計測日時                     "inspectionDt"      <!--測定日-->
+      FROM
+        TBL_フリクションロス実測 FRQ
+      INNER JOIN
+        TBL_作業指示保存 SGO
+          ON SGO.指示レベル = '7' AND FRQ.型式コード = SGO.型式コード AND FRQ.機番 = SGO.機番
+      LEFT JOIN
+        TT_DI_SERIAL7 S7
+          ON FRQ.型式コード = S7.MODEL_CD AND FRQ.機番 = S7.SERIAL6
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="modelCd" prepend="AND">
+          FRQ.型式コード LIKE #modelCd# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="modelNm" prepend="AND">
+          SGO.型式名 LIKE #modelNm# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="serial6" prepend="AND">
+          FRQ.機番 = #serial6#
+        </isNotEmpty>
+        <isNotEmpty property="idno" prepend="AND">
+          FRQ.IDNO = #idno#
+        </isNotEmpty>
+        <isNotEmpty property="result" prepend="AND">
+          FRQ.平均判定 = #result#
+        </isNotEmpty>
+        <isNotEmpty property="dtFrom" prepend="AND">
+          FRQ.計測日時 <![CDATA[>=]]> #dtFrom#
+        </isNotEmpty>
+        <isNotEmpty property="dtTo" prepend="AND">
+          FRQ.計測日時 <![CDATA[<=]]> #dtTo#
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+        FRQ.計測日時
+    </statement>
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン:フリクションロスExcel出力用詳細]                                                    -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineFrictionForExcel">
+      SELECT
+	      FRQ.型式コード,
+        SGO.国コード,
+	      SGO.型式名,
+	      FRQ.機番,
+        FRQ.IDNO,
+        FRQ.計測日時,
+        CASE FRQ.平均判定                            
+          WHEN '1' THEN 'OK'
+          WHEN '0' THEN 'NG'
+          ELSE NULL
+        END 平均判定,
+	      FRQ.回転数,
+	      FRQ.最大,
+	      FRQ.最小,
+	      FRQ.平均,
+        FRQ.気温,
+        FRQ.最大値,
+        FRQ.最小値,
+        FRQ.平均上限,
+        FRQ.平均下限,
+        FRQ.伝送日時,
+        FRQ.伝送判定
+      FROM
+	      TBL_フリクションロス実測 FRQ
+      INNER JOIN
+	      TBL_作業指示保存 SGO
+	        ON SGO.指示レベル = '7' AND FRQ.型式コード = SGO.型式コード AND FRQ.機番 = SGO.機番
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="modelCd" prepend="AND">
+          FRQ.型式コード LIKE #modelCd# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="modelNm" prepend="AND">
+          SGO.型式名 LIKE #modelNm# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="serial6" prepend="AND">
+          FRQ.機番 = #serial6#
+        </isNotEmpty>
+        <isNotEmpty property="idno" prepend="AND">
+          FRQ.IDNO = #idno#
+        </isNotEmpty>
+        <isNotEmpty property="result" prepend="AND">
+          FRQ.平均判定 = #result#
+        </isNotEmpty>
+        <isNotEmpty property="dtFrom" prepend="AND">
+          FRQ.計測日時 <![CDATA[>=]]> #dtFrom#
+        </isNotEmpty>
+        <isNotEmpty property="dtTo" prepend="AND">
+          FRQ.計測日時 <![CDATA[<=]]> #dtTo#
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+        FRQ.計測日時
+    </statement>
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン:エンジン運転測定03検索]                                                      -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineTest03List">
+      SELECT
+        DH.PRO_CODE                     "modelCd",         <!--型式コード-->
+        DH.PRO_NAME                     "modelNm",         <!--型式名-->
+        DH.ENG_SNO                      "serial6",         <!--6桁機番-->
+        S7.SERIAL7		            		   "serial7",		      <!--7桁機番-->
+        DH.COUNTRY                      "countryCd",       <!--生産国 -->
+        DH.ID_NO                        "idno",            <!--IDNO-->
+        CASE DH.RESULT                                                     
+          WHEN 1 THEN 'OK'
+          WHEN 2 THEN 'NG'
+          ELSE NULL
+        END                              "result",          <!--結果-->
+        TO_DATE(DH.MEASURE_DATETIME, 'YYYYMMDDHH24MISS') "inspectionDt"  <!--測定日-->
+      FROM 
+        D_HEADER DH
+      LEFT JOIN
+        TT_DI_SERIAL7 S7
+          ON DH.PRO_CODE = S7.MODEL_CD AND DH.ENG_SNO = S7.SERIAL6
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="modelCd" prepend="AND">
+          DH.PRO_CODE LIKE #modelCd# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="modelNm" prepend="AND">
+          DH.PRO_NAME LIKE #modelNm# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="serial6" prepend="AND">
+          DH.ENG_SNO = #serial6#
+        </isNotEmpty>
+        <isNotEmpty property="idno" prepend="AND">
+          DH.ID_NO = #idno#
+        </isNotEmpty>
+        <isNotEmpty property="result" prepend="AND">
+          DH.RESULT = #result#
+        </isNotEmpty>
+        <isNotEmpty property="dtFrom" prepend="AND">
+          DH.MEASURE_DATETIME <![CDATA[>=]]> TO_CHAR(#dtFrom#, 'YYYYMMDDHH24MISS')
+        </isNotEmpty>
+        <isNotEmpty property="dtTo" prepend="AND">
+          DH.MEASURE_DATETIME <![CDATA[<=]]> TO_CHAR(#dtTo#, 'YYYYMMDDHH24MISS')
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+        DH.MEASURE_DATETIME
+    </statement>
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン:エンジン運転測定03Excel出力用詳細]                                                  -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineTest03ForExcel">
+        SELECT
+          DH.PRO_CODE             "生産型式コード",
+          DH.COUNTRY              "国コード",
+          DH.PRO_NAME             "エンジン型式名",
+          DH.ENG_SNO              "エンジン機番",
+          DH.ID_NO                "IDNO",
+          TO_DATE(DH.MEASURE_DATETIME, 'YYYYMMDDHH24MISS') "測定年月日",
+          DH.BENCHINO             "ベンチNo",
+          CASE DH.RESULT
+              WHEN 1 THEN 'OK'
+              WHEN 2 THEN 'NG'
+          END                     "判定",
+          DH.WORKER_NAME          "作業者名",
+          DH.PALETNO              "パレットNo",
+          CASE DH.EGR_KBN
+              WHEN '0' THEN '無'
+              WHEN '1' THEN '有'
+          END                     "EGR有無",
+          TO_DATE(DH.ENG_CARRYDATE, 'YYYYMMDDHH24MISS') "搬入日時",
+          TO_CHAR(TO_DATE(DH.ENG_STARTTIME, 'HH24MISS'),'HH24:MI:SS') "始動",
+          TO_CHAR(TO_DATE(DH.MEASURE_STARTTIME, 'HH24MISS'),'HH24:MI:SS') "調整開始",
+          TO_CHAR(TO_DATE(DH.MEASURE_ENDTIME, 'HH24MISS'),'HH24:MI:SS') "調整終了",
+          CASE DH.TIER_KBN
+              WHEN '0' THEN 'T3'
+              WHEN '1' THEN 'T4'
+          END                     "排ガス区分",
+          CASE DH.OEM_KBN
+              WHEN '0' THEN '搭載'
+              WHEN '1' THEN 'OEM'
+          END                     "OEM区分",
+          CASE
+              WHEN DH.CRS_ENG_FLAG = '1' THEN 'コモンレール'
+              WHEN DH.SI_KBN = '1' THEN 'SI'
+              ELSE 'メカ式'
+          END                     "エンジン区分",
+          CASE DH.GOVERNOR_KBN
+              WHEN '0' THEN '無'
+              WHEN '1' THEN 'フル電子'
+          END                     "フル電子ガバナ区分",
+          DH.TEIKAKU_RTFLJT_VAL   "定格点Qランク",
+          DH.TORQUE_RTFLJT_VAL    "トルク点Qランク",
+          DH.TEIKAKU2_RTFLJT_VAL  "第2定格点Qランク",
+          DH.RACK_OFFSET_VAL      "ラック位置オフセット",
+          CASE DH.INTER_COOLER_KBN
+              WHEN '0' THEN '無'
+              WHEN '1' THEN '有'
+          END                     "インタークーラー有無",
+          CASE DH.ACCEL_VOLTAGE_KBN
+              WHEN '0' THEN 'フル'
+              WHEN '1' THEN 'ハーフ'
+              WHEN '2' THEN 'クロス'
+          END                     "アクセル電圧区分",
+          CASE DH.ECU_KBN
+              WHEN 1 THEN '三菱'
+              WHEN 2 THEN 'E-Controls'
+          END                     "ECU区分",
+          CASE DH.HARNESS_RELAY_FLAG
+              WHEN 0 THEN '無'
+              WHEN 1 THEN '有'
+          END                     "ハーネスリレー有無",
+          CASE DH.FUEL_KBN
+              WHEN 0 THEN 'DI'
+              WHEN 1 THEN 'G'
+              WHEN 2 THEN 'L(Ground)'
+              WHEN 3 THEN 'N'
+              WHEN 4 THEN 'L(+V)'
+          END                     "燃料区分",
+          CASE DH.ENGINE_MODE
+              WHEN '1' THEN 'Eco'
+              WHEN '2' THEN 'Standard'
+              WHEN '3' THEN 'Power'
+          END                     "出力モード",
+          DH.SA_SELECT            "TSC1 SA SELECT",
+          CASE DH.TCO1_SEND            
+              WHEN '0' THEN '無'
+              WHEN '1' THEN '有'
+          END                     "TCO1送信",
+          DH.TCO1_SA_SELECT       "TCO1 SA SELECT",
+          CASE DH.CAN_SPEED_KBN
+              WHEN '0' THEN '250kbps'
+              WHEN '1' THEN '500kbps'
+          END                     "CAN通信速度",
+          DD.SEQNO                "測定項目No",
+          DD.MEASURE_NAME         "測定項目名",
+          TO_CHAR(TO_DATE(DD.MEASURE_TIME, 'HH24MISS'),'HH24:MI:SS') "測定時間",
+          DD.POWER_RPM            "回転数(rpm)",
+          DD.POWER_NM             "トルク(N･m)",
+          DD.COOL_TEMP_IN         "冷却水入口(℃)",
+          DD.COOL_TEMP_OUT        "冷却水出口(℃)",
+          DD.L_TEMP               "潤滑油温度(℃)",
+          DD.L_PRS                "潤滑油圧力(kPa)",
+          DD.IN_TEMP              "呼気温度(℃)",
+          DD.IN_HUM               "呼気湿度(％)",
+          DD.F_ML                 "燃料測定流量(ml/min)",
+          DD.F_RML                "燃料補正流量(ml/min)",
+          DD.F_TEMP               "燃料温度(℃)",
+          DD.F_SUPPLY             "燃料供給温度(℃)",
+          DD.F_PRS                "燃料供給圧力(kPa)",
+          DD.PA_HG                "大気圧(kPa)",
+          DD.TRN_RPM              "回転ハンチング(rpm)",
+          DD.Q_ST                 "燃料噴射量(mm3/st)",
+          DD.PS_KW                "出力(kW)",
+          DD.SK_KW                "修正出力(kW)",
+          DD.TK_NM                "修正トルク(N･m)",
+          DD.KEISUU               "修正係数",
+          DD.PIN_PRS              "ブースト圧力(kPa)",
+          DD.EGR_TEMP             "EGR測定温度(℃)",
+          DD.ECU_IN_TEMP          "ECU呼気温度(℃)",
+          DD.ECURPM_VAL           "ECU回転数(rpm)",
+          DD.ECUTHROTTLE_VAL      "スロットル開度(％)",
+          DD.ECUINTAKE_PRS        "呼気圧(kPa)",
+          DD.O2_PRECAT            "O2センサ Pre-cat",
+          DD.O2_POSTCAT           "O2センサ Post-cat",
+          DD.BE_VAL               "補正値(％)",
+          DD.MILEAGE_VAL          "燃費(g/kWh)",
+          DD.ECUMILEAGE_VAL       "ECU燃費率(g/s)",
+          DD.AF_VAL               "空気過剰率(％)",
+          DD.ECUACCEL_VAL         "アクセル開度(％)",
+          DD.STABILITY_TIME       "安定時間(sec)",
+          DD.MEASURE_AVERAGE      "測定時間(sec)"
+      FROM
+          D_HEADER DH
+      INNER JOIN
+          D_DETAIL DD
+              ON DH.ID_NO = DD.ID_NO AND DH.MEASURE_DATETIME = DD.MEASURE_DATETIME
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="modelCd" prepend="AND">
+          DH.PRO_CODE LIKE #modelCd# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="modelNm" prepend="AND">
+          DH.PRO_NAME LIKE #modelNm# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="serial6" prepend="AND">
+          DH.ENG_SNO = #serial6#
+        </isNotEmpty>
+        <isNotEmpty property="idno" prepend="AND">
+          DH.ID_NO = #idno#
+        </isNotEmpty>
+        <isNotEmpty property="result" prepend="AND">
+          DH.RESULT = #result#
+        </isNotEmpty>
+        <isNotEmpty property="dtFrom" prepend="AND">
+          DH.MEASURE_DATETIME <![CDATA[>=]]> TO_CHAR(#dtFrom#, 'YYYYMMDDHH24MISS')
+        </isNotEmpty>
+        <isNotEmpty property="dtTo" prepend="AND">
+          DH.MEASURE_DATETIME <![CDATA[<=]]> TO_CHAR(#dtTo#, 'YYYYMMDDHH24MISS')
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+        DH.MEASURE_DATETIME
+    </statement>
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン:エンジン運転測定07検索]                                                      -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineTest07List">
+       SELECT
+        DH.PRO_CODE                     "modelCd",         <!--型式コード-->
+        DH.PRO_NAME                     "modelNm",         <!--型式名-->
+        DH.ENG_SNO                      "serial6",         <!--6桁機番-->
+        S7.SERIAL7		            		  "serial7",		     <!--7桁機番-->
+        DH.COUNTRY                      "countryCd",       <!--生産国 -->
+        DH.ID_NO                        "idno",            <!--IDNO-->
+        CASE DH.RESULT                                                     
+          WHEN 1 THEN 'OK'
+          WHEN 2 THEN 'NG'
+          ELSE NULL
+        END                              "result",          <!--結果-->
+        TO_DATE(DH.MEASURE_DATETIME, 'YYYYMMDDHH24MISS') "inspectionDt"  <!--測定日-->
+      FROM
+        D_HEADER_07 DH
+      INNER JOIN
+        TT_DI_SERIAL7 S7
+          ON DH.PRO_CODE = S7.MODEL_CD AND DH.ENG_SNO = S7.SERIAL6
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="modelCd" prepend="AND">
+          DH.PRO_CODE LIKE #modelCd# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="modelNm" prepend="AND">
+          DH.PRO_NAME LIKE #modelNm# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="serial6" prepend="AND">
+          DH.ENG_SNO = #serial6#
+        </isNotEmpty>
+        <isNotEmpty property="idno" prepend="AND">
+          DH.ID_NO = #idno#
+        </isNotEmpty>
+        <isNotEmpty property="result" prepend="AND">
+          DH.RESULT = #result#
+        </isNotEmpty>
+        <isNotEmpty property="dtFrom" prepend="AND">
+          DH.MEASURE_DATETIME <![CDATA[>=]]> TO_CHAR(#dtFrom#, 'YYYYMMDDHH24MISS')
+        </isNotEmpty>
+        <isNotEmpty property="dtTo" prepend="AND">
+          DH.MEASURE_DATETIME <![CDATA[<=]]> TO_CHAR(#dtTo#, 'YYYYMMDDHH24MISS')
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+        DH.MEASURE_DATETIME
+    </statement>
+    <!-- ************************************************************************************** -->
+    <!-- [エンジン:エンジン運転測定07Excel出力用詳細]                                                  -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectEngineTest07ForExcel">
+       SELECT
+          DH.PRO_CODE             "生産型式コード",
+          DH.COUNTRY              "国コード",
+          DH.PRO_NAME             "エンジン型式名",
+          DH.ENG_SNO              "エンジン機番",
+          DH.ID_NO                "IDNO",
+          TO_DATE(DH.MEASURE_DATETIME, 'YYYYMMDDHH24MISS') "測定年月日",
+          DH.BENCHINO             "ベンチNo",
+          CASE DH.RESULT
+              WHEN 1 THEN 'OK'
+              WHEN 2 THEN 'NG'
+          END                     "判定",
+          DH.WORKER_NAME          "作業者名",
+          DH.PALETNO              "パレットNo",
+          CASE DH.EGR_KBN
+              WHEN '0' THEN '無'
+              WHEN '1' THEN '有'
+          END                     "EGR有無",
+          TO_DATE(DH.ENG_CARRYDATE, 'YYYYMMDDHH24MISS') "搬入日時",
+          TO_CHAR(TO_DATE(DH.ENG_STARTTIME, 'HH24MISS'),'HH24:MI:SS') "始動",
+          TO_CHAR(TO_DATE(DH.MEASURE_STARTTIME, 'HH24MISS'),'HH24:MI:SS') "調整開始",
+          TO_CHAR(TO_DATE(DH.MEASURE_ENDTIME, 'HH24MISS'),'HH24:MI:SS') "調整終了",
+          CASE DH.TIER_KBN
+              WHEN '0' THEN 'T3'
+              WHEN '1' THEN 'T4'
+          END                     "排ガス区分",
+          CASE DH.OEM_KBN
+              WHEN '0' THEN '搭載'
+              WHEN '1' THEN 'OEM'
+          END                     "OEM区分",
+          CASE
+              WHEN DH.CRS_ENG_FLAG = '1' THEN 'コモンレール'
+              ELSE 'メカ式'
+          END                     "CRS区分",
+          DH.TEIKAKU_RTFLJT_VAL   "定格点Qランク",
+          DH.TORQUE_RTFLJT_VAL    "トルク点Qランク",
+          CASE DH.INTER_COOLER_KBN
+              WHEN '0' THEN '無'
+              WHEN '1' THEN '有'
+          END                     "インタークーラー有無",
+          CASE DH.ACCEL_VOLTAGE_KBN
+              WHEN '0' THEN 'フル'
+              WHEN '1' THEN 'ハーフ'
+              WHEN '2' THEN 'クロス'
+          END                     "アクセル電圧区分",
+          CASE DH.CAN_SPEED_KBN
+              WHEN '0' THEN '250kbps'
+              WHEN '1' THEN '500kbps'
+          END                     "CAN通信速度",
+          DH.ACCEL_MANUAL_INS_COUNT     "アクセル手動計測（指示）",
+          DH.ACCEL_MANUAL_RESULT_COUNT  "アクセル手動計測（実績）",
+          DD.SEQNO                "測定項目No",
+          DD.MEASURE_NAME         "測定項目名",
+          TO_CHAR(TO_DATE(DD.MEASURE_TIME, 'HH24MISS'),'HH24:MI:SS') "測定時間",
+          DD.POWER_RPM            "回転数(rpm)",
+          DD.POWER_NM             "トルク(N･m)",
+          DD.COOL_TEMP_IN         "冷却水入口(℃)",
+          DD.COOL_TEMP_OUT        "冷却水出口(℃)",
+          DD.L_TEMP               "潤滑油温度(℃)",
+          DD.L_PRS                "潤滑油圧力(kPa)",
+          DD.IN_TEMP              "呼気温度(℃)",
+          DD.IN_HUM               "呼気湿度(％)",
+          DD.F_ML                 "燃料測定流量(ml/min)",
+          DD.F_RML                "燃料補正流量(ml/min)",
+          DD.F_TEMP               "燃料温度(℃)",
+          DD.F_SUPPLY             "燃料供給温度(℃)",
+          DD.F_PRS                "燃料供給圧力(kPa)",
+          DD.PA_HG                "大気圧(kPa)",
+          DD.TRN_RPM              "回転ハンチング(rpm)",
+          DD.Q_ST                 "燃料噴射量(mm3/st)",
+          DD.PS_KW                "出力(kW)",
+          DD.SK_KW                "修正出力(kW)",
+          DD.TK_NM                "修正トルク(N･m)",
+          DD.KEISUU               "修正係数",
+          DD.PIN_PRS              "ブースト圧力(kPa)",
+          DD.EGR_TEMP             "EGR測定温度(℃)",
+          DD.ECU_IN_TEMP          "ECU呼気温度(℃)"
+      FROM
+          D_HEADER_07 DH
+      INNER JOIN
+          D_DETAIL_07 DD
+              ON DH.ID_NO = DD.ID_NO AND DH.MEASURE_DATETIME = DD.MEASURE_DATETIME
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="modelCd" prepend="AND">
+          DH.PRO_CODE LIKE #modelCd# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="modelNm" prepend="AND">
+          DH.PRO_NAME LIKE #modelNm# || '%'
+        </isNotEmpty>
+        <isNotEmpty property="serial6" prepend="AND">
+          DH.ENG_SNO = #serial6#
+        </isNotEmpty>
+        <isNotEmpty property="idno" prepend="AND">
+          DH.ID_NO = #idno#
+        </isNotEmpty>
+        <isNotEmpty property="result" prepend="AND">
+          DH.RESULT = #result#
+        </isNotEmpty>
+        <isNotEmpty property="dtFrom" prepend="AND">
+          DH.MEASURE_DATETIME <![CDATA[>=]]> TO_CHAR(#dtFrom#, 'YYYYMMDDHH24MISS')
+        </isNotEmpty>
+        <isNotEmpty property="dtTo" prepend="AND">
+          DH.MEASURE_DATETIME <![CDATA[<=]]> TO_CHAR(#dtTo#, 'YYYYMMDDHH24MISS')
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+        DH.MEASURE_DATETIME
+    </statement>
+  </statements>
+</sqlMap>

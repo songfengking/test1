@@ -1,0 +1,1703 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>KTDataAccess</name>
+    </assembly>
+    <members>
+        <member name="T:KTFramework.Dao.BindParameter">
+            <summary>
+            <h3>
+            SQLパラメータ格納クラス
+            </h3>
+            SqlMapに定義したステートメントで使用するバインド変数の値を保持します。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.BindParameter.#ctor">
+            <summary>
+            バインド変数を作成します
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.BindParameter.#ctor(System.Object)">
+            <summary>
+            バインド変数を作成します
+            </summary>
+            <param name="value">バインド変数に割当てる値</param>
+        </member>
+        <member name="M:KTFramework.Dao.BindParameter.#ctor(System.Object,KTFramework.Dao.BindParameter.ValueType)">
+            <summary>
+            バインド変数を作成します
+            </summary>
+            <param name="value">バインド変数に割当てる値</param>
+            <param name="type">バインド変数種別</param>
+        </member>
+        <member name="M:KTFramework.Dao.BindParameter.Finalize">
+            <summary>
+            デストラクタ
+            </summary>
+        </member>
+        <member name="P:KTFramework.Dao.BindParameter.Value">
+            <summary>バインド変数に割当てる値、実引数値を取得、設定します。</summary>
+        </member>
+        <member name="P:KTFramework.Dao.BindParameter.Type">
+            <summary>バインド変数種別を取得、設定します。</summary>
+        </member>
+        <member name="T:KTFramework.Dao.BindParameter.ValueType">
+            <summary>
+            バインド変数種別
+            </summary>
+        </member>
+        <member name="F:KTFramework.Dao.BindParameter.ValueType.BindValue">
+            <summary>バインド変数に直接代入する値</summary>
+        </member>
+        <member name="F:KTFramework.Dao.BindParameter.ValueType.EntityClass">
+            <summary>Enitiy Class型の値</summary>
+        </member>
+        <member name="T:KTFramework.Dao.KTBindParameters">
+            <summary>
+            <h3>
+            SQLパラメータマッピングクラス
+            </h3>
+            SqlMapに定義したステートメントで使用するバインド変数をマッピングします。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.KTBindParameters.#ctor">
+            <summary>
+            バインド変数マップを作成します
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.KTBindParameters.Add(System.String,System.Object)">
+            <summary>
+            SQLパラメータを追加します。
+            </summary>
+            <param name="key">ステートメントで使用するバインド変数の完全一致名</param>
+            <param name="value">キーに対応する値</param>
+        </member>
+        <member name="M:KTFramework.Dao.KTBindParameters.Add(System.String,System.Object,KTFramework.Dao.BindParameter.ValueType)">
+            <summary>
+            SQLパラメータを追加します。
+            </summary>
+            <param name="key">ステートメントで使用するバインド変数の完全一致名</param>
+            <param name="value">キーに対応する値</param>
+            <param name="type">バインド変数種別</param>
+        </member>
+        <member name="M:KTFramework.Dao.KTBindParameters.AddFromEntity``1(``0)">
+            <summary>
+            エンティティクラスオブジェクトの全てのパブリックフィールドを追加します
+            ただし、値がnullのフィールドは追加されません
+            </summary>
+            <param name="entity">エンティティクラスオブジェクト</param>
+        </member>
+        <member name="M:KTFramework.Dao.KTBindParameters.SetToEntity``1(``0@)">
+            <summary>
+            エンティティクラスオブジェクトにマッピングします
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="entity"></param>
+        </member>
+        <member name="T:KTFramework.Dao.Cursor">
+            <summary>
+            <h3>
+            カーソルクラス
+            </h3>
+            ステートメント実行後、結果表をフェッチする際のカーソルを管理します。
+            </summary>
+        </member>
+        <member name="F:KTFramework.Dao.Cursor._reader">
+            <summary>Oracleカーソルインスタンス</summary>
+        </member>
+        <member name="F:KTFramework.Dao.Cursor._cmdDB">
+            <summary>Oracleコマンドインスタンス</summary>
+        </member>
+        <member name="M:KTFramework.Dao.Cursor.#ctor">
+            <summary>
+            コンストラクタ
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.Cursor.#ctor(Oracle.DataAccess.Client.OracleCommand,Oracle.DataAccess.Client.OracleDataReader)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="cmdDB">Oracleコマンドインスタンス</param>
+            <param name="reader">Oracleカーソルインスタンス</param>
+        </member>
+        <member name="P:KTFramework.Dao.Cursor.Reader">
+            <summary>Oracleカーソルインスタンス</summary>
+        </member>
+        <member name="P:KTFramework.Dao.Cursor.Command">
+            <summary>Oracleコマンドインスタンス</summary>
+        </member>
+        <member name="P:KTFramework.Dao.Cursor.HasRows">
+            <summary>
+            未読取の行が存在するかチェックします。
+            true:未読取の行あり false:未読取の行なし
+            </summary>
+        </member>
+        <member name="T:KTFramework.Dao.DataAccessBase">
+            <summary>
+            <h3>
+            Oracleデータベースアクセス汎用クラス
+            </h3>
+            Oracleサーバへの接続/切断、及びトランザクション管理メソッドを提供します。
+            本クラスは抽象クラスです。インスタンス化する為には、KTDataAccessBaseクラスを継承して下さい。
+            </summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessBase.COMMAND_DEFAULT_TIMEOUT">
+            <summary>ステートメント実行時の共通タイムアウト時間(秒)</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessBase.COMMAND_RETRY_COUNT">
+            <summary>ステートメント実行時特定エラーのリトライカウント</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessBase.DBMODE_RELEASE">
+            <summary>DB接続モード識別子：本番</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessBase.DBMODE_TEST">
+            <summary>DB接続モード識別子：テスト</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessBase.DBMODE_DEVELOP">
+            <summary>DB接続モード識別子：開発</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessBase.ORAERROR_UNIQUE_CONSTRAINT">
+            <summary>ORA-00001:一意制約違反</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessBase.ORAERROR_TIMEOUT">
+            <summary>ORA-01013:タイムアウト</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessBase.ERROR_CODE_NUTRAL">
+            <summary>エラーコード：ニュートラル</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessBase.ERROR_MESSAGE_NUTRAL">
+            <summary>エラーメッセージ：ニュートラル</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessBase.logger">
+            <summary>ロガー定義</summary>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.#ctor">
+            <summary>
+            コンストラクタ
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Finalize">
+            <summary>
+            デストラクタ
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Dispose">
+            <summary>
+            ディスポーザ。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ResetLastError">
+            <summary>
+            最終エラーを初期化してリセットする
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.SetLastError(Oracle.DataAccess.Client.OracleException)">
+            <summary>
+            最終エラーをセットする
+            </summary>
+            <param name="ex">Oracle例外</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.LoadSqlMap(System.String,System.String)">
+            <summary>
+            iBatis.NetのSqlMap.Configファイルを読み込みます。
+            アセンブリに対し、SqlMap.Configファイルは1つのみ指定できます。
+            </summary>
+            <param name="assemblyName">SqlMapを読み込むアセンブリ名</param>
+            <param name="sqlMapConfigPath">SqlMap.Configパス(ファイルパス、またはリソースパスを指定)</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.UnloadSqlMap(System.String)">
+            <summary>
+            LoadSqlMap()によりロードされた、iBatis.NetのSqlMap.Configファイルをアンロードします。
+            </summary>
+            <param name="assemblyName">SqlMapを読み込んだアセンブリ名</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.UnloadAllSqlMap">
+            <summary>
+            LoadSqlMap()によりロードされた、すべてのiBatis.NetのSqlMap.Configファイルをアンロードします。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.GetStatementBySqlMap(System.String@,System.Collections.Generic.List{Oracle.DataAccess.Client.OracleParameter}@,System.String,KTFramework.Dao.KTBindParameters)">
+            <summary>
+            ステートメント読込処理。
+            iBatis.NetのSqlMapファイルから指定したstatementIdが割り当てられているステートメントと、SQLパラメータを取得します。
+            </summary>
+            <param name="sqlStatement">実行するSQLステートメント</param>
+            <param name="parameterCollection">ステートメント実行用SQLパラメータ</param>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="ktBindParameters">SqlMapで指定されているパラメータ</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.GetProcedureBySqlMap(System.String@,System.Collections.Generic.List{Oracle.DataAccess.Client.OracleParameter}@,System.String,KTFramework.Dao.KTProcedureParameters)">
+            <summary>
+            PL/SQL関数名読込処理。
+            iBatis.NetのSqlMapファイルから指定したstatementIdが割り当てられているPL/SQL名と、SQLパラメータを取得します。
+            SqlMapには、PL/SQL名のみを設定して下さい。
+            </summary>
+            <param name="plSql">実行するPL/SQL名</param>
+            <param name="parameterCollection">PL/SQL実行用SQLパラメータ</param>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="ktProcedureParameters">PL/SQLパラメータ</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.LoadConnectionString(System.String,System.String,System.String)">
+            <summary>
+            DB接続文字列取得処理。
+            DB接続設定ファイルからDB接続情報を取得し、ConnectionStringを生成します。
+            _connectionStringへ接続文字列を保持します。
+            また、_connectionDisplayへ画面表示用接続情報を保持します。
+            </summary>
+            <param name="dbName">データベース名称(KTFramework.Dao.Connectionセクションで指定したname)</param>
+            <param name="dbMode">接続設定ファイルから参照する接続モード(Release/Test/Debug)</param>
+            <param name="connectionFilePath">接続設定ファイル</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Connect(System.String,System.String,System.String)">
+            <summary>
+            DBサーバへ接続を開始します。
+            設定ファイルのKTFramework.Dao.Connectionセクションの設定値(name=[dbName])から取得した、
+            接続設定ファイルから、DB接続情報を読み込みます。
+            ステートメント実行時タイムアウトは30秒に設定されます。
+            </summary>
+            <param name="dbName">データベース名称(KTFramework.Dao.Connectionセクションで指定したname)</param>
+            <param name="mode">接続設定ファイルから参照する接続モード(Release/Test/Debug)</param>
+            <param name="connectionFilePath">接続設定ファイル</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Connect(System.String,System.String,System.String,System.Int32)">
+            <summary>
+            DBサーバへ接続を開始します。
+            設定ファイルのKTFramework.Dao.Connectionセクションの設定値(name=[dbName])から取得した、
+            接続設定ファイルから、DB接続情報を読み込みます。
+            </summary>
+            <param name="dbName">データベース名称(KTFramework.Dao.Connectionセクションで指定したName)</param>
+            <param name="dbMode">接続設定ファイルから参照する接続モード(RELEASE/TEST/DEBUG)</param>
+            <param name="connectionFilePath">接続設定ファイル</param>
+            <param name="commandDefaultTimeout">ステートメント実行時の共通タイムアウト時間(秒)</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Disconnect">
+            <summary>
+            DBサーバへの接続を終了します。
+            現在進行中のトランザクションが存在する場合はロールバックされます。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.GetTransactionKey">
+            <summary>
+            トランザクションキーを生成します。
+            </summary>
+            <returns>トランザクションキー</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.GetTransactionKey(System.Int32,System.Int32)">
+            <summary>
+            トランザクションキーを生成します。
+            </summary>
+            <param name="processId">プロセスID</param>
+            <param name="threadId">スレッドID</param>
+            <returns>トランザクションキー</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.GetTransactionStatus">
+            <summary>
+            呼出元のスレッドが管理するトランザクションのステータスを取得します。(IsTransactionと同義)
+            </summary>
+            <returns>true:トランザクション中 false:トランザクション未実施</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.GetTransactionStatus(System.Int32)">
+            <summary>
+            指定したスレッドが管理するトランザクションのステータスを取得します。
+            </summary>
+            <param name="threadId">トランザクションを管理するスレッドID</param>
+            <returns>true:トランザクション中 false:トランザクション未実施</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.BeginTransaction">
+            <summary>
+            トランザクションを開始します。
+            Modify()メソッドにより、データ更新を実施する場合には、必ず本メソッドを実行して下さい。
+            また、トランザクションの終了は、CommitTransaction()、RollbackTransaction()を実行します。
+            本メソッドはデータベース未接続、またはトランザクション実行中はThrowされます。
+            トランザクションロック動作は共有ロックになります。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.BeginTransaction(System.Data.IsolationLevel)">
+            <summary>
+            トランザクションを開始します。
+            Modify()メソッドにより、データ更新を実施する場合には、必ず本メソッドを実行して下さい。
+            また、トランザクションの終了は、CommitTransaction()、RollbackTransaction()を実行します。
+            本メソッドはデータベース未接続、またはトランザクション実行中はThrowされます。
+            </summary>
+            <param name="level">接続のトランザクションロック動作</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.BeginTransaction(System.Data.IsolationLevel,System.String)">
+            <summary>
+            トランザクションを開始します。
+            </summary>
+            <param name="level">接続のトランザクションロック動作</param>
+            <param name="transactionKey">トランザクション管理キー(スレッドID)</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.CommitTransaction">
+            <summary>
+            トランザクションをコミットします。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.CommitTransaction(System.String)">
+            <summary>
+            トランザクションをコミットします。
+            </summary>
+            <param name="transactionKey">トランザクション管理キー(スレッドID)</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.RollbackTransaction">
+            <summary>
+            トランザクションをロールバックします。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.RollbackTransaction(System.Int32)">
+            <summary>
+            トランザクションをロールバックします。
+            </summary>
+            <param name="threadId">停止するトランザクションを管理するスレッドID</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.RollbackTransaction(System.String)">
+            <summary>
+            トランザクションをロールバックします。
+            </summary>
+            <param name="transactionKey">トランザクション管理キー(スレッドID)</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Count(System.String)">
+            <summary>
+            SELECTステートメントの結果件数を返します。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <returns>抽出した表の行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Count(System.String,System.Int32)">
+            <summary>
+            SELECTステートメントの結果件数を返します。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>抽出した表の行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Count``1(System.String,``0)">
+            <summary>
+            SELECTステートメントの結果件数を返します。
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="entityParam">SqlMap内で参照するパラメータEntityクラス</param>
+            <returns>抽出した表の行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Count``1(System.String,``0,System.Int32)">
+            <summary>
+            SELECTステートメントの結果件数を返します。
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="entityParam">SqlMap内で参照するパラメータEntityクラス</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>抽出した表の行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Count(System.String,KTFramework.Dao.KTBindParameters)">
+            <summary>
+            SELECTステートメントの結果件数を返します。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="param">SqlMap内で参照するパラメータリスト</param>
+            <returns>抽出した表の行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Count(System.String,KTFramework.Dao.KTBindParameters,System.Int32)">
+            <summary>
+            SELECTステートメントの結果件数を返します。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="param">SqlMap内で参照するパラメータリスト</param>
+            <param name="timeout">ステートメント実行タイムアウト</param>
+            <returns>抽出した表の行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.CountByQuery(System.String)">
+            <summary>
+            SELECTステートメントの結果件数を返します。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <returns>抽出した表の行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.CountByQuery(System.String,System.Int32)">
+            <summary>
+            SELECTステートメントの結果件数を返します。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <param name="timeout">ステートメント実行タイムアウト</param>
+            <returns>抽出した表の行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.CountByQuery``1(System.String,``0)">
+            <summary>
+            SELECTステートメントの結果件数を返します。
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="sqlStatement">SQLステートメント</param>
+            <param name="entityParam">SqlMap内で参照するパラメータEntityクラス</param>
+            <returns>抽出した表の行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.CountByQuery``1(System.String,``0,System.Int32)">
+            <summary>
+            SELECTステートメントの結果件数を返します。
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="sqlStatement">SQLステートメント</param>
+            <param name="entityParam">SqlMap内で参照するパラメータEntityクラス</param>
+            <param name="timeout">ステートメント実行タイムアウト</param>
+            <returns>抽出した表の行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.CountByQuery(System.String,KTFramework.Dao.KTBindParameters)">
+            <summary>
+            SELECTステートメントの結果件数を返します。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <param name="param">SqlMap内で参照するパラメータリスト</param>
+            <returns>抽出した表の行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.CountByQuery(System.String,KTFramework.Dao.KTBindParameters,System.Int32)">
+            <summary>
+            SELECTステートメントの結果件数を返します。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <param name="param">SqlMap内で参照するパラメータリスト</param>
+            <param name="timeout">ステートメント実行タイムアウト</param>
+            <returns>抽出した表の行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Select(System.String)">
+            <summary>
+            SELECTステートメントを実行します。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <returns>結果表を返します。</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Select(System.String,System.Int32)">
+            <summary>
+            SELECTステートメントを実行します。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>結果表を返します。</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Select(System.String,KTFramework.Dao.KTBindParameters)">
+            <summary>
+            SELECTステートメントを実行します。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="param">SqlMap内で参照するパラメータリスト</param>
+            <returns>結果表を返します。</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Select(System.String,KTFramework.Dao.KTBindParameters,System.Int32)">
+            <summary>
+            SELECTステートメントを実行します。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="param">SqlMap内で参照するパラメータリスト</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>結果表を返します。</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.SelectByQuery(System.String)">
+            <summary>
+            SELECTステートメントを実行します。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <returns>結果表を返します。</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.SelectByQuery(System.String,System.Int32)">
+            <summary>
+            SELECTステートメントを実行します。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>結果表を返します。</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.SelectByQuery(System.String,KTFramework.Dao.KTBindParameters)">
+            <summary>
+            SELECTステートメントを実行します。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <param name="param">SqlMap内で参照するパラメータリスト</param>
+            <returns>結果表を返します。</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.SelectByQuery(System.String,KTFramework.Dao.KTBindParameters,System.Int32)">
+            <summary>
+            SELECTステートメントを実行します。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <param name="param">SqlMap内で参照するパラメータリスト</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>結果表を返します。</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Select``1(System.String)">
+            <summary>
+            SELECTステートメントを実行します。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <returns>結果表を返します。</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Select``1(System.String,System.Int32)">
+            <summary>
+            SELECTステートメントを実行します。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>結果表を返します。</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Select``1(System.String,``0)">
+            <summary>
+            SELECTステートメントを実行します。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="entity">SqlMap内で参照するパラメータEntityクラス</param>
+            <returns>結果表を返します。</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Select``1(System.String,``0,System.Int32)">
+            <summary>
+            SELECTステートメントを実行します。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="entity">SqlMap内で参照するパラメータEntityクラス</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>結果表を返します。</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Select``1(System.String,KTFramework.Dao.KTBindParameters)">
+            <summary>
+            SELECTステートメントを実行します。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="param">SqlMap内で参照するパラメータリスト</param>
+            <returns>結果表を返します。</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Select``1(System.String,KTFramework.Dao.KTBindParameters,System.Int32)">
+            <summary>
+            SELECTステートメントを実行します。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="param">SqlMap内で参照するパラメータリスト</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>結果表を返します。</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.OpenCursor(System.String)">
+            <summary>
+            カーソルをオープンします。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <returns>カーソルインスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.OpenCursor(System.String,System.Int32)">
+            <summary>
+            カーソルをオープンします。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>カーソルインスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.OpenCursor``1(System.String,``0)">
+            <summary>
+            カーソルをオープンします。
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="entityParam">SqlMap内で参照するパラメータEntityクラス</param>
+            <returns>カーソルインスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.OpenCursor``1(System.String,``0,System.Int32)">
+            <summary>
+            カーソルをオープンします。
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="entityParam">SqlMap内で参照するパラメータEntityクラス</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>カーソルインスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.OpenCursor(System.String,KTFramework.Dao.KTBindParameters)">
+            <summary>
+            カーソルをオープンします。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="param">SqlMap内で参照するパラメータリスト</param>
+            <returns>カーソルインスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.OpenCursor(System.String,KTFramework.Dao.KTBindParameters,System.Int32)">
+            <summary>
+            カーソルをオープンします。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="param">SqlMap内で参照するパラメータリスト</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>カーソルインスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.OpenCursor(System.String,KTFramework.Dao.KTProcedureParameters)">
+            <summary>
+            結果表を返すPL/SQLのカーソルをオープンします。SqlMapにはPL/SQL名のみを定義して下さい。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="ktProcedureParameters">PL/SQL引数、戻り値パラメータリスト</param>
+            <returns>カーソルインスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.OpenCursor(System.String,KTFramework.Dao.KTProcedureParameters,System.Int32)">
+            <summary>
+            結果表を返すPL/SQLのカーソルをオープンします。SqlMapにはPL/SQL名のみを定義して下さい。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="ktProcedureParameters">PL/SQL引数、戻り値パラメータリスト</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>カーソルインスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.OpenCursorByQuery(System.String)">
+            <summary>
+            カーソルをオープンします。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <returns>カーソルインスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.OpenCursorByQuery(System.String,System.Int32)">
+            <summary>
+            カーソルをオープンします。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>カーソルインスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.OpenCursorByQuery(System.String,KTFramework.Dao.KTBindParameters)">
+            <summary>
+            カーソルをオープンします。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <param name="param">SqlMap内で参照するパラメータリスト</param>
+            <returns>カーソルインスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.OpenCursorByQuery(System.String,KTFramework.Dao.KTBindParameters,System.Int32)">
+            <summary>
+            カーソルをオープンします。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <param name="param">SqlMap内で参照するパラメータリスト</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>カーソルインスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.OpenCursorByQuery(System.String,KTFramework.Dao.KTProcedureParameters)">
+            <summary>
+            結果表を返すPL/SQLのカーソルをオープンします。SqlMapにはPL/SQL名のみを定義して下さい。
+            </summary>
+            <param name="plSqlName">PL/SQL名</param>
+            <param name="ktProcedureParameters">PL/SQL引数、戻り値パラメータリスト</param>
+            <returns>カーソルインスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.OpenCursorByQuery(System.String,KTFramework.Dao.KTProcedureParameters,System.Int32)">
+            <summary>
+            結果表を返すPL/SQLのカーソルをオープンします。SqlMapにはPL/SQL名のみを定義して下さい。
+            </summary>
+            <param name="plSqlName">PL/SQL名</param>
+            <param name="ktProcedureParameters">PL/SQL引数、戻り値パラメータリスト</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>カーソルインスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Fetch``1(KTFramework.Dao.Cursor@)">
+            <summary>
+            カーソルをフェッチします
+            </summary>
+            <typeparam name="T">Entityクラス</typeparam>
+            <param name="cursor">カーソル</param>
+            <returns>Entityクラス</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Fetch(System.Data.DataTable@,KTFramework.Dao.Cursor@)">
+            <summary>
+            カーソルをフェッチします
+            </summary>
+            <param name="resultTable">SELECT実行結果を格納するDataTable(カラムは自動で追加されます)</param>
+            <param name="cursor">カーソル(OpenCursorの戻り値)</param>
+            <returns>レコード取得結果 true:取得 false:終端</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.CloseCursor(KTFramework.Dao.Cursor@)">
+            <summary>
+            カーソルをクローズします
+            </summary>
+            <param name="cursor">カーソル(OpenCursorの戻り値)</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Exec(System.String)">
+            <summary>
+            INSERT/UPDATE/DELETEステートメントを実行します。
+            BeginTransaction()～CommitTransaction()/RollbackTransaction()の範囲内で呼び出す必要があります。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <returns>ステートメント影響行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Exec(System.String,System.Int32)">
+            <summary>
+            INSERT/UPDATE/DELETEステートメントを実行します。
+            BeginTransaction()～CommitTransaction()/RollbackTransaction()の範囲内で呼び出す必要があります。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>ステートメント影響行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Exec``1(System.String,``0)">
+            <summary>
+            INSERT/UPDATE/DELETEステートメントを実行します。
+            BeginTransaction()～CommitTransaction()/RollbackTransaction()の範囲内で呼び出す必要があります。
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="entityParam">SqlMap内で参照するパラメータEntityクラス</param>
+            <returns>ステートメント影響行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Exec``1(System.String,``0,System.Int32)">
+            <summary>
+            INSERT/UPDATE/DELETEステートメントを実行します。
+            BeginTransaction()～CommitTransaction()/RollbackTransaction()の範囲内で呼び出す必要があります。
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="entityParam">SqlMap内で参照するパラメータEntityクラス</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>ステートメント影響行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Exec(System.String,KTFramework.Dao.KTBindParameters)">
+            <summary>
+            INSERT/UPDATE/DELETEステートメントを実行します。
+            BeginTransaction()～CommitTransaction()/RollbackTransaction()の範囲内で呼び出す必要があります。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="param">SqlMap内で参照するパラメータリスト</param>
+            <returns>ステートメント影響行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Exec(System.String,KTFramework.Dao.KTBindParameters,System.Int32)">
+            <summary>
+            INSERT/UPDATE/DELETEステートメントを実行します。
+            BeginTransaction()～CommitTransaction()/RollbackTransaction()の範囲内で呼び出す必要があります。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="param">SqlMap内で参照するパラメータリスト</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>ステートメント影響行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Exec``1(System.String,``0,System.Boolean)">
+            <summary>
+            INSERT/UPDATE/DELETEステートメントを実行します。
+            BeginTransaction()～CommitTransaction()/RollbackTransaction()の範囲内で呼び出す必要があります。
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="entityParam">SqlMap内でparameterClassとして定義したパラメータEntityクラスの変数名</param>
+            <param name="throwUniqueConstraint">一意制約違反時の動作(True:一意制約違反は例外をThrowする False:一意制約違反でも処理を返す(戻り値=-1))</param>
+            <returns>ステートメント影響行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Exec``1(System.String,``0,System.Boolean,System.Int32)">
+            <summary>
+            INSERT/UPDATE/DELETEステートメントを実行します。
+            BeginTransaction()～CommitTransaction()/RollbackTransaction()の範囲内で呼び出す必要があります。
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="entityParam">SqlMap内でparameterClassとして定義したパラメータEntityクラスの変数名</param>
+            <param name="throwUniqueConstraint">一意制約違反時の動作(True:一意制約違反は例外をThrowする False:一意制約違反でも処理を返す(戻り値=-1))</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>ステートメント影響行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Exec(System.String,KTFramework.Dao.KTBindParameters,System.Boolean)">
+            <summary>
+            INSERT/UPDATE/DELETEステートメントを実行します。
+            BeginTransaction()～CommitTransaction()/RollbackTransaction()の範囲内で呼び出す必要があります。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="param">SqlMap内でparameterClassとして定義したパラメータEntityクラスの変数名</param>
+            <param name="throwUniqueConstraint">一意制約違反時の動作(True:一意制約違反は例外をThrowする False:一意制約違反でも処理を返す(戻り値=-1))</param>
+            <returns>ステートメント影響行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Exec(System.String,KTFramework.Dao.KTBindParameters,System.Boolean,System.Int32)">
+            <summary>
+            INSERT/UPDATE/DELETEステートメントを実行します。
+            BeginTransaction()～CommitTransaction()/RollbackTransaction()の範囲内で呼び出す必要があります。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="param">パラメータリスト</param>
+            <param name="throwUniqueConstraint">true:一意制約違反は例外をThrowする false:一意制約違反でも処理を返す(return=-1)</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>ステートメント影響行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecByQuery(System.String)">
+            <summary>
+            INSERT/UPDATE/DELETEステートメントを実行します。
+            BeginTransaction()～CommitTransaction()/RollbackTransaction()の範囲内で呼び出す必要があります。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <returns>ステートメント影響行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecByQuery(System.String,System.Int32)">
+            <summary>
+            INSERT/UPDATE/DELETEステートメントを実行します。
+            BeginTransaction()～CommitTransaction()/RollbackTransaction()の範囲内で呼び出す必要があります。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>ステートメント影響行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecByQuery(System.String,KTFramework.Dao.KTBindParameters)">
+            <summary>
+            INSERT/UPDATE/DELETEステートメントを実行します。
+            BeginTransaction()～CommitTransaction()/RollbackTransaction()の範囲内で呼び出す必要があります。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <param name="param">SqlMap内で参照するパラメータリスト</param>
+            <returns>ステートメント影響行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecByQuery(System.String,KTFramework.Dao.KTBindParameters,System.Int32)">
+            <summary>
+            INSERT/UPDATE/DELETEステートメントを実行します。
+            BeginTransaction()～CommitTransaction()/RollbackTransaction()の範囲内で呼び出す必要があります。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <param name="param">SqlMap内で参照するパラメータリスト</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>ステートメント影響行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecByQuery(System.String,KTFramework.Dao.KTBindParameters,System.Boolean)">
+            <summary>
+            INSERT/UPDATE/DELETEステートメントを実行します。
+            BeginTransaction()～CommitTransaction()/RollbackTransaction()の範囲内で呼び出す必要があります。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <param name="param">SqlMap内でparameterClassとして定義したパラメータEntityクラスの変数名</param>
+            <param name="throwUniqueConstraint">一意制約違反時の動作(True:一意制約違反は例外をThrowする False:一意制約違反でも処理を返す(戻り値=-1))</param>
+            <returns>ステートメント影響行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecByQuery(System.String,KTFramework.Dao.KTBindParameters,System.Boolean,System.Int32)">
+            <summary>
+            INSERT/UPDATE/DELETEステートメントを実行します。
+            BeginTransaction()～CommitTransaction()/RollbackTransaction()の範囲内で呼び出す必要があります。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <param name="param">パラメータリスト</param>
+            <param name="throwUniqueConstraint">true:一意制約違反は例外をThrowする false:一意制約違反でも処理を返す(return=-1)</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>ステートメント影響行数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecWithoutTransaction(System.String)">
+            <summary>
+            DDLやDCLを実行します。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecWithoutTransaction(System.String,System.Int32)">
+            <summary>
+            DDLやDCLを実行します。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecWithoutTransaction``1(System.String,``0)">
+            <summary>
+            DDLやDCLを実行します。
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="entityParam">SqlMap内で参照するパラメータEntityクラス</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecWithoutTransaction``1(System.String,``0,System.Int32)">
+            <summary>
+            DDLやDCLを実行します。
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="entityParam">SqlMap内で参照するパラメータEntityクラス</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecWithoutTransaction(System.String,KTFramework.Dao.KTBindParameters)">
+            <summary>
+            DDLやDCLを実行します。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="param">SqlMap内で参照するパラメータリスト</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecWithoutTransaction(System.String,KTFramework.Dao.KTBindParameters,System.Int32)">
+            <summary>
+            DDLやDCLを実行します。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="param">SqlMap内で参照するパラメータリスト</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecWithoutTransaction``1(System.String,``0,System.Boolean)">
+            <summary>
+            DDLやDCLを実行します。
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="entityParam">SqlMap内でparameterClassとして定義したパラメータEntityクラスの変数名</param>
+            <param name="throwUniqueConstraint">一意制約違反時の動作(True:一意制約違反は例外をThrowする False:一意制約違反でも処理を返す(戻り値=-1))</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecWithoutTransaction``1(System.String,``0,System.Boolean,System.Int32)">
+            <summary>
+            DDLやDCLを実行します。
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="entityParam">SqlMap内でparameterClassとして定義したパラメータEntityクラスの変数名</param>
+            <param name="throwUniqueConstraint">一意制約違反時の動作(True:一意制約違反は例外をThrowする False:一意制約違反でも処理を返す(戻り値=-1))</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecWithoutTransaction(System.String,KTFramework.Dao.KTBindParameters,System.Boolean)">
+            <summary>
+            DDLやDCLを実行します。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="param">SqlMap内でparameterClassとして定義したパラメータEntityクラスの変数名</param>
+            <param name="throwUniqueConstraint">一意制約違反時の動作(True:一意制約違反は例外をThrowする False:一意制約違反でも処理を返す(戻り値=-1))</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecWithoutTransaction(System.String,KTFramework.Dao.KTBindParameters,System.Boolean,System.Int32)">
+            <summary>
+            DDLやDCLを実行します。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="param">パラメータリスト</param>
+            <param name="throwUniqueConstraint">true:一意制約違反は例外をThrowする false:一意制約違反でも処理を返す(return=-1)</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecWithoutTransactionByQuery(System.String)">
+            <summary>
+            DDLやDCLを実行します。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecWithoutTransactionByQuery(System.String,System.Int32)">
+            <summary>
+            DDLやDCLを実行します。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecWithoutTransactionByQuery(System.String,KTFramework.Dao.KTBindParameters)">
+            <summary>
+            DDLやDCLを実行します。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <param name="param">SqlMap内で参照するパラメータリスト</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecWithoutTransactionByQuery(System.String,KTFramework.Dao.KTBindParameters,System.Int32)">
+            <summary>
+            DDLやDCLを実行します。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <param name="param">SqlMap内で参照するパラメータリスト</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecWithoutTransactionByQuery(System.String,KTFramework.Dao.KTBindParameters,System.Boolean)">
+            <summary>
+            DDLやDCLを実行します。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <param name="param">SqlMap内でparameterClassとして定義したパラメータEntityクラスの変数名</param>
+            <param name="throwUniqueConstraint">一意制約違反時の動作(True:一意制約違反は例外をThrowする False:一意制約違反でも処理を返す(戻り値=-1))</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecWithoutTransactionByQuery(System.String,KTFramework.Dao.KTBindParameters,System.Boolean,System.Int32)">
+            <summary>
+            DDLやDCLを実行します。
+            </summary>
+            <param name="sqlStatement">SQLステートメント</param>
+            <param name="param">パラメータリスト</param>
+            <param name="throwUniqueConstraint">true:一意制約違反は例外をThrowする false:一意制約違反でも処理を返す(return=-1)</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecProcedure(System.String)">
+            <summary>
+            PL/SQLを実行します。SqlMapにはPL/SQL名のみを定義して下さい。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecProcedure(System.String,System.Int32)">
+            <summary>
+            PL/SQLを実行します。SqlMapにはPL/SQL名のみを定義して下さい。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="timeout">PL/SQL実行タイムアウト時間(秒)</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecProcedure(System.String,KTFramework.Dao.KTProcedureParameters@)">
+            <summary>
+            PL/SQLを実行します。SqlMapにはPL/SQL名のみを定義して下さい。
+            PL/SQLの戻り値と引数(IN/OUT)は、KTProcedureParametersに含めてください。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="ktProcedureParameters">PL/SQL引数、戻り値パラメータリスト</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecProcedure(System.String,KTFramework.Dao.KTProcedureParameters@,System.Int32)">
+            <summary>
+            PL/SQLを実行します。SqlMapにはPL/SQL名のみを定義して下さい。
+            PL/SQLの戻り値と引数(IN/OUT)は、KTProcedureParametersに含めてください。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="ktProcedureParameters">PL/SQL引数、戻り値パラメータリスト</param>
+            <param name="timeout">PL/SQL実行タイムアウト時間(秒)</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecProcedureByQuery(System.String)">
+            <summary>
+            PL/SQLを実行します。SqlMapにはPL/SQL名のみを定義して下さい。
+            </summary>
+            <param name="plSqlName">PL/SQL名</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecProcedureByQuery(System.String,System.Int32)">
+            <summary>
+            PL/SQLを実行します。SqlMapにはPL/SQL名のみを定義して下さい。
+            </summary>
+            <param name="plSqlName">PL/SQL名</param>
+            <param name="timeout">PL/SQL実行タイムアウト時間(秒)</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecProcedureByQuery(System.String,KTFramework.Dao.KTProcedureParameters@)">
+            <summary>
+            PL/SQLを実行します。SqlMapにはPL/SQL名のみを定義して下さい。
+            PL/SQLの戻り値と引数(IN/OUT)は、KTProcedureParametersに含めてください。
+            </summary>
+            <param name="plSqlName">PL/SQL名</param>
+            <param name="ktProcedureParameters">PL/SQL引数、戻り値パラメータリスト</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecProcedureByQuery(System.String,KTFramework.Dao.KTProcedureParameters@,System.Int32)">
+            <summary>
+            PL/SQLを実行します。SqlMapにはPL/SQL名のみを定義して下さい。
+            PL/SQLの戻り値と引数(IN/OUT)は、KTProcedureParametersに含めてください。
+            </summary>
+            <param name="plSqlName">PL/SQL名</param>
+            <param name="ktProcedureParameters">PL/SQL引数、戻り値パラメータリスト</param>
+            <param name="timeout">PL/SQL実行タイムアウト時間(秒)</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecRecordSetProcedure(System.String,KTFramework.Dao.KTProcedureParameters)">
+            <summary>
+            結果表を返すPL/SQLを実行します。
+            バインド変数はPL/SQLの引数になります。SqlMapで指定した変数名と対応する値を設定して下さい。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="ktProcedureParameters">SqlMap内で参照するパラメータリスト</param>
+            <returns>結果表を返します。</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecRecordSetProcedure(System.String,KTFramework.Dao.KTProcedureParameters,System.Int32)">
+            <summary>
+            結果表を返すPL/SQLを実行します。
+            バインド変数はPL/SQLの引数になります。SqlMapで指定した変数名と対応する値を設定して下さい。
+            </summary>
+            <param name="statementId">SqlMapで定義したクエリID([アセンブリ名].[namespace].[statement id])</param>
+            <param name="ktProcedureParameters">SqlMap内で参照するパラメータリスト</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>結果表を返します。</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecRecordSetProcedureByQuery(System.String,KTFramework.Dao.KTProcedureParameters)">
+            <summary>
+            結果表を返すPL/SQLを実行します。
+            バインド変数はPL/SQLの引数になります。SqlMapで指定した変数名と対応する値を設定して下さい。
+            </summary>
+            <param name="plSqlName">PL/SQL名</param>
+            <param name="ktProcedureParameters">SqlMap内で参照するパラメータリスト</param>
+            <returns>結果表を返します。</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecRecordSetProcedureByQuery(System.String,KTFramework.Dao.KTProcedureParameters,System.Int32)">
+            <summary>
+            結果表を返すPL/SQLを実行します。
+            バインド変数はPL/SQLの引数になります。SqlMapで指定した変数名と対応する値を設定して下さい。
+            </summary>
+            <param name="plSqlName">PL/SQL名</param>
+            <param name="ktProcedureParameters">SqlMap内で参照するパラメータリスト</param>
+            <param name="timeout">ステートメント実行タイムアウト時間(秒)</param>
+            <returns>結果表を返します。</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.GetDbType(System.Object)">
+            <summary>
+            プログラムデータタイプに対応するOracleフィールド定義を取得します。
+            </summary>
+            <param name="value">値</param>
+            <returns>SqlDbType列挙体(OracleParameterで使用するフィールド(プロパティ)のデータ型)</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.CreateCommand(System.String,System.Data.CommandType,System.Int32)">
+            <summary>
+            OracleCommandインスタンスを取得します。
+            トランザクションを開始する場合には、BeginTransaction()メソッドを呼び出して、コマンドインスタンスを取得して下さい。
+            </summary>
+            <returns>OracleCommandインスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.DestroyCommand(Oracle.DataAccess.Client.OracleCommand@)">
+            <summary>
+            SqlCommandインスタンスを破棄します。
+            トランザクションを終了する場合には、CommitTransaction()/RollbackTransaction()メソッドを呼び出してください。
+            </summary>
+            <param name="command">OracleCommandインスタンス</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.Execute(System.Data.DataTable@,Oracle.DataAccess.Client.OracleCommand,System.Boolean)">
+            <summary>
+            結果を返すSQLステートメントを実行します。
+            </summary>
+            <param name="resultTable">実行結果格納先のDataTable</param>
+            <param name="command">コマンドインスタンス</param>
+            <param name="fillData">スキーマ情報とデータを取得する場合にはTrue、スキーマ情報のみ取得する場合にはFalse</param>
+            <returns>結果表件数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecuteNonQuery(Oracle.DataAccess.Client.OracleCommand,System.Boolean)">
+            <summary>
+            結果を返さないSQLステートメントを実行します。
+            </summary>
+            <param name="command">コマンドインスタンス</param>
+            <param name="throwUniqueConstraint">true:一意制約違反は例外をThrowする false:一意制約違反でも処理を返す(return=-1)</param>
+            <returns>ステートメント影響件数</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.ExecuteReader(Oracle.DataAccess.Client.OracleCommand)">
+            <summary>
+            SQLステートメントを実行し、カーソルを返します
+            </summary>
+            <param name="command">コマンドインスタンス</param>
+            <returns>OracleDataReaderインスタンス</returns>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessBase.CheckRetryOracleError(Oracle.DataAccess.Client.OracleException,System.Int32,Oracle.DataAccess.Client.OracleCommand)">
+            <summary>
+            リトライ判定
+            リトライが不要な場合は例外がそのままスローされます
+            </summary>
+            <param name="ex">Oracle例外</param>
+            <param name="retryCount">リトライカウント</param>
+            <param name="command">Oracleコマンド</param>
+        </member>
+        <member name="P:KTFramework.Dao.DataAccessBase.LastErrorCode">
+            <summary>最終エラーコード</summary>
+        </member>
+        <member name="P:KTFramework.Dao.DataAccessBase.LastErrorMessage">
+            <summary>最終エラーメッセージ</summary>
+        </member>
+        <member name="P:KTFramework.Dao.DataAccessBase.Timeout">
+            <summary>
+            ステートメント実行タイムアウト時間(秒)。デフォルトは30秒。
+            ステートメントが発行されてから、結果が返信されるまでの間に、例外を発生させる時間を取得/設定します。
+            このプロパティで指定した時間は、実行されるすべてのステートメントに適用されます。
+            ステートメントごとにタイムアウト時間を設定する場合には、ステートメント実行メソッドのtimeout引数に
+            指定して下さい。
+            </summary>
+        </member>
+        <member name="P:KTFramework.Dao.DataAccessBase.IsTransaction">
+            <summary>
+            トランザクション実行状態を取得します。
+            トランザクション実行中=True、トランザクション未実施=False
+            </summary>
+        </member>
+        <member name="P:KTFramework.Dao.DataAccessBase.IsDBOpenSuccess">
+            <summary>
+            DBオープン有無を取得します
+            </summary>
+        </member>
+        <member name="P:KTFramework.Dao.DataAccessBase.ConnectionString">
+            <summary>
+            画面表示用DB接続情報(DB名 / ユーザID)を取得します
+            </summary>
+        </member>
+        <member name="T:KTFramework.Dao.DataAccessBase.RetryOracleError">
+            <summary>
+            リトライ対象Oracleエラーコード定数
+            </summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessBase.RetryOracleError.DblinkDisconnect2068">
+            <summary>ORA-02068:DBリンク切れ</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessBase.RetryOracleError.DblinkDisconnect3113">
+            <summary>ORA-03113:DBリンク切れ</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessBase.RetryOracleError.DblinkDisconnect3114">
+            <summary>ORA-03114:DBリンク切れ</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessBase.RetryOracleError.AuthTimeout3136">
+            <summary>ORA-03136:認証タイムアウト</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessBase.RetryOracleError.DblinkDisconnect12571">
+            <summary>ORA-12571:DBリンク切れ</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessBase.RetryOracleError.IoError17002">
+            <summary>ORA-17002:I/Oエラー</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessBase.RetryOracleError.IoError17410">
+            <summary>ORA-17410:I/Oエラー</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessBase.RetryOracleError.IoError28547">
+            <summary>ORA-28547:I/Oエラー</summary>
+        </member>
+        <member name="T:KTFramework.Dao.DataAccessError">
+            <summary>
+            <h3>
+            KTDataAccessエラー定義クラス
+            </h3>
+            DataAccessモジュール内で発生するエラーコードとメッセージを定義します。
+            </summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessError.Undefined">
+            <summary>エラーコード未定義</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessError.ConnectTargetUndefined">
+            <summary>接続先未指定エラー</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessError.ConnectModeUndefined">
+            <summary>接続モード未指定エラー</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessError.SqlMapLoadError">
+            <summary>SqlMap読込エラー</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessError.ConnectionParameterReadError">
+            <summary>接続情報読込エラー</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessError.ConnectError">
+            <summary>未接続エラー</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessError.CreateCommandError">
+            <summary>コマンド生成エラー</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessError.CreateAdapterError">
+            <summary>アダプタ生成エラー</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessError.TransactionStartError">
+            <summary>トランザクション開始エラー</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessError.TransactionNotStart">
+            <summary>トランザクション未実行エラー</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessError.TransactionAlreadyStarted">
+            <summary>トランザクション実行中エラー</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessError.TransactionCommitError">
+            <summary>トランザクションコミットエラー</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessError.TransactionRollbackError">
+            <summary>トランザクションロールバックエラー</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessError.TransactionEndError">
+            <summary>トランザクション終了エラー</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessError.ExecuteQueryError">
+            <summary>SQL実行エラー</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessError.ExecuteFetchError">
+            <summary>フェッチエラー</summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessError.ExecuteRetryError">
+            <summary>リトライエラー</summary>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessError.GetMessage(System.Int32)">
+            <summary>
+            KTDataAccessエラーメッセージを取得する
+            </summary>
+            <param name="code">KTDataAccessエラーコード</param>
+            <returns>KTDataAccessエラーメッセージ</returns>
+        </member>
+        <member name="T:KTFramework.Dao.DataAccessException">
+            <summary>
+            <h3>
+            KTDataAccess例外クラス
+            </h3>
+            DataAccessモジュール内で発生するExceptionをラップします。
+            </summary>
+        </member>
+        <member name="F:KTFramework.Dao.DataAccessException._errorCode">
+            <summary>KTDataAccessエラーコード</summary>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessException.#ctor(System.String)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="message">エラーメッセージ</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessException.#ctor(System.String,System.Exception)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="message">エラーメッセージ</param>
+            <param name="ex">上位例外</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessException.#ctor(System.Int32)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="errorCode">エラーコード</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessException.#ctor(System.Int32,System.Exception)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="errorCode">エラーコード</param>
+            <param name="ex">上位例外</param>
+        </member>
+        <member name="P:KTFramework.Dao.DataAccessException.ErrorCode">
+            <summary>エラーコードを取得します</summary>
+        </member>
+        <member name="P:KTFramework.Dao.DataAccessException.OracleErrorNumber">
+            <summary>Oracleエラーコードを取得します</summary>
+        </member>
+        <member name="T:KTFramework.Dao.DataAccessLogger">
+            <summary>
+            <h3>
+            KTDataAccessロガークラス
+            </h3>
+            DataAccessモジュール内のログ出力を共通化します。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessLogger.#ctor(System.Type)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="methodType">メソッドタイプ(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType)</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessLogger.DebugDb(System.String,System.String)">
+            <summary>
+            Debugログを出力する(MDC有)
+            </summary>
+            <param name="dbName"></param>
+            <param name="message"></param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessLogger.DebugDb(System.String,System.String,System.Object[])">
+            <summary>
+            Debugログを出力する(MDC有)
+            </summary>
+            <param name="dbName"></param>
+            <param name="format"></param>
+            <param name="param"></param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessLogger.DebugDbSelected(System.String,System.String,System.Object[])">
+            <summary>
+            SELECT SQLログ出力がtrueの時、Debugログ出力します。
+            </summary>
+            <param name="dbName">DB名</param>
+            <param name="format">書式文字列</param>
+            <param name="param">埋め込みパラメータ</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessLogger.InfoDb(System.String,System.String)">
+            <summary>
+            Infoログを出力する(MDC有)
+            </summary>
+            <param name="dbName"></param>
+            <param name="message"></param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessLogger.InfoDb(System.String,System.String,System.Object[])">
+            <summary>
+            Infoログを出力する(MDC有)
+            </summary>
+            <param name="dbName"></param>
+            <param name="format"></param>
+            <param name="param"></param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessLogger.InfoDbSelected(System.String,System.String,System.Object[])">
+            <summary>
+            SELECT SQLログ出力がtrueの時、Infoログ出力します。
+            </summary>
+            <param name="dbName">DB名</param>
+            <param name="format">書式文字列</param>
+            <param name="param">埋め込みパラメータ</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessLogger.InfoSql(System.String,Oracle.DataAccess.Client.OracleCommand)">
+            <summary>
+            SQLとパラメータをInfoログ出力します。
+            SELECT SQLログ出力がtrueの時のみ
+            </summary>
+            <param name="dbName"></param>
+            <param name="command"></param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessLogger.NoticeDb(System.String,System.String)">
+            <summary>
+            Noticeログを出力する(MDC有)
+            </summary>
+            <param name="dbName"></param>
+            <param name="message"></param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessLogger.NoticeDb(System.String,System.String,System.Object[])">
+            <summary>
+            Noticeログを出力する(MDC有)
+            </summary>
+            <param name="dbName"></param>
+            <param name="format"></param>
+            <param name="param"></param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessLogger.NoticeDbSelected(System.String,System.String,System.Object[])">
+            <summary>
+            SELECT SQLログ出力がtrueの時、Noticeログ出力します。
+            </summary>
+            <param name="dbName">DB名</param>
+            <param name="format">書式文字列</param>
+            <param name="param">埋め込みパラメータ</param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessLogger.WarnDb(System.String,System.String)">
+            <summary>
+            Warnログを出力する(MDC有)
+            </summary>
+            <param name="dbName"></param>
+            <param name="message"></param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessLogger.WarnDb(System.String,System.String,System.Object[])">
+            <summary>
+            Warnログを出力する(MDC有)
+            </summary>
+            <param name="dbName"></param>
+            <param name="format"></param>
+            <param name="param"></param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessLogger.ErrorDb(System.String,System.String)">
+            <summary>
+            Errorログを出力する(MDC有)
+            </summary>
+            <param name="dbName"></param>
+            <param name="message"></param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessLogger.ErrorDb(System.String,System.String,System.Object[])">
+            <summary>
+            Errorログを出力する(MDC有)
+            </summary>
+            <param name="dbName"></param>
+            <param name="format"></param>
+            <param name="param"></param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessLogger.ErrorSql(System.String,Oracle.DataAccess.Client.OracleCommand)">
+            <summary>
+            SQLとパラメータをErrorログ出力します。
+            </summary>
+            <param name="dbName"></param>
+            <param name="command"></param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessLogger.ExceptionDb(System.String,Oracle.DataAccess.Client.OracleException,System.String)">
+            <summary>
+            例外ログを出力する(MDC有)
+            </summary>
+            <param name="dbName"></param>
+            <param name="ex"></param>
+            <param name="message"></param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessLogger.ExceptionDb(System.String,System.Exception,System.String,System.Object[])">
+            <summary>
+            例外ログを出力する(MDC有)
+            </summary>
+            <param name="dbName"></param>
+            <param name="ex"></param>
+            <param name="format"></param>
+            <param name="param"></param>
+        </member>
+        <member name="M:KTFramework.Dao.DataAccessLogger.GetParamsString(Oracle.DataAccess.Client.OracleCommand)">
+            <summary>
+            バインドパラメータの列挙文字列を取得する
+            </summary>
+            <param name="command">Oracleコマンド</param>
+            <returns>バインドパラメータ列挙文字列</returns>
+        </member>
+        <member name="T:KTFramework.Dao.FetchHandlerBase`1">
+            <summary>
+            <h3>
+            フェッチハンドラ
+            </h3>
+            フェッチ処理を手順化します。
+            </summary>
+            <remarks>
+            <h3>
+            [使用方法]
+            </h3>
+            下記はMS_ZISEKIテーブルから結果をフェッチする例です。
+            エンティティクラスとしてMsZisekiDtoクラスを定義したものと仮定しています。
+            <h4>
+            ・フェッチハンドラの作成
+            </h4>
+            <code>
+            //カーソルオープン
+            public MsZisekiFetchHandler( string statementId, BidmDto param )
+                : base( PicDao.GetInstance().OpenCursor<![CDATA[<MsZisekiDto>]]>( statementId, param ) ) {
+            }
+            //フェッチ
+            public override MsZisekiDto Fetch() {
+                return PicDao.GetInstance().Fetch<![CDATA[<MsZisekiDto>]]>( ref _fetchCursor );
+            }
+            //カーソルクローズ
+            public override void Close() {
+                PicDao.GetInstance().CloseCursor( ref _fetchCursor );
+            }
+            </code>
+            <h4>
+            ・フェッチハンドラの利用
+            </h4>
+            <code>
+            MsZisekiFetchHandler fetch = null;
+            try {
+                //カーソルオープン
+                fetch = new MsZisekiFetchHandler( SQLのステートメントID, バインドパラメータ用エンティティ );
+                
+                //フェッチ
+                MsZisekiDto data;
+                while ( fetch.HasRows ) ) {
+                    //処理・・・
+                }
+            } finally {
+                //カーソルクローズ
+                if ( ObjectUtils.IsNotNull( fetch ) ) {
+                    fetch.Close();
+                }
+            }
+            </code>
+            </remarks>
+            <typeparam name="T">エンティティクラス</typeparam>
+        </member>
+        <member name="F:KTFramework.Dao.FetchHandlerBase`1._fetchCursor">
+            <summary>カーソル</summary>
+        </member>
+        <member name="M:KTFramework.Dao.FetchHandlerBase`1.#ctor(KTFramework.Dao.Cursor)">
+            <summary>
+            コンストラクタ
+            </summary>
+            <param name="fetchCursor">カーソル</param>
+        </member>
+        <member name="M:KTFramework.Dao.FetchHandlerBase`1.Fetch">
+            <summary>
+            フェッチ
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:KTFramework.Dao.FetchHandlerBase`1.Close">
+            <summary>
+            フェッチクローズ
+            </summary>
+        </member>
+        <member name="P:KTFramework.Dao.FetchHandlerBase`1.HasRows">
+            <summary>未読行有無</summary>
+        </member>
+        <member name="T:KTFramework.Dao.NoRegistDataException">
+            <summary>
+            <h3>
+            登録データ未ヒット例外
+            </h3>
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.NoRegistDataException.#ctor">
+            <summary>
+            登録データ未ヒット例外
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.NoRegistDataException.#ctor(System.String)">
+            <summary>
+            登録データ未ヒット例外
+            </summary>
+            <param name="message">メッセージ</param>
+        </member>
+        <member name="T:KTFramework.Dao.NoSearchDataException">
+            <summary>
+            <h3>
+            検索データ未ヒット例外
+            </h3>
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.NoSearchDataException.#ctor">
+            <summary>
+            検索データ未ヒット例外
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.NoSearchDataException.#ctor(System.String)">
+            <summary>
+            検索データ未ヒット例外
+            </summary>
+            <param name="message">メッセージ</param>
+        </member>
+        <member name="T:KTFramework.Dao.ProcedureParameter">
+            <summary>
+            <h3>
+            PL/SQLパラメータ格納クラス
+            </h3>
+            SqlMapに定義したPL/SQLステートメントで使用するバインド変数の値を保持します。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.ProcedureParameter.#ctor">
+            <summary>
+            PL/SQLパラメータを割当てます
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.ProcedureParameter.#ctor(System.Object,KTFramework.Dao.ProcedureParameter.ParameterDirection)">
+            <summary>
+            PL/SQLパラメータを割当てます
+            </summary>
+            <param name="value">パラメータ(引数、戻り値)に割当てる値</param>
+            <param name="direction">パラメータの入出力定義</param>
+        </member>
+        <member name="M:KTFramework.Dao.ProcedureParameter.#ctor(System.Object,KTFramework.Dao.ProcedureParameter.ParameterDirection,System.Int32)">
+            <summary>
+            PL/SQLパラメータを割当てます
+            </summary>
+            <param name="value">パラメータ(引数、戻り値)に割当てる値</param>
+            <param name="direction">パラメータの入出力定義</param>
+            <param name="size">パラメータのバッファサイズ</param>
+        </member>
+        <member name="M:KTFramework.Dao.ProcedureParameter.#ctor(System.Object,KTFramework.Dao.ProcedureParameter.ParameterDirection,System.Int32,KTFramework.Dao.ProcedureParameter.ParameterType)">
+            <summary>
+            PL/SQLパラメータを割当てます
+            </summary>
+            <param name="value">パラメータ(引数、戻り値)に割当てる値</param>
+            <param name="direction">パラメータの入出力定義</param>
+            <param name="size">パラメータのバッファサイズ</param>
+            <param name="type">パラメータ種別</param>
+        </member>
+        <member name="M:KTFramework.Dao.ProcedureParameter.Finalize">
+            <summary>
+            デストラクタ
+            </summary>
+        </member>
+        <member name="P:KTFramework.Dao.ProcedureParameter.Value">
+            <summary>PL/SQLパラメータに割当てる値を取得、設定します。</summary>
+        </member>
+        <member name="P:KTFramework.Dao.ProcedureParameter.Direction">
+            <summary>PL/SQLパラメータの入出力を取得、設定します。</summary>
+        </member>
+        <member name="P:KTFramework.Dao.ProcedureParameter.Size">
+            <summary>PL/SQL出力パラメータのバッファサイズを取得、設定します。</summary>
+        </member>
+        <member name="P:KTFramework.Dao.ProcedureParameter.Type">
+            <summary>パラメータ種別を取得、設定します。</summary>
+        </member>
+        <member name="T:KTFramework.Dao.ProcedureParameter.ParameterDirection">
+            <summary>パラメータ入出力定義</summary>
+        </member>
+        <member name="F:KTFramework.Dao.ProcedureParameter.ParameterDirection.In">
+            <summary>入力型</summary>
+        </member>
+        <member name="F:KTFramework.Dao.ProcedureParameter.ParameterDirection.InOut">
+            <summary>入出力型</summary>
+        </member>
+        <member name="F:KTFramework.Dao.ProcedureParameter.ParameterDirection.Out">
+            <summary>出力型</summary>
+        </member>
+        <member name="F:KTFramework.Dao.ProcedureParameter.ParameterDirection.ReturnValue">
+            <summary>戻り値型</summary>
+        </member>
+        <member name="T:KTFramework.Dao.ProcedureParameter.ParameterType">
+            <summary>パラメータ種別</summary>
+        </member>
+        <member name="F:KTFramework.Dao.ProcedureParameter.ParameterType.Value">
+            <summary>値渡し</summary>
+        </member>
+        <member name="F:KTFramework.Dao.ProcedureParameter.ParameterType.RefCursor">
+            <summary>カーソル渡し</summary>
+        </member>
+        <member name="T:KTFramework.Dao.KTProcedureParameters">
+            <summary>
+            PL/SQLパラメータ格納リストクラス
+            PL/SQLに渡すパラメータ名と値を対応付けます。
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.KTProcedureParameters.#ctor">
+            <summary>
+            コンストラクタ
+            </summary>
+        </member>
+        <member name="M:KTFramework.Dao.KTProcedureParameters.Add(System.String,System.Object,KTFramework.Dao.ProcedureParameter.ParameterDirection)">
+            <summary>
+            コンストラクタ
+            PL/SQLパラメータを割当てます。
+            </summary>
+            <param name="key">パラメータ(引数、戻り値)の完全一致名</param>
+            <param name="value">パラメータ(引数、戻り値)に割当てる値</param>
+            <param name="direction">パラメータの入出力定義</param>
+        </member>
+        <member name="M:KTFramework.Dao.KTProcedureParameters.Add(System.String,System.Object,KTFramework.Dao.ProcedureParameter.ParameterDirection,System.Int32)">
+            <summary>
+            コンストラクタ
+            PL/SQLパラメータを割当てます。
+            </summary>
+            <param name="key">パラメータ(引数、戻り値)の完全一致名</param>
+            <param name="value">パラメータ(引数、戻り値)に割当てる値</param>
+            <param name="direction">パラメータの入出力定義</param>
+            <param name="size">パラメータのバッファサイズ</param>
+        </member>
+        <member name="M:KTFramework.Dao.KTProcedureParameters.Add(System.String,System.Object,KTFramework.Dao.ProcedureParameter.ParameterDirection,System.Int32,KTFramework.Dao.ProcedureParameter.ParameterType)">
+            <summary>
+            コンストラクタ
+            PL/SQLパラメータを割当てます。
+            </summary>
+            <param name="key">パラメータ(引数、戻り値)の完全一致名</param>
+            <param name="value">パラメータ(引数、戻り値)に割当てる値</param>
+            <param name="direction">パラメータの入出力定義</param>
+            <param name="size">パラメータのバッファサイズ</param>
+            <param name="type">パラメータ種別</param>
+        </member>
+    </members>
+</doc>

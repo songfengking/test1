@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="TmCcAuthUser"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <!-- 電子かんばんユーザ情報取得 -->
+    <statement id="GetKanbanPickingUserInfo">
+      SELECT
+      CAU.USER_ID,
+      CAU.USER_NM
+      FROM
+      TM_CC_AUTH_USER CAU
+      LEFT JOIN
+      TM_CC_AUTH_APUSER APU
+      ON
+      CAU.USER_ID = APU.USER_ID
+      LEFT JOIN
+      TM_CC_AUTH_AP APP
+      ON
+      APP.APP_ID = APU.APP_ID
+      WHERE
+      APP.APP_NM = 'EKANB_N_HR_Picking'
+      ORDER BY
+      CAU.USER_ID
+    </statement>
+  </statements>
+</sqlMap>

@@ -1,0 +1,144 @@
+﻿<?xml version="1.0"?>
+<!--
+標準アプリケーション汎用設定ファイル
+
+・アプリケーションが使用する汎用情報を外部ファイルとして管理します。
+・実行モジュールでKTFramework.CommonApp.CommonApplicationを継承し、
+  Initialize()をコールするとロードされます。
+・設定ファイルのパスは./resources/ApplicationConfig.xmlをデフォルトとしています。
+  個別に指定する場合はコマンドライン引数に/conf {ファイルパス}を指定してください。
+・ノードはConfigタグcategoryタグsectionタグとkeyタグで構成されます
+・Configタグはname属性にアセンブリ名を設定します。
+・categoryタグとsectionタグはname属性にそれぞれカテゴリ名とセクション名を設定します。
+  同一nameのタグは解析時に集約されます。
+・keyタグにはname属性にキー名、value属性に値を設定します。
+  同一nameのvalue値は配列に格納されます。
+・データ取得方法は下記の通りです。
+    string value = AppConfig.Config[カテゴリ名][セクション名][キー名];
+    string[] values = AppConfig.Config[カテゴリ名][セクション名][キー名];
+・データ設定方法は下記の通りです。
+    AppConfig.Config[カテゴリ名][セクション名][キー名] = value;
+  尚、同一キーが複数ある場合は例外がスローされます。
+
+[設定ファイル構成例]
+[アプリケーション設定情報]
+<Config name="{アセンブリ名}">                      … 必須
+  <category name="Common">                          … 必須
+    <section name="Application">                    … 必須
+      <key name="id" value="KTBatchSample" />       … 必須 アクセス方法 string appId = AppId;
+      <key name="name" value="KTBatchサンプル" />   … 必須 アクセス方法 string appId = AppName;
+    </section>                                      … 必須
+  </category>                                       … 必須
+  <category name="Settings">                        … 任意 アクセス方法 ConfigXmlCategory cateogry = AppConfig.Config["Settings"];
+    <section name="plcSetting">                     … 任意 アクセス方法 ConfigXmlSection section = AppConfig.Config["Settings"]["plcSetting"];
+      <key name="register1" value="257" />          … 任意 アクセス方法 string value = AppConfig.Config["Settings"]["plcSetting"]["register1"];
+      <key name="register2" value="258" />          … 任意 アクセス方法 string value = AppConfig.Config["Settings"]["plcSetting"]["register2"];
+      <key name="register3" value="259" />          … 任意 アクセス方法 string value = AppConfig.Config["Settings"]["plcSetting"]["register3"];
+    </section>                                      … 任意
+    <section name="displaySetting">                 … 任意 アクセス方法 ConfigXmlSection section = AppConfig.Config["Settings"]["displaySetting"];
+      <key name="maxRecordCount" value="100" />     … 任意 アクセス方法 string value = AppConfig.Config["Settings"]["displaySetting"]["maxRecordCount"];
+    </section>                                      … 任意
+    <section name="viewSetting">                    … 任意 アクセス方法 ConfigXmlSection section = AppConfig.Config["Settings"]["viewSetting"];
+      <key name="viewName" value="画面01" />        … 任意 アクセス方法 string value = AppConfig.Config["Settings"]["viewSetting"].Get("id")[0];
+      <key name="viewName" value="画面02" />        … 任意 アクセス方法 string value = AppConfig.Config["Settings"]["viewSetting"].Get("id")[1];
+      <key name="viewName" value="画面03" />        … 任意 アクセス方法 string value = AppConfig.Config["Settings"]["viewSetting"].Get("id")[2];
+      <key name="viewName" value="画面04" />        … 任意 アクセス方法 string value = AppConfig.Config["Settings"]["viewSetting"].Get("id")[3];
+      <key name="viewName" value="画面05" />        … 任意 アクセス方法 string value = AppConfig.Config["Settings"]["viewSetting"].Get("id")[4];
+    </section>
+  </category>
+</applicationConfig>
+-->
+<!-- デバッグ用 VisualStudioから起動する時に使用 -->
+<!-- アプリケーション設定情報 -->
+<Config name="TRC_W_PWT_ProductView">
+  <!-- 共通情報 -->
+  <category name="Common">
+    <!-- アプリケーション情報 -->
+    <section name="Application">
+      <key name="plantCode" value="28" />
+      <key name="plantName" value="筑波工場" />
+      <key name="class" value="PWT" />
+      <key name="project" value="TRC" />
+      <key name="id" value="TRC_W_PWT_ProductView" />
+      <key name="name" value="トレーサビリティシステム" />
+      <key name="display" value="Tsukuba Plant, Kubota Corporation. 株式会社クボタ 筑波工場 / Traceability System トレーサビリティシステム" />
+    </section>
+    <!-- WEB共通情報 -->
+    <section name="WebCommon">
+      <!-- セッション維持の自動更新間隔 単位：ミリ秒 ※0以下の時には、自動更新しない -->
+      <key name="sessionKeep" value="60000" />
+      <!-- 一覧表示最大検索件数 -->
+      <key name="maxGridViewCount" value="4000" />
+      <!-- 部品検索画面 一覧表示最大検索件数 -->
+      <key name="partsViewMaxGridViewCount" value="10000" />
+      <!-- 工程検索画面 一覧表示最大検索件数 -->
+      <key name="processViewMaxGridViewCount" value="10000" />
+      <!-- 順序情報検索画面 一覧表示最大検索件数 -->
+      <key name="searchOrderInfoMaxGridViewCount" value="25000" />
+    </section>
+    <!-- AD認証 -->
+    <!--<section name="ADLogon">-->
+    <!-- AD認証(本番) -->
+    <!--<key name="release" value="http://web/logon/?apid=140011&urlno=1&dbno=1" />-->
+    <!-- AD認証(開発サーバ) -->
+    <!--<key name="test" value="http://133.253.80.5:8079/logon/?apid=140011&urlno=2&dbno=2" />-->
+    <!-- AD認証(開発環境) -->
+    <!--<key name="develop" value="http://133.253.80.5:8079/logon/?apid=140011&urlno=2&dbno=2" />-->
+    <!--</section>-->
+  </category>
+  <category name="Application">
+    <!-- 工程情報 -->
+    <section name="ProcessSetting">
+      <!-- トラクタ品質画像証跡ステーション -->
+      <key name="tractorCamImageStation" value="212002" />
+      <key name="tractorCamImageStation" value="250010" />
+      <!-- エンジン品質画像証跡ステーション -->
+      <key name="engineCamImageStation" value="306205" />
+      <key name="engineCamImageStation" value="309099" />
+      <!-- 出荷部品画像証跡ステーション -->
+      <key name="engineShipmentPartsPickStation" value="858210"/>
+      <!-- トラクタAI画像解析ステーション -->
+      <key name="tractorAiImageStation" value="212302" />
+      <!-- エンジンAI画像解析ステーション -->
+      <key name="engineAiImageStation" value="" />
+    </section>
+    <section name="ManualFilePath">
+      <!-- マニュアル格納先ベースパス(Webサーバ 自プロジェクト内ディレクトリ)  -->
+      <key name="BasePath" value="TemplateFiles\Manual\"/>
+      <!-- 排ガス規制部品メンテマニュアル -->
+      <key name="Manual" value="ユーザーズガイド：トレーサビリティ.pdf" />
+    </section>
+    <section name="DefaultSetting">
+      <!-- パラメータでURL_NUM(urlNum)が指定されていない時には以下をURL_NUMとして扱います -->
+      <key name="defaultUrlNum" value="2" />
+    </section>
+    <section name="ReportFilePath">
+      <!-- 帳票格納先ベースパス(Webサーバ 自プロジェクト内ディレクトリ)  -->
+      <key name="BasePath" value="TemplateFiles\Report\"/>
+      <!-- トラクタ電子チェックシート帳票ファイル -->
+      <key name="ELCheckSheet" value="TRCR0001.xml" />
+      <!-- トラクタイメージチェックシート帳票ファイル -->
+      <key name="TractorImgCheckSheet" value="TRCR0002.xml" />
+      <!-- エンジン電子チェックシート帳票ファイル -->
+      <key name="EngineELCheckSheet" value="ENGR0001.xml" />
+      <!-- NG報告書テンプレートファイル -->
+      <key name="NGReport" value="NG報告書.xls" />
+      <!-- 噴射計測03詳細データ -->
+      <key name="EngineInjection03Detail" value="EngineInjection03DetailReport.pdf" />
+      <!-- 噴射計測07詳細データ -->
+      <key name="EngineInjection07Detail" value="EngineInjection07DetailReport.pdf" />
+    </section>
+    <section name="TempFilePath">
+      <!-- temporaryパス(Webサーバ 自プロジェクト内ディレクトリ)  -->
+      <key name="BasePath" value="C:\temp\TRC"/>
+    </section>
+    <section name="MassDataOutput">
+      <!-- 大量データ出力：検索対象期間(単位:月)  -->
+      <key name="SearchPeriod" value="3"/>
+    </section>
+    <section name="AiImagePreviewPath">
+      <!-- プレビュー画像格納先ベースパス  -->
+      <key name="BasePath" value=""/>
+    </section>
+  </category>
+</Config>

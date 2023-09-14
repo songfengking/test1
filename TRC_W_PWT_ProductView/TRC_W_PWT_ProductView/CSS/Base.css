@@ -1,0 +1,224 @@
+﻿/*------------------------------------------------------------------------------
+	画面共通で使用するスタイル
+------------------------------------------------------------------------------*/
+html, body {
+    background: #ffffff;
+    width: 100%;
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+    box-sizing: border-box;
+}
+span{
+    vertical-align:middle;
+}
+/*------------------------------------------------------------------------------
+	マスター画面内エリアスタイル
+------------------------------------------------------------------------------*/
+div#main-container {
+    position: static;
+    width: 100%;
+    height: auto !important;
+    box-sizing: border-box;
+}
+header#header-area {
+    box-sizing: border-box;
+}
+div#containts-area-top {
+    position: static;
+    overflow: hidden;
+    box-sizing: border-box;
+    width: 100%;
+}
+div#containts-area {
+    position: static;
+    overflow-y:auto;
+    overflow-x:hidden;
+    height: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    box-sizing: border-box;
+    width: 100%;
+}
+div#containts-area-bottom {
+    position: absolute;
+    overflow: hidden;
+    box-sizing: border-box;
+    bottom: 60px;
+    width: 100%;
+}
+/*div#button-area {
+    position: absolute;
+    bottom: 60px;
+    width: 100%;
+    margin-top: 7px;
+    padding-bottom: 0px;
+    box-sizing: border-box;
+    background-color:antiquewhite;
+}*/
+footer#footer-area {
+    box-sizing: border-box;
+}
+div#footer-group {
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    height: 55px;
+    margin-top:5px;
+    box-sizing: border-box;
+}
+div#footer-message-area {
+    position: relative;
+    margin: 0px 17px 0px 5px;
+}
+div#footer-copyrights {
+    position: relative;
+    bottom: 0px;
+    width: 100%;
+    text-align: center;
+    font-size: x-small;
+}
+/*------------------------------------------------------------------------------
+	ヘッダー用定義
+------------------------------------------------------------------------------*/
+/*マスタ部定義*/
+.header-area {
+    position: relative;
+    width: 100%;
+    height: 45px;
+    box-sizing: border-box;
+    border-bottom: 1px solid grey;
+}
+/* クボタロゴ表示欄 */
+.header-logo-area {
+    position: relative;
+    float: left;
+    margin-top: 2px;
+    margin-left: 2px;
+}
+/* クボタロゴスタイル */
+.logo-style {
+    width: 160px; 
+    height: 35px;
+}
+/* ヘッダー欄個別枠 */
+.header-info-area-sub {
+    position: relative;
+    width: 100%;
+    height: 20px;
+}
+/* アプリケーション情報欄 */
+.header-application-info-area {
+    position: relative;
+    float: left;
+    width: 240px;
+    margin-left: 20px;
+}
+/* アプリケーションID */
+.header-info-app-id {
+    font-size: large;
+    font-style: italic;
+    font-weight: 800;
+}
+/* アプリケーション名 */
+.header-info-app-name {
+    font-size: small; 
+    font-style: italic;
+}
+/* ユーザ情報欄 */
+.header-user-info-area {
+    position: relative;
+    float: left;
+    width: 300px;
+    margin-left: 20px;
+}
+/* リンク、時刻等表示欄 */
+.header-etc-info-area {
+    position: relative;
+    float: right;
+    width: 600px;
+    text-align: right;
+    margin-right: 5px;
+}
+/* 画面タイトル欄 */
+.header-title-area {
+    width:100%;
+    height: 30px;
+    box-sizing: border-box;
+    text-align: center;
+    vertical-align:middle;
+    font-size: x-large;
+    font-weight: 600;
+}
+/*------------------------------------------------------------------------------
+	コントロール設定
+------------------------------------------------------------------------------*/
+/* 所属、ユーザ用タイトル */
+.belong-title {
+   width: 50px;
+   margin-right: 10px;
+   border: 1px solid black;
+   background-color: lightblue;
+}
+/* リンク風ボタン */
+.link-style {
+   text-decoration: underline;
+   color: #0000ff;
+   border: none;
+   background: transparent;
+   cursor: pointer;
+   /*margin-left: 1px;
+   margin-right: 1px;*/
+   padding: 0px;
+}
+/* フッター メッセージ表示テキストボックス */
+.footer-message-box {
+    height: 32px;
+    width: 100%;
+}
+/*------------------------------------------------------------------------------
+	共通スタイル定義
+------------------------------------------------------------------------------*/
+/* 非表示 */
+.invisible {
+    display:none;
+    border:0;
+}
+/* 幅高さ 0指定 */
+.size-zero {
+    height:0px;
+    width:0px;
+}
+/* IME不可 */
+.ime-disabled {
+    ime-mode: disabled;
+}
+/* IME日本語入力(初期) */
+.ime-active {
+    ime-mode:active;
+}
+/* IME英数字入力(初期) */
+.ime-inactive {
+    ime-mode:inactive;
+}
+/*------------------------------------------------------------------------------
+	文字列の配置
+------------------------------------------------------------------------------*/
+.al-lf {
+    text-align: left !important;
+}
+.al-ct {
+    text-align: center !important;
+    text-indent:0px !important;
+}
+.al-rg {
+    text-align: right !important;
+    text-indent:0px !important;
+}
+/*------------------------------------------------------------------------------
+	システム共通フォント
+------------------------------------------------------------------------------*/
+.font-default {
+    font-family: 'MS Gothic';
+    font-size:small;
+}

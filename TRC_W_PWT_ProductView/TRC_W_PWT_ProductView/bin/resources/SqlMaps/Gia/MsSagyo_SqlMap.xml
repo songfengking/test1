@@ -1,0 +1,497 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="MsSagyo"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <statement id="SelectData">
+      SELECT
+      MS_SIJI_LVL,
+      MS_IDNO,
+      MS_YYMM_NO,
+      MS_JUN_YYMM,
+      MS_JUN_NO,
+      MS_KAN_YO_YM,
+      MS_KAN_YYMMDD,
+      MS_S_PATAN,
+      MS_K_PATAN,
+      MS_B_KATA_C,
+      MS_B_KUNI_C,
+      MS_B_KATA_N,
+      MS_K_KATA_C,
+      MS_K_KATA_N,
+      MS_JUCHU_S,
+      MS_HATUKEN_S,
+      MS_SMPLE_S,
+      MS_TENJI_S,
+      MS_TYAKKEN_S,
+      MS_TOKKIJIKOU,
+      MS_KIBAN,
+      MS_LOT,
+      MS_HAKKO,
+      MS_E_KATA_C,
+      MS_E_KUNI_C,
+      MS_E_KATA_N,
+      MS_E_NAME,
+      MS_KOKUIN_G,
+      MS_KOKUIN_CH,
+      MS_KOKUIN_SIZ,
+      MS_KOKUIN_MRK,
+      MS_KOKUIN_KBN,
+      MS_M_CASE,
+      MS_H_CASE,
+      MS_SUIFU,
+      MS_TEST_L,
+      MS_KINO_TEST,
+      MS_HANSITU,
+      MS_SUIF_ROBOT,
+      MS_PAINT,
+      MS_ENG_OIL,
+      MS_M_OIL,
+      MS_F_OIL,
+      MS_LBL_HIGH,
+      MS_LBL_KATA,
+      MS_LBL_KBN,
+      MS_LBL_SYARYO,
+      MS_LBL_KIKAN,
+      MS_LBL_PS,
+      MS_LBL_RPM,
+      MS_LBL_MUHUKA,
+      MS_CTL_BOX,
+      MS_INS_YMD,
+      MS_UPD_YMD,
+      MS_E_KIBAN
+      FROM
+      MS_SAGYO
+      WHERE
+      MS_SIJI_LVL IN ('1','3','7') AND
+      MS_IDNO = #idno#
+    </statement>
+
+
+    <!-- ************************************************************************************** -->
+    <!-- 作業情報取得                                                                      -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectJunjoListByIdKiban">
+      SELECT
+      S.MS_SIJI_LVL,
+      S.MS_IDNO,
+      S.MS_YYMM_NO,
+      S.MS_JUN_YYMM,
+      S.MS_JUN_NO,
+      S.MS_KAN_YYMMDD,
+      TRIM(S.MS_K_PATAN) MS_K_PATAN,
+      S.MS_B_KATA_C,
+      S.MS_B_KUNI_C,
+      S.MS_B_KATA_N,
+      S.MS_K_KATA_C,
+      TRIM(S.MS_K_KATA_N) MS_K_KATA_N,
+      S.MS_TOKKIJIKOU,
+      CASE WHEN S.MS_S_PATAN='10' THEN SUBSTR(PKG_COM_E7.Get_Plant_Code(S.MS_B_KATA_C, S.MS_KIBAN)||S.MS_KIBAN,1,7) ELSE S.MS_KIBAN END MS_KIBAN,
+      S.MS_E_KATA_C,
+      S.MS_E_KUNI_C,
+      S.MS_E_KATA_N,
+      S.MS_INS_YMD,
+      SH.エンジンIDNO,
+      CASE WHEN S.MS_S_PATAN='30' THEN SUBSTR(PKG_COM_E7.Get_Plant_Code(SH.エンジン型式コード,SH.エンジン機番)||SH.エンジン機番,1,7) ELSE SH.エンジン機番 END エンジン機番,
+      SH.完成日時,
+      CASE WHEN TRIM(BIDM.出荷年月日) IS NOT NULL THEN TO_DATE('20' || BIDM.出荷年月日,'YYYY/MM/DD') ELSE NULL END AS 出荷日
+      FROM
+      MS_SAGYO_KEEP S
+      LEFT JOIN TBL_作業指示保存 SH ON (SH.IDNO = S.MS_IDNO AND SH.指示月度 = S.MS_JUN_YYMM)
+      LEFT JOIN TBL_MIG_BIDM物流製品番号 BIDM ON S.MS_IDNO = BIDM.ＩＤ_ＮＯ
+      WHERE
+      1 = 1 AND
+      S.MS_JUN_YYMM = #shijiYM#
+      <isNotEmpty property="idno" prepend="AND">
+        S.MS_IDNO = '$idno$'
+      </isNotEmpty>
+      <isNotEmpty property="kiban" prepend="AND">
+        S.MS_KIBAN LIKE '$kiban$'
+      </isNotEmpty>
+      UNION
+      SELECT
+      S.指示レベル MS_SIJI_LVL,
+      S.IDNO MS_IDNO,
+      S.指示月度 || LPAD(S.指示連番,5,'0') MS_YYMM_NO,
+      S.指示月度 MS_JUN_YYMM ,
+      S.指示連番 MS_JUN_NO,
+      S.完成予定日 MS_KAN_YYMMDD,
+      TRIM(S.組立パターン) MS_K_PATAN,
+      S.型式コード MS_B_KATA_C,
+      S.国コード MS_B_KUNI_C,
+      S.型式名 MS_B_KATA_N,
+      B.MODEL_GROUP_ITEM_CD MS_K_KATA_C,
+      C.MODEL_GROUP_ITEM_NM MS_K_KATA_N,
+      S.特記事項 MS_TOKKIJIKOU,
+      CASE WHEN S.総称パターン='10' THEN SUBSTR(PKG_COM_E7.Get_Plant_Code(S.型式コード, S.機番)||S.機番,1,7) ELSE S.機番 END MS_KIBAN,
+      S.エンジン型式コード MS_E_KATA_C,
+      S.エンジン国コード MS_E_KUNI_C,
+      S.エンジン型式名 MS_E_KATA_N,
+      S.MS_SAGYO作成日 MS_INS_YMD,
+      S.エンジンIDNO,
+      CASE WHEN S.総称パターン='30' THEN SUBSTR(PKG_COM_E7.Get_Plant_Code(S.エンジン型式コード, S.エンジン機番)||S.エンジン機番,1,7) ELSE S.エンジン機番 END エンジン機番,
+      S.完成日時,
+      CASE WHEN TRIM(BIDM.出荷年月日) IS NOT NULL THEN TO_DATE('20' || BIDM.出荷年月日,'YYYY/MM/DD') ELSE NULL END AS 出荷日
+      FROM
+      TBL_作業指示保存 S
+      LEFT JOIN VM_CC_PRODUCT_MODEL PROD ON (S.型式コード = PROD.PRODUCT_MODEL_CD)
+      LEFT JOIN TM_CC_MODEL_GROUP B ON (PROD.PRODUCT_MODEL_CD = B.MODEL_CD AND B.MODEL_GROUP_KIND = '10')
+      LEFT JOIN TM_CC_MODEL_GROUP_ITEM C ON (B.MODEL_GROUP_KIND = C.MODEL_GROUP_KIND AND B.MODEL_GROUP_ITEM_CD = C.MODEL_GROUP_ITEM_CD)
+      LEFT JOIN TBL_MIG_BIDM物流製品番号 BIDM ON S.IDNO = BIDM.ＩＤ_ＮＯ
+      WHERE
+      1 = 1 AND
+      S.指示月度 = #shijiYM#
+      <isNotEmpty property="idno" prepend="AND">
+        (S.IDNO = '$idno$' OR S.エンジンIDNO = '$idno$')
+      </isNotEmpty>
+      <isNotEmpty property="kiban" prepend="AND">
+        (S.機番 LIKE '$kiban$' OR S.エンジン機番 LIKE '$kiban$')
+      </isNotEmpty>
+      ORDER BY
+      MS_IDNO,
+      MS_SIJI_LVL
+    </statement>
+
+
+    <!-- ************************************************************************************** -->
+    <!-- 順序リスト2取得                                                                      -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectJunjoList_2">
+      WITH
+      TMP_計画台数 AS (
+      SELECT
+      ASMD.PRODUCT_MODEL_CD  型式コード,
+      ASMD.COUNTRY_CD  国コード,
+      SUM(ASMD.QUANTITY)  合計台数
+      FROM
+      TT_PP_ASSEMBLY_PLAN_PUBLIC ASM
+      INNER JOIN
+      TT_PP_ASSEMBLY_PLAN_DETAIL ASMD ON ASM.ASSEMBLY_PLAN_ID = ASMD.ASSEMBLY_PLAN_ID
+      INNER JOIN
+      VM_CC_PRODUCT_MODEL PMDL ON ASMD.PRODUCT_MODEL_CD = PMDL.PRODUCT_MODEL_CD
+      WHERE
+      ASM.PRODUCT_YM = #shijiYM#
+      AND ASM.LINE_CD IN (SELECT DISTINCT ASMP.CALENDAR_NO FROM TM_CC_ASSEMBLY_PATTERN ASMP WHERE ASMP.GENERAL_PATTERN_CD = #soshoPattern#)
+      AND ASMD.PSI_KIND = '10'
+      AND ASMD.PSI_SUB_KIND = '00'
+      AND ASM.LATEST_FLG = 1
+      GROUP BY
+      ASMD.PRODUCT_MODEL_CD,
+      ASMD.COUNTRY_CD
+      ),
+      TMP_検索対象 AS (
+      <isEqual property="targetSagyoKeep" compareValue="true">
+        SELECT
+        S.MS_SIJI_LVL,
+        S.MS_IDNO,
+        S.MS_YYMM_NO,
+        S.MS_JUN_YYMM,
+        S.MS_JUN_NO,
+        S2.MS_YYMM_NO 指示月度連番,
+        S2.MS_JUN_YYMM 指示月度,
+        S2.MS_JUN_NO 指示連番,
+        S.MS_KAN_YYMMDD,
+        S.MS_K_PATAN,
+        S.MS_B_KATA_C,
+        S.MS_B_KUNI_C,
+        S.MS_B_KATA_N,
+        S.MS_K_KATA_C,
+        TRIM(S.MS_K_KATA_N) MS_K_KATA_N,
+        S.MS_TOKKIJIKOU,
+        CASE WHEN S.MS_S_PATAN='10' THEN SUBSTR(PKG_COM_E7.Get_Plant_Code(S.MS_B_KATA_C, S.MS_KIBAN)||S.MS_KIBAN,1,7) ELSE S.MS_KIBAN END MS_KIBAN,
+        S.MS_E_KATA_C,
+        S.MS_E_KUNI_C,
+        S.MS_E_KATA_N,
+        S.MS_INS_YMD,
+        PROD.ASSEMBLY_PATTERN_CD || PROD.ASSEMBLY_PATTERN_SUB_CD エンジン組立パターン,
+        SH.エンジンIDNO,
+        CASE WHEN S.MS_S_PATAN='30' THEN SUBSTR(PKG_COM_E7.Get_Plant_Code(SH.エンジン型式コード,SH.エンジン機番)||SH.エンジン機番,1,7) ELSE SH.エンジン機番 END エンジン機番,
+        SH.完成日時,
+        CASE WHEN TRIM(BIDM.出荷年月日) IS NOT NULL THEN TO_DATE('20' || BIDM.出荷年月日,'YYYY/MM/DD') ELSE NULL END AS 出荷日,
+        ROW_NUMBER() OVER(
+        PARTITION BY
+        S.MS_B_KATA_C,
+        S.MS_B_KUNI_C
+        ORDER BY
+        S.MS_YYMM_NO
+        ) 型式別累計台数,
+        NVL(合計台数,0) 型式別計画台数
+        FROM
+        MS_SAGYO_KEEP S
+        LEFT JOIN MS_SAGYO_KEEP S2 ON (S2.MS_SIJI_LVL = '1' AND S2.MS_IDNO = S.MS_IDNO)
+        LEFT JOIN VM_CC_PRODUCT_MODEL PROD ON (PROD.PRODUCT_MODEL_CD = S.MS_E_KATA_C)
+        LEFT JOIN TBL_作業指示保存 SH ON (SH.IDNO = S.MS_IDNO AND SH.指示月度 = S.MS_JUN_YYMM)
+        LEFT JOIN TMP_計画台数 K ON (S.MS_B_KATA_C = K.型式コード AND SUBSTR(S.MS_B_KUNI_C,1,3) = K.国コード)
+        LEFT JOIN TBL_MIG_BIDM物流製品番号 BIDM ON S.MS_IDNO = BIDM.ＩＤ_ＮＯ
+        WHERE
+        S.MS_SIJI_LVL = #shijiLevel# AND
+        S.MS_JUN_YYMM = #shijiYM#
+        <isNotEmpty property="idno" prepend="AND">
+          S.MS_IDNO LIKE '$idno$%'
+        </isNotEmpty>
+        <isNotEmpty property="katashikiCode" prepend="AND">
+          S.MS_B_KATA_C LIKE '$katashikiCode$%'
+        </isNotEmpty>
+        <isNotEmpty property="kuniCode" prepend="AND">
+          S.MS_B_KUNI_C LIKE '$kuniCode$%'
+        </isNotEmpty>
+        <isNotEmpty property="katashikiName"  prepend="AND">
+          S.MS_B_KATA_N LIKE '$katashikiName$%'
+        </isNotEmpty>
+        <isNotEmpty property="tokki" prepend="AND">
+          S.MS_TOKKIJIKOU LIKE '%$tokki$%'
+        </isNotEmpty>
+      </isEqual>
+      <isNotEqual property="targetSagyoKeep" compareValue="true">
+        SELECT
+        S.指示レベル MS_SIJI_LVL,
+        S.IDNO MS_IDNO,
+        S.指示月度 || LPAD(S.指示連番,5,'0') MS_YYMM_NO,
+        S.指示月度 MS_JUN_YYMM ,
+        S.指示連番 MS_JUN_NO,
+        '' 指示月度連番,
+        '' 指示月度,
+        '' 指示連番,
+        S.完成予定日 MS_KAN_YYMMDD,
+        S.組立パターン MS_K_PATAN,
+        S.型式コード MS_B_KATA_C,
+        S.国コード MS_B_KUNI_C,
+        S.型式名 MS_B_KATA_N,
+        B.MODEL_GROUP_ITEM_CD MS_K_KATA_C,
+        C.MODEL_GROUP_ITEM_NM MS_K_KATA_N,
+        S.特記事項 MS_TOKKIJIKOU,
+        CASE WHEN S.総称パターン='10' THEN SUBSTR(PKG_COM_E7.Get_Plant_Code(S.型式コード, S.機番)||S.機番,1,7) ELSE S.機番 END MS_KIBAN,
+        S.エンジン型式コード MS_E_KATA_C,
+        S.エンジン国コード MS_E_KUNI_C,
+        S.エンジン型式名 MS_E_KATA_N,
+        S.MS_SAGYO作成日 MS_INS_YMD,
+        PROD2.ASSEMBLY_PATTERN_CD|| PROD2.ASSEMBLY_PATTERN_SUB_CD  エンジン組立パターン,
+        S.エンジンIDNO,
+        CASE WHEN S.総称パターン='30' THEN SUBSTR(PKG_COM_E7.Get_Plant_Code(S.エンジン型式コード, S.エンジン機番)||S.エンジン機番,1,7) ELSE S.エンジン機番 END エンジン機番,
+        S.完成日時,
+        CASE WHEN TRIM(BIDM.出荷年月日) IS NOT NULL THEN TO_DATE('20' || BIDM.出荷年月日,'YYYY/MM/DD') ELSE NULL END AS 出荷日,
+        ROW_NUMBER() OVER(
+        PARTITION BY
+        S.型式コード,
+        S.国コード
+        ORDER BY
+        S.指示月度,
+        S.指示連番
+        ) 型式別累計台数,
+        NVL(合計台数,0) 型式別計画台数
+        FROM
+        TBL_作業指示保存 S
+        LEFT JOIN VM_CC_PRODUCT_MODEL PROD1 ON (PROD1.PRODUCT_MODEL_CD = S.型式コード)
+        LEFT JOIN TM_CC_MODEL_GROUP B ON (PROD1.PRODUCT_MODEL_CD = B.MODEL_CD AND B.MODEL_GROUP_KIND = '10')
+        LEFT JOIN TM_CC_MODEL_GROUP_ITEM C ON (B.MODEL_GROUP_KIND = C.MODEL_GROUP_KIND AND B.MODEL_GROUP_ITEM_CD = C.MODEL_GROUP_ITEM_CD)
+        LEFT JOIN VM_CC_PRODUCT_MODEL PROD2 ON (PROD2.PRODUCT_MODEL_CD = S.エンジン型式コード)
+        LEFT JOIN TMP_計画台数 K ON (S.型式コード = K.型式コード AND SUBSTR(S.国コード,1,3) = K.国コード)
+        LEFT JOIN TBL_MIG_BIDM物流製品番号 BIDM ON S.IDNO = BIDM.ＩＤ_ＮＯ
+        WHERE
+        S.指示レベル = #shijiLevel# AND
+        S.指示月度 = #shijiYM#
+        <isNotEmpty property="idno" prepend="AND">
+          S.IDNO LIKE '$idno$%'
+        </isNotEmpty>
+        <isNotEmpty property="katashikiCode" prepend="AND">
+          S.型式コード LIKE '$katashikiCode$%'
+        </isNotEmpty>
+        <isNotEmpty property="kuniCode" prepend="AND">
+          S.国コード LIKE '$kuniCode$%'
+        </isNotEmpty>
+        <isNotEmpty property="katashikiName"  prepend="AND">
+          S.型式名 LIKE '$katashikiName$%'
+        </isNotEmpty>
+        <isNotEmpty property="tokki" prepend="AND">
+          S.特記事項 LIKE '%$tokki$%'
+        </isNotEmpty>
+      </isNotEqual>
+      )
+      SELECT
+      TMP2.*
+      <isEqual property="shijiLevel" compareValue="2">
+        ,CASE WHEN 指示月度連番 <![CDATA[<]]> ( SELECT MAX(指示月度連番) FROM TMP_検索対象 TMP1 WHERE TMP1.MS_YYMM_NO <![CDATA[<]]> TMP2.MS_YYMM_NO ) THEN 0 ELSE 1 END AS 直通
+      </isEqual>
+      FROM
+      TMP_検索対象 TMP2
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="kiban" prepend="AND">
+          MS_KIBAN LIKE '%$kiban$%'
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+      MS_YYMM_NO
+    </statement>
+
+
+    <!-- ************************************************************************************** -->
+    <!-- 順序リスト取得                                                                       -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectJunjoList">
+      WITH
+      TMP_計画台数 AS (
+      SELECT
+          ASMD.PRODUCT_MODEL_CD   型式コード, 
+          ASMD.COUNTRY_CD  国コード,
+          SUM(ASMD.QUANTITY)  合計台数
+      FROM
+          TT_PP_ASSEMBLY_PLAN_PUBLIC ASM
+      INNER JOIN
+          TT_PP_ASSEMBLY_PLAN_DETAIL ASMD ON ASM.ASSEMBLY_PLAN_ID = ASMD.ASSEMBLY_PLAN_ID
+      INNER JOIN
+          VM_CC_PRODUCT_MODEL PMDL ON ASMD.PRODUCT_MODEL_CD = PMDL.PRODUCT_MODEL_CD
+      WHERE
+          ASM.PRODUCT_YM = #shijiYM#
+      AND ASM.LINE_CD IN (SELECT DISTINCT ASMP.CALENDAR_NO FROM TM_CC_ASSEMBLY_PATTERN ASMP WHERE ASMP.GENERAL_PATTERN_CD = #soshoPattern#)
+      AND ASMD.PSI_KIND = '10'
+      AND ASMD.PSI_SUB_KIND = '00'
+      AND ASM.LATEST_FLG = 1
+      GROUP BY
+          ASMD.PRODUCT_MODEL_CD, 
+          ASMD.COUNTRY_CD
+      ),
+      TMP_検索対象 AS (
+      <isEqual property="targetSagyoKeep" compareValue="true">
+        SELECT
+        S.MS_SIJI_LVL,
+        S.MS_IDNO,
+        S.MS_YYMM_NO,
+        S.MS_JUN_YYMM,
+        S.MS_JUN_NO,
+        S2.MS_YYMM_NO 指示月度連番,
+        S2.MS_JUN_YYMM 指示月度,
+        S2.MS_JUN_NO 指示連番,
+        S.MS_KAN_YYMMDD,
+        S.MS_K_PATAN,
+        S.MS_B_KATA_C,
+        S.MS_B_KUNI_C,
+        S.MS_B_KATA_N,
+        S.MS_K_KATA_C,
+        TRIM(S.MS_K_KATA_N) MS_K_KATA_N,
+        S.MS_TOKKIJIKOU,
+        CASE WHEN S.MS_S_PATAN='10' THEN SUBSTR(PKG_COM_E7.Get_Plant_Code(S.MS_B_KATA_C, S.MS_KIBAN)||S.MS_KIBAN,1,7) ELSE S.MS_KIBAN END MS_KIBAN,
+        S.MS_E_KATA_C,
+        S.MS_E_KUNI_C,
+        S.MS_E_KATA_N,
+        S.MS_INS_YMD,
+        PROD.ASSEMBLY_PATTERN_CD|| PROD.ASSEMBLY_PATTERN_SUB_CD  エンジン組立パターン,
+        SH.エンジンIDNO,
+        CASE WHEN S.MS_S_PATAN='30' THEN SUBSTR(PKG_COM_E7.Get_Plant_Code(SH.エンジン型式コード,SH.エンジン機番)||SH.エンジン機番,1,7) ELSE SH.エンジン機番 END エンジン機番,
+        SH.完成日時,
+        CASE WHEN TRIM(BIDM.出荷年月日) IS NOT NULL THEN TO_DATE('20' || BIDM.出荷年月日,'YYYY/MM/DD') ELSE NULL END AS 出荷日,
+        ROW_NUMBER() OVER(
+        PARTITION BY
+        S.MS_B_KATA_C,
+        S.MS_B_KUNI_C
+        ORDER BY
+        S.MS_YYMM_NO
+        ) 型式別累計台数,
+        NVL(合計台数,0) 型式別計画台数
+        FROM
+        MS_SAGYO_KEEP S
+        LEFT JOIN MS_SAGYO_KEEP S2 ON (S2.MS_SIJI_LVL = '1' AND S2.MS_IDNO = S.MS_IDNO)
+        LEFT JOIN VM_CC_PRODUCT_MODEL PROD ON (PROD.PRODUCT_MODEL_CD = S.MS_E_KATA_C)
+        LEFT JOIN TBL_作業指示保存 SH ON (SH.IDNO = S.MS_IDNO AND SH.指示月度 = S.MS_JUN_YYMM)
+        LEFT JOIN TMP_計画台数 K ON (S.MS_B_KATA_C = K.型式コード AND SUBSTR(S.MS_B_KUNI_C,1,3) = K.国コード)
+        LEFT JOIN TBL_MIG_BIDM物流製品番号 BIDM ON S.MS_IDNO = BIDM.ＩＤ_ＮＯ
+        WHERE
+        S.MS_SIJI_LVL = #shijiLevel# AND
+        S.MS_JUN_YYMM = #shijiYM#
+        <isNotEmpty property="idno" prepend="AND">
+          S.MS_IDNO LIKE '$idno$%'
+        </isNotEmpty>
+        <isNotEmpty property="katashikiCode" prepend="AND">
+          S.MS_B_KATA_C LIKE '$katashikiCode$%'
+        </isNotEmpty>
+        <isNotEmpty property="kuniCode" prepend="AND">
+          S.MS_B_KUNI_C LIKE '$kuniCode$%'
+        </isNotEmpty>
+        <isNotEmpty property="katashikiName"  prepend="AND">
+          S.MS_B_KATA_N LIKE '$katashikiName$%'
+        </isNotEmpty>
+        <isNotEmpty property="tokki" prepend="AND">
+          S.MS_TOKKIJIKOU LIKE '%$tokki$%'
+        </isNotEmpty>
+      </isEqual>
+      <isNotEqual property="targetSagyoKeep" compareValue="true">
+        SELECT
+        S.指示レベル MS_SIJI_LVL,
+        S.IDNO MS_IDNO,
+        S.指示月度 || LPAD(S.指示連番,5,'0') MS_YYMM_NO,
+        S.指示月度 MS_JUN_YYMM ,
+        S.指示連番 MS_JUN_NO,
+        '' 指示月度連番,
+        '' 指示月度,
+        '' 指示連番,
+        S.完成予定日 MS_KAN_YYMMDD,
+        S.組立パターン MS_K_PATAN,
+        S.型式コード MS_B_KATA_C,
+        S.国コード MS_B_KUNI_C,
+        S.型式名 MS_B_KATA_N,
+        B.MODEL_GROUP_ITEM_CD MS_K_KATA_C,
+        C.MODEL_GROUP_ITEM_NM MS_K_KATA_N,
+        S.特記事項 MS_TOKKIJIKOU,
+        CASE WHEN S.総称パターン='10' THEN SUBSTR(PKG_COM_E7.Get_Plant_Code(S.型式コード, S.機番)||S.機番,1,7) ELSE S.機番 END MS_KIBAN,
+        S.エンジン型式コード MS_E_KATA_C,
+        S.エンジン国コード MS_E_KUNI_C,
+        S.エンジン型式名 MS_E_KATA_N,
+        S.MS_SAGYO作成日 MS_INS_YMD,
+        PROD2.ASSEMBLY_PATTERN_CD|| PROD2.ASSEMBLY_PATTERN_SUB_CD  エンジン組立パターン,
+        S.エンジンIDNO,
+        CASE WHEN S.総称パターン='30' THEN SUBSTR(PKG_COM_E7.Get_Plant_Code(S.エンジン型式コード, S.エンジン機番)||S.エンジン機番,1,7) ELSE S.エンジン機番 END エンジン機番,
+        S.完成日時,
+        CASE WHEN TRIM(BIDM.出荷年月日) IS NOT NULL THEN TO_DATE('20' || BIDM.出荷年月日,'YYYY/MM/DD') ELSE NULL END AS 出荷日,
+        ROW_NUMBER() OVER(
+        PARTITION BY
+        S.型式コード,
+        S.国コード
+        ORDER BY
+        S.指示月度,
+        S.指示連番
+        ) 型式別累計台数,
+        NVL(合計台数,0) 型式別計画台数
+        FROM
+        TBL_作業指示保存 S
+        LEFT JOIN VM_CC_PRODUCT_MODEL PROD1 ON (PROD1.PRODUCT_MODEL_CD = S.型式コード)
+        LEFT JOIN TM_CC_MODEL_GROUP B ON (PROD1.PRODUCT_MODEL_CD = B.MODEL_CD AND B.MODEL_GROUP_KIND = '10')
+        LEFT JOIN TM_CC_MODEL_GROUP_ITEM C ON (B.MODEL_GROUP_KIND = C.MODEL_GROUP_KIND AND B.MODEL_GROUP_ITEM_CD = C.MODEL_GROUP_ITEM_CD)
+        LEFT JOIN VM_CC_PRODUCT_MODEL PROD2 ON (PROD2.PRODUCT_MODEL_CD = S.エンジン型式コード)
+        LEFT JOIN TMP_計画台数 K ON (S.型式コード = K.型式コード AND SUBSTR(S.国コード,1,3) = K.国コード)
+        LEFT JOIN TBL_MIG_BIDM物流製品番号 BIDM ON S.IDNO = BIDM.ＩＤ_ＮＯ
+        WHERE
+        S.指示レベル = #shijiLevel# AND
+        S.指示月度 = #shijiYM#
+        <isNotEmpty property="idno" prepend="AND">
+          S.IDNO LIKE '$idno$%'
+        </isNotEmpty>
+        <isNotEmpty property="katashikiCode" prepend="AND">
+          S.型式コード LIKE '$katashikiCode$%'
+        </isNotEmpty>
+        <isNotEmpty property="kuniCode" prepend="AND">
+          S.国コード LIKE '$kuniCode$%'
+        </isNotEmpty>
+        <isNotEmpty property="katashikiName"  prepend="AND">
+          S.型式名 LIKE '$katashikiName$%'
+        </isNotEmpty>
+        <isNotEmpty property="tokki" prepend="AND">
+          S.特記事項 LIKE '%$tokki$%'
+        </isNotEmpty>
+      </isNotEqual>
+      )
+      SELECT
+      *
+      FROM
+      TMP_検索対象
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="kiban" prepend="AND">
+          MS_KIBAN LIKE '%$kiban$%'
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+      MS_YYMM_NO
+    </statement>
+
+
+  </statements>
+
+</sqlMap>

@@ -1,0 +1,1208 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="Products"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <!-- ************************************************************************************** -->
+    <!-- 製品一覧検索(検索画面/詳細画面(ヘッダ表示用)からの呼び出し)                            -->
+    <!--                                                                                        -->
+    <!-- PARAMETER:                                                                             -->
+    <!--   結合部品テーブル              : appendPartsCd           [NULL=無し/02=crate/03=rops] -->
+    <!--  *仕掛/在庫本機検索             : searchProductingTractor     [0=非対象/1=対象]        -->
+    <!--  *仕掛/在庫OEM/搭載エンジン検索 : searchProductingEngine      [0=非対象/1=対象]        -->
+    <!--  *仕掛/在庫堺エンジン検索       : searchSakaiEngine           [0=非対象/1=対象]        -->
+    <!--  *仕掛/在庫ロータリー           : searchProductingRotary      [0=非対象/1=対象]        -->
+    <!--  *出荷済全製品                  : searchShippedProducts       [0=非対象/1=対象]        -->
+    <!--  *出荷済本機の搭載エンジン      : searchShippedEquippedEngine [0=非対象/1=対象]        -->
+    <!--  (生産中エンジン/トラクタ検索時)                                                       -->
+    <!--                                 : SubSelectSagyoセクションを参照                       -->
+    <!--  (生産中ロータリー検索時)                                                              -->
+    <!--                                 : SubSelectBidmセクションを参照                        -->
+    <!--  (出荷済み製品検索時)                                                                  -->
+    <!--                                 : SubSelectKibanFileセクションを参照                   -->
+    <!--  (出荷済本機の搭載エンジン検索時)                                                      -->
+    <!--                                 : SubSelectKibanFileEquippedEngineセクションを参照     -->
+    <!--                                                                                        -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectProductList">
+      SELECT
+      PDCT.DATA_SOURCE                        dataSource,         <!--作業指示保存-->
+      CASE                                                        <!--状態-->
+      WHEN TRIM(PDCT.SHIPPED_YMD) IS NOT NULL THEN '出荷済'
+      WHEN TRIM(PDCT.PRODUCT_YMD) IS NOT NULL THEN '未出荷'
+      ELSE '未完成'
+      END productStatus,
+      PDCT.GENERAL_PATTERN_CD                 generalPatternCd,   <!--総称パターン[2]-->
+      PDCT.ASSEMBLY_PATTERN_CD                assemblyPatternCd,  <!--組立パターン[3]-->
+      NULL                                    assemblyPatternNm,  <!--組立パターン名(別途割当)-->
+      PDCT.PRODUCT_MODEL_CD                   productModelCd,     <!--生産型式コード[10]-->
+      NULL                                    productModelCdStr,  <!--生産型式コード表記(別途割当)-->
+      NVL(SUBSTR(PDCT.PRODUCT_COUNTRY_CD,1,3),'   ') productCountryCd,   <!--生産国コード[3]-->
+      PDCT.MODEL_CD                           modelCd,            <!--型式コード[10]-->
+      NVL(SUBSTR(PDCT.COUNTRY_CD,1,3),'   ')  countryCd,          <!--国コード[3]-->
+      TRIM(PDCT.PRODUCT_MODEL_NM)             productModelNm,     <!--生産型式名[20]-->
+      NVL(SERI7_P.SERIAL7,PDCT.SERIAL6)       serial,             <!--機番[7](抽出後、トラクタ機番の先頭0は削除が必要)-->
+      PDCT.SERIAL6                            serial6,            <!--6桁機番[6]-->
+      PDCT.IDNO                               idno,               <!--IDNO[7]-->
+      CASE                                                        <!--完成予定日-->
+      WHEN PDCT.PLAN_YMD != '        ' THEN TO_DATE(PDCT.PLAN_YMD,'YYYYMMDD')
+      END planDt,
+      CASE                                                        <!--完成日-->
+      WHEN PDCT.PRODUCT_YMD != '        ' THEN TO_DATE(PDCT.PRODUCT_YMD,'YYYYMMDD')
+      END productDt,
+      PDCT.TRACTOR_MODEL_CD                   tractorModelCd,     <!--本機型式コード[10]-->
+      NULL                                    tractorModelCdStr,  <!--本機型式コード表記(別途割当)-->
+      SUBSTR(PDCT.TRACTOR_COUNTRY_CD,1,3)     tractorCountryCd,   <!--本機国コード[3]-->
+      TRIM(PDCT.TRACTOR_MODEL_NM)             tractorModelNm,     <!--本機型式名[20]-->
+      PDCT.TRACTOR_SERIAL6                    tractorSerial,      <!--本機機番[6]-->
+      PDCT.ENGINE_MODEL_CD                    engineModelCd,      <!--エンジン型式コード[10]-->
+      NULL                                    engineModelCdStr,   <!--エンジン型式コード表記(別途割当)-->
+      SUBSTR(PDCT.ENGINE_COUNTRY_CD,1,3)      engineCountryCd,    <!--エンジン国コード[3]-->
+      TRIM(PDCT.ENGINE_MODEL_NM)              engineModelNm,      <!--エンジン型式名[20]-->
+      NVL(SERI7_E.SERIAL7,PDCT.ENGINE_SERIAL6) engineSerial,      <!--エンジン機番[7]-->
+      PDCT.ENGINE_SERIAL6                     engineSerial6,      <!--エンジン機番[6]-->
+      PDCT.SALES_MODEL_CD                     salesModelCd,       <!--販売型式コード-->
+      NULL                                    salesModelCdStr,    <!--販売型式コード表記(別途割当)-->
+      PDCT.SALES_COUNTRY_CD                   salesCountryCd,     <!--販売国コード-->
+      TRIM(PDCT.SALES_MODEL_NM)               salesModelNm,       <!--販売型式名-->
+      CASE                                                        <!--出荷日-->
+      WHEN PDCT.SHIPPED_YMD != '        ' THEN TO_DATE(PDCT.SHIPPED_YMD,'YYYYMMDD')
+      END shippedDt,
+      CASE                                                        <!--出荷伝票NO[9](輸出伝票は先頭ハイフンを取り除く)-->
+      WHEN SUBSTR(PDCT.SHIPPING_VOUCHER_NUM,1,2) = '--' THEN SUBSTR(PDCT.SHIPPING_VOUCHER_NUM,3,6)
+      ELSE PDCT.SHIPPING_VOUCHER_NUM
+      END shippingVoucherNum,
+      PRODUCT_ORDER_NUM1                      productOrderNum1,   <!--投入順序連番-->
+      PRODUCT_ORDER_NUM2                      productOrderNum2,   <!--確定順序連番-->
+      TRIM(PDCT.CUSTOMER_NM)                  customerNM,            <!--得意先名-->
+      TRIM(TRAILING '　' FROM PDCT.DELIVERY_DESTINATION_NM)      deliveryDestinationNm, <!--納所名-->
+      CASE                                                             <!--改造内容-->
+      WHEN PDCT.PRODUCT_MODEL_CD != PDCT.MODEL_CD  THEN '型式変更'
+      WHEN PDCT.PRODUCT_COUNTRY_CD != PDCT.COUNTRY_CD    THEN '仕向地変更'
+      ELSE NULL
+      END preAlterationDetail,
+      PDCT.PRODUCT_MODEL_CD                   preAlterationModelCd,     <!--前型式コード-->
+      NVL(SUBSTR(PDCT.PRODUCT_COUNTRY_CD, 1, 3), '   ')  preAlterationCountryCd,   <!--前国コード-->
+      PIN.PINCODE                             pinCd
+      <isNotEmpty property="appendPartsCd">
+        <!-- クレート/ロプスの部品検索時には、製品検索時に結合する -->
+        <isEqual property="appendPartsCd" compareValue="T2">
+          <!-- 製品区分=トラクタ 部品区分=クレート の場合 -->
+          ,
+          CRT.作成日時                          installDt,          <!--組付日-->
+          CRT.クレート機番                      crateSerial         <!--クレート機番-->
+        </isEqual>
+        <isEqual property="appendPartsCd" compareValue="T3">
+          <!-- 製品区分=トラクタ 部品区分=ロプス の場合 -->
+          ,
+          RPS.作成年月日                        installDt,          <!--組付日-->
+          RPS.ロプス型式名                      ropsModelCd,        <!--ロプス品番-->
+          RPS.ロプス機番                        ropsSerial          <!--ロプス機番-->
+        </isEqual>
+      </isNotEmpty>
+      FROM (
+      <!-- 生産中本機の検索[10]         ==== TBL_作業指示保存         -->
+      <isEqual property="searchProductingTractor" compareValue="1">
+        <include refid="SubSelectSagyo" />
+      </isEqual>
+      <!-- 生産中エンジンの検索[10]     ==== TBL_作業指示保存         -->
+      <isEqual property="searchProductingEngine" compareValue="1">
+        <!--OEM/搭載エンジン(内作)-->
+        <include refid="SubSelectSagyo" />
+        UNION ALL
+        <!--堺エンジン-->
+        <include refid="SubSelectSagyoSakai" />
+      </isEqual>
+
+      <isEqual property="unionStockProducts" compareValue="1">
+        UNION ALL
+      </isEqual>
+      <!-- 在庫本機の検索[20]         ==== TBL_MIG_BIDM物流製品番号   -->
+      <isEqual property="searchStockTractor" compareValue="1">
+        <include refid="SubSelectBidm" />
+      </isEqual>
+      <!-- 在庫エンジンの検索[20]     ==== TBL_MIG_BIDM物流製品番号   -->
+      <isEqual property="searchStockEngine" compareValue="1">
+        <!--OEMエンジン-->
+        <include refid="SubSelectBidm" />
+        UNION ALL
+        <!--搭載エンジン(トラクタ完成後はBIDMを参照)-->
+        <include refid="SubSelectBidmEquippedEngine" />
+        UNION ALL
+        <!--搭載エンジン(トラクタ完成前は作業指示保存を参照)-->
+        <include refid="SubSelectSagyoEquippedEngine" />
+      </isEqual>
+      <!-- 在庫ロータリの検索[20]     ==== TBL_MIG_BIDM物流製品番号   -->
+      <isEqual property="searchStockRotary" compareValue="1">
+        <include refid="SubSelectBidm" />
+      </isEqual>
+
+      <isEqual property="unionShippedProducts" compareValue="1">
+        UNION ALL
+      </isEqual>
+      <!-- 出荷済本機の検索[30]       ==== TBL_機番情報ファイル       -->
+      <isEqual property="searchShippedTractor" compareValue="1">
+        <include refid="SubSelectKibanFile" />
+      </isEqual>
+      <!-- 出荷済エンジンの検索[30]   ==== TBL_機番情報ファイル       -->
+      <isEqual property="searchShippedEngine" compareValue="1">
+        <include refid="SubSelectKibanFile" />
+        <isEqual property="paramModelType" compareValue="0">
+          UNION ALL
+          <include refid="SubSelectKibanFileEquippedEngine" />
+        </isEqual>
+      </isEqual>
+      <!-- 出荷済ロータリ検索[32]    ==== TBL_機番情報ファイル     -->
+      <isEqual property="searchShippedRotary" compareValue="1">
+        <include refid="SubSelectKibanFileRotary" />
+      </isEqual>
+      ) PDCT
+      LEFT OUTER JOIN
+      TT_DI_SERIAL7 SERI7_P ON PDCT.PRODUCT_MODEL_CD = SERI7_P.MODEL_CD AND PDCT.SERIAL6 = SERI7_P.SERIAL6
+      LEFT OUTER JOIN
+      TT_DI_SERIAL7 SERI7_E ON PDCT.ENGINE_MODEL_CD = SERI7_E.MODEL_CD AND PDCT.ENGINE_SERIAL6 = SERI7_E.SERIAL6
+      LEFT OUTER JOIN TT_SI_PINCODE PIN ON PDCT.MODEL_CD = PIN.MODEL_CD AND PDCT.SERIAL6 = PIN.SERIAL
+      <isNotEmpty property="appendPartsCd">
+        <!-- 部品(クレート)検索             ==== (+)TBL_WMSクレート機番   -->
+        <isEqual property="appendPartsCd" compareValue="T2">
+          INNER JOIN
+          TBL_WMSクレート機番 CRT ON PDCT.IDNO = CRT.IDNO AND PDCT.PRODUCT_MODEL_CD = CRT.型式コード AND PDCT.PRODUCT_COUNTRY_CD = CRT.国コード
+          <isNotEmpty property="paramPartsSerial" prepend="AND">
+            CRT.クレート機番 = #paramPartsSerial#
+          </isNotEmpty>
+          <!-- [組付日(FROM)検索] -->
+          <isNotEmpty property="paramInstallDtFrom" prepend="AND">
+            CRT.作成日時 <![CDATA[>=]]> #paramInstallDtFrom#
+          </isNotEmpty>
+          <!-- [組付日(TO)検索] -->
+          <isNotEmpty property="paramInstallDtTo" prepend="AND">
+            CRT.作成日時 <![CDATA[<=]]> #paramInstallDtTo#
+          </isNotEmpty>
+        </isEqual>
+        <!-- 部品(ロプス)検索               ==== (+)ロプス機番            -->
+        <isEqual property="appendPartsCd" compareValue="T3">
+          INNER JOIN
+          ロプス機番 RPS ON PDCT.IDNO = RPS.トラクタＩＤＮＯ AND PDCT.PRODUCT_MODEL_CD = RPS.トラクタ型式コード AND PDCT.PRODUCT_COUNTRY_CD = RPS.トラクタ国コード
+          <isNotEmpty property="paramPartsNum" prepend="AND">
+            RPS.ロプス型式名 like #paramPartsNum# || '%'
+          </isNotEmpty>
+          <isNotEmpty property="paramPartsSerial" prepend="AND">
+            RPS.ロプス機番 = #paramPartsSerial#
+          </isNotEmpty>
+          <!-- [組付日(FROM)検索] -->
+          <isNotEmpty property="paramInstallDtFrom" prepend="AND">
+            RPS.作成年月日 <![CDATA[>=]]> #paramInstallDtFrom#
+          </isNotEmpty>
+          <!-- [組付日(TO)検索] -->
+          <isNotEmpty property="paramInstallDtTo" prepend="AND">
+            RPS.作成年月日 <![CDATA[<=]]> #paramInstallDtTo#
+          </isNotEmpty>
+        </isEqual>
+      </isNotEmpty>
+      <dynamic prepend="WHERE">
+        <!-- [機番検索] -->
+        <isNotEmpty property="paramSerial" prepend="AND">
+          NVL(SERI7_P.SERIAL7,PDCT.SERIAL6) = #paramSerial#
+        </isNotEmpty>
+        <isNotEmpty property="paramPinCdCheck">
+          <isEqual property="paramPinCdCheck" compareValue="True" prepend="AND">
+            PIN.PINCODE IS NOT NULL
+          </isEqual>
+        </isNotEmpty>
+        <isNotEmpty property="paramPinCd" prepend="AND">
+          PIN.PINCODE LIKE #paramPinCd# || '%'
+        </isNotEmpty>
+      </dynamic>
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- 製品一覧検索のサブクエリ[TBL_作業指示保存]生産中本機/エンジンの検索                    -->
+    <!--                                                                                        -->
+    <!-- PARAMETER:                                                                             -->
+    <!--  *仕掛本機検索          : searchProductingTractor     [0=非対象/1=対象]                -->
+    <!--  *仕掛エンジン検索      : searchProductingEngine      [0=非対象/1=対象]                -->
+    <!--   型式/機番リスト       : paramSerialList                                              -->
+    <!--   生産型式コード        : paramProductModelCd                                          -->
+    <!--   生産型式名            : paramProductModelNm                                          -->
+    <!--   機番                  : paramSerial6                                                 -->
+    <!--   IDNO                  : paramIdno                                                    -->
+    <!--   完成予定日(FROM)      : paramPlanDtFrom                                              -->
+    <!--   完成予定日(TO)        : paramPlanDtTo                                                -->
+    <!--  *出荷有無              : paramProductStatus        [0=未出荷(固定)]                   -->
+    <!--                                                                                        -->
+    <!-- ************************************************************************************** -->
+    <sql id="SubSelectSagyo">
+      SELECT
+      10                                      DATA_SOURCE,        <!--取得元:作業指示保存-->
+      SGO.総称パターン                        GENERAL_PATTERN_CD, <!--総称パターン-->
+      PROD.ASSEMBLY_PATTERN_CD || PROD.ASSEMBLY_PATTERN_SUB_CD ASSEMBLY_PATTERN_CD,<!--組立パターン-->
+      SGO.IDNO                                IDNO,               <!--IDNO-->
+      SGO.型式コード                          PRODUCT_MODEL_CD,   <!--生産型式コード-->
+      SGO.国コード                            PRODUCT_COUNTRY_CD, <!--生産国コード-->
+      SGO.型式コード                          MODEL_CD,           <!--型式コード-->
+      SGO.国コード                            COUNTRY_CD,         <!--国コード-->
+      SGO.型式名                              PRODUCT_MODEL_NM,   <!--生産型式名-->
+      SGO.機番                                SERIAL6,            <!--6桁機番-->
+      TO_CHAR(SGO.完成予定日,'YYYYMMDD')      PLAN_YMD,           <!--完成予定日-->
+      NULL                                    PRODUCT_YMD,        <!--完成日-->
+      CASE                                                        <!--本機型式コード(生産型式)-->
+      WHEN '10' = SGO.総称パターン THEN SGO.本機型式コード
+      ELSE SGO.型式コード
+      END    TRACTOR_MODEL_CD,
+      CASE                                                        <!--本機国コード(生産型式)-->
+      WHEN '10' = SGO.総称パターン THEN SGO.本機国コード
+      ELSE SGO.国コード
+      END TRACTOR_COUNTRY_CD,
+      CASE                                                        <!--本機型式名(生産型式)-->
+      WHEN '10' = SGO.総称パターン THEN SGO.本機型式名
+      ELSE SGO.型式名
+      END TRACTOR_MODEL_NM,
+      CASE                                                        <!--本機機番-->
+      WHEN '10' = SGO.総称パターン THEN SGO.本機機番
+      ELSE SGO.機番
+      END TRACTOR_SERIAL6,
+      CASE                                                        <!--搭載エンジン型式コード-->
+      WHEN '30' = SGO.総称パターン THEN SGO.エンジン型式コード
+      ELSE SGO.型式コード
+      END ENGINE_MODEL_CD,
+      CASE                                                        <!--搭載エンジン国コード-->
+      WHEN '30' = SGO.総称パターン THEN SGO.エンジン国コード
+      ELSE SGO.国コード
+      END ENGINE_COUNTRY_CD,
+      CASE                                                        <!--搭載エンジン型式名-->
+      WHEN '30' = SGO.総称パターン THEN SGO.エンジン型式名
+      ELSE SGO.型式名
+      END ENGINE_MODEL_NM,
+      CASE                                                        <!--搭載エンジン機番-->
+      WHEN '30' = SGO.総称パターン THEN SGO.エンジン機番
+      ELSE SGO.機番
+      END ENGINE_SERIAL6,
+      NULL                                    SHIPPED_YMD,          <!--出荷日-->
+      NULL                                    SHIPPING_VOUCHER_NUM, <!--出荷伝票NO-->
+      NULL                                    SALES_MODEL_CD,       <!--販売型式コード-->
+      NULL                                    SALES_COUNTRY_CD,     <!--販売国コード-->
+      NULL                                    SALES_MODEL_NM,       <!--販売型式名-->
+      NULL                                    CUSTOMER_NM,             <!--得意先名-->
+      NULL                                    DELIVERY_DESTINATION_NM, <!--納所名-->
+      DECODE( LENGTH(TRIM(SGO.指示月度)), 0, NULL, SGO.指示月度 || '-' || LPAD(SGO.指示連番,5,'0')) PRODUCT_ORDER_NUM1, <!--投入順序連番-->
+      DECODE( LENGTH(TRIM(ZSK.実績月度)), 0, NULL, ZSK.実績月度 || '-' || LPAD(ZSK.実績連番,5,'0')) PRODUCT_ORDER_NUM2  <!--確定順序連番-->
+      FROM
+      TBL_作業指示保存 SGO
+      LEFT OUTER JOIN
+      TBL_通過実績保存 ZSK ON ZSK.ステーション = '214011' AND SGO.指示レベル = ZSK.指示レベル AND SGO.IDNO = ZSK.IDNO AND SGO.指示月度 = ZSK.指示月度
+      LEFT OUTER JOIN
+      VM_CC_PRODUCT_MODEL PROD ON SGO.型式コード = PROD.PRODUCT_MODEL_CD
+      <dynamic prepend="WHERE">
+        <!-- [対象製品(必須条件):本機] -->
+        <isEqual property="searchProductingTractor" compareValue="1" prepend="AND">
+          SGO.指示レベル = '1'
+        </isEqual>
+        <!-- [対象製品(必須条件):エンジン] -->
+        <isEqual property="searchProductingEngine" compareValue="1" prepend="AND">
+          SGO.指示レベル IN ('3','7')
+        </isEqual>
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (SGO.型式コード, SGO.機番) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialListForToractor" prepend="AND">
+          (SGO.エンジン型式コード, SGO.エンジン機番) IN
+          <iterate property="paramSerialListForToractor" open="(" close=")" conjunction="," >
+            (#paramSerialListForToractor[].productModelCd#, #paramSerialListForToractor[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          SGO.型式コード like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式名検索] -->
+        <isNotEmpty property="paramProductModelNm" prepend="AND">
+          SGO.型式名 like #paramProductModelNm# || '%'
+        </isNotEmpty>
+        <!-- [機番検索] -->
+        <isNotEmpty property="paramSerial6" prepend="AND">
+          SGO.機番 = #paramSerial6#
+        </isNotEmpty>
+        <!-- [IDNO検索] -->
+        <isNotEmpty property="paramIdno" prepend="AND">
+          SGO.IDNO = #paramIdno#
+        </isNotEmpty>
+        <!-- [完成予定日(FROM)検索] -->
+        <isNotEmpty property="paramPlanDtFrom" prepend="AND">
+          SGO.完成予定日 <![CDATA[>=]]> #paramPlanDtFrom#
+        </isNotEmpty>
+        <!-- [完成予定日(TO)検索] -->
+        <isNotEmpty property="paramPlanDtTo" prepend="AND">
+          SGO.完成予定日 <![CDATA[<=]]> #paramPlanDtTo#
+        </isNotEmpty>
+        <!-- [製品状態(必須条件):仕掛] -->
+        <isEqual property="paramProductStatus" compareValue="0" prepend="AND">
+          SGO.完成日時 IS NULL
+        </isEqual>
+        <!-- [製品状態(必須条件):仕掛] -->
+        <isEqual property="paramProductStatus" compareValue="1" prepend="AND">
+          SGO.完成日時 IS NULL
+        </isEqual>
+      </dynamic>
+    </sql>
+
+    <!-- ************************************************************************************** -->
+    <!-- 製品一覧検索のサブクエリ[TBL_作業指示保存]生産中堺エンジンの検索                       -->
+    <!--                                                                                        -->
+    <!-- PARAMETER:                                                                             -->
+    <!--  *仕掛エンジン検索      : searchProductingEngine      [0=非対象/1=対象]                -->
+    <!--   型式/機番リスト       : paramSerialList                                              -->
+    <!--   生産型式コード        : paramProductModelCd                                          -->
+    <!--   生産型式名            : paramProductModelNm                                          -->
+    <!--   機番                  : paramSerial6                                                 -->
+    <!--   IDNO                  : paramIdno                                                    -->
+    <!--   完成予定日(FROM)      : paramPlanDtFrom                                              -->
+    <!--   完成予定日(TO)        : paramPlanDtTo                                                -->
+    <!--  *出荷有無              : paramProductStatus          [0=未出荷(固定)]                 -->
+    <!--                                                                                        -->
+    <!-- ************************************************************************************** -->
+    <sql id="SubSelectSagyoSakai">
+      SELECT
+      11                                      DATA_SOURCE,        <!--取得元:作業指示保存-->
+      '10'                                    GENERAL_PATTERN_CD, <!--総称パターン-->
+      PROD.ASSEMBLY_PATTERN_CD || PROD.ASSEMBLY_PATTERN_SUB_CD ASSEMBLY_PATTERN_CD,<!--組立パターン-->
+      SGO.エンジンIDNO                        IDNO,               <!--IDNO-->
+      SGO.エンジン型式コード                  PRODUCT_MODEL_CD,   <!--生産型式コード-->
+      SGO.エンジン国コード                    PRODUCT_COUNTRY_CD, <!--生産国コード-->
+      SGO.エンジン型式コード                  MODEL_CD,           <!--型式コード-->
+      SGO.エンジン国コード                    COUNTRY_CD,         <!--国コード-->
+      SGO.エンジン型式名                      PRODUCT_MODEL_NM,   <!--生産型式名-->
+      SGO.エンジン機番                        SERIAL6,            <!--6桁機番-->
+      TO_CHAR(SGO.完成予定日,'YYYYMMDD')      PLAN_YMD,           <!--完成予定日(本機)-->
+      NULL                                    PRODUCT_YMD,        <!--完成日(本機)-->
+      SGO.型式コード                          TRACTOR_MODEL_CD,   <!--本機型式コード(生産型式)-->
+      SGO.国コード                            TRACTOR_COUNTRY_CD, <!--本機国コード(生産国)-->
+      SGO.型式名                              TRACTOR_MODEL_NM,   <!--本機型式名(生産型式)-->
+      SGO.機番                                TRACTOR_SERIAL6,    <!--本機機番-->
+      SGO.エンジン型式コード                  ENGINE_MODEL_CD,    <!--搭載エンジン型式コード-->
+      SGO.エンジン国コード                    ENGINE_COUNTRY_CD,  <!--搭載エンジン国コード-->
+      SGO.エンジン型式名                      ENGINE_MODEL_NM,    <!--搭載エンジン型式名-->
+      SGO.エンジン機番                        ENGINE_SERIAL6,     <!--搭載エンジン機番-->
+      NULL                                    SHIPPED_YMD,        <!--出荷日-->
+      NULL                                    SHIPPING_VOUCHER_NUM,   <!--出荷伝票NO-->
+      NULL                                    SALES_MODEL_CD,     <!--販売型式コード-->
+      NULL                                    SALES_COUNTRY_CD,   <!--販売国コード-->
+      NULL                                    SALES_MODEL_NM,     <!--販売型式名-->
+      NULL                                    CUSTOMER_NM,             <!--得意先名-->
+      NULL                                    DELIVERY_DESTINATION_NM, <!--納所名-->
+      NULL                                    PRODUCT_ORDER_NUM1, <!--投入順序連番-->
+      NULL                                    PRODUCT_ORDER_NUM2  <!--確定順序連番-->
+      FROM
+      TBL_作業指示保存 SGO
+      LEFT OUTER JOIN
+      VM_CC_PRODUCT_MODEL PROD ON SGO.エンジン型式コード = PROD.PRODUCT_MODEL_CD
+      <dynamic prepend="WHERE">
+        <!-- [対象製品(必須条件):搭載エンジン(生産計画にないもののみ)] -->
+        <isEqual property="searchProductingEngine" compareValue="1" prepend="AND">
+          NOT EXISTS (SELECT 'X' FROM TBL_作業指示保存 SGO_E WHERE SGO.エンジン型式コード = SGO_E.型式コード AND SGO.エンジン機番 = SGO_E.機番) AND
+          SGO.指示レベル = '1'
+        </isEqual>
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (SGO.エンジン型式コード, SGO.エンジン機番) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialListForToractor" prepend="AND">
+          (SGO.エンジン型式コード, SGO.エンジン機番) IN
+          <iterate property="paramSerialListForToractor" open="(" close=")" conjunction="," >
+            (#paramSerialListForToractor[].productModelCd#, #paramSerialListForToractor[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          SGO.エンジン型式コード like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式名検索] -->
+        <isNotEmpty property="paramProductModelNm" prepend="AND">
+          SGO.エンジン型式名 like #paramProductModelNm# || '%'
+        </isNotEmpty>
+        <!-- [機番検索] -->
+        <isNotEmpty property="paramSerial6" prepend="AND">
+          SGO.エンジン機番 = #paramSerial6#
+        </isNotEmpty>
+        <!-- [IDNO検索] -->
+        <isNotEmpty property="paramIdno" prepend="AND">
+          SGO.エンジンIDNO = #paramIdno#
+        </isNotEmpty>
+        <!-- [完成予定日(FROM)検索] -->
+        <isNotEmpty property="paramPlanDtFrom" prepend="AND">
+          SGO.完成予定日 <![CDATA[>=]]> #paramPlanDtFrom#
+        </isNotEmpty>
+        <!-- [完成予定日(TO)検索] -->
+        <isNotEmpty property="paramPlanDtTo" prepend="AND">
+          SGO.完成予定日 <![CDATA[<=]]> #paramPlanDtTo#
+        </isNotEmpty>
+        <!-- [製品状態(必須条件):仕掛] -->
+        <isEqual property="paramProductStatus" compareValue="0" prepend="AND">
+          SGO.完成日時 IS NULL AND SGO.エンジン機番 IS NOT NULL
+        </isEqual>
+        <!-- [製品状態(必須条件):仕掛] -->
+        <isEqual property="paramProductStatus" compareValue="1" prepend="AND">
+          SGO.完成日時 IS NULL AND SGO.エンジン機番 IS NOT NULL
+        </isEqual>
+      </dynamic>
+    </sql>
+
+    <!-- ************************************************************************************** -->
+    <!-- 製品一覧検索のサブクエリ[TBL_MIG_BIDM物流製品番号]在庫製品の検索(内部呼出用)           -->
+    <!--                                                                                        -->
+    <!-- PARAMETER:                                                                             -->
+    <!--  *在庫本機              : searchStockTractor          [0=非対象/1=対象]                -->
+    <!--  *在庫エンジン          : searchStockEngine           [0=非対象/1=対象]                -->
+    <!--  *在庫ロータリー        : searchStockRotary           [0=非対象/1=対象]                -->
+    <!--   型式/機番リスト       : paramSerialList                                              -->
+    <!--   生産型式コード        : paramProductModelCd                                          -->
+    <!--   生産型式名            : paramProductModelNm                                          -->
+    <!--   機番                  : paramSerial6                                                 -->
+    <!--   IDNO                  : paramIdno                                                    -->
+    <!--   完成日(FROM)          : paramProductDtFrom                                           -->
+    <!--   完成日(TO)            : paramProductDtTo                                             -->
+    <!--  *出荷有無              : paramProductStatus          [1=未出荷(固定)]                 -->
+    <!--                                                                                        -->
+    <!-- ************************************************************************************** -->
+    <sql id="SubSelectBidm">
+      SELECT
+      20                                      DATA_SOURCE,        <!--取得元:BIDM-->
+      BIDM.パターンコード                     GENERAL_PATTERN_CD, <!--総称パターン-->
+      PROD.ASSEMBLY_PATTERN_CD || PROD.ASSEMBLY_PATTERN_SUB_CD ASSEMBLY_PATTERN_CD,<!--組立パターン-->
+      BIDM.ＩＤ_ＮＯ                          IDNO,               <!--IDNO-->
+      BIDM.生産型式コード                     PRODUCT_MODEL_CD,   <!--生産型式コード-->
+      BIDM.生産国コード                       PRODUCT_COUNTRY_CD, <!--生産国コード-->
+      BIDM.型式コード                         MODEL_CD,           <!--型式コード-->
+      BIDM.国コード                           COUNTRY_CD,         <!--国コード-->
+      BIDM.型式名                             PRODUCT_MODEL_NM,   <!--生産型式名-->
+      BIDM.本機機番                           SERIAL6,            <!--6桁機番-->
+      NULL                                    PLAN_YMD,           <!--完成予定日(BIDMには予定日はない)-->
+      CASE                                                        <!--完成日-->
+      WHEN BIDM.生産年月日 = '      ' THEN NULL
+      ELSE '20' || BIDM.生産年月日
+      END PRODUCT_YMD,
+      CASE
+      WHEN '30' = BIDM.パターンコード THEN BIDM.生産型式コード
+      END                                     TRACTOR_MODEL_CD,   <!--本機型式コード-->
+      CASE
+      WHEN '30' = BIDM.パターンコード THEN BIDM.生産国コード
+      END                                     TRACTOR_COUNTRY_CD, <!--本機国コード-->
+      CASE
+      WHEN '30' = BIDM.パターンコード THEN BIDM.型式名
+      END                                     TRACTOR_MODEL_NM,   <!--本機型式名-->
+      CASE
+      WHEN '30' = BIDM.パターンコード THEN BIDM.本機機番
+      END                                     TRACTOR_SERIAL6,    <!--本機機番-->
+      CASE
+      WHEN '30' = BIDM.パターンコード THEN BIDM.エンジン型式コード
+      END                                     ENGINE_MODEL_CD,    <!--エンジン型式コード-->
+      CASE
+      WHEN '30' = BIDM.パターンコード THEN  BIDM.エンジン国コード
+      END                                     ENGINE_COUNTRY_CD,  <!--エンジン国コード-->
+      CASE
+      WHEN '30' = BIDM.パターンコード THEN  PROD_E2.PRODUCT_MODEL_NM
+      END                                     ENGINE_MODEL_NM,    <!--エンジン型式名-->
+      CASE
+      WHEN '30' = BIDM.パターンコード THEN  BIDM.エンジン機番
+      END                                     ENGINE_SERIAL6,     <!--エンジン機番-->
+      CASE                                                        <!--出荷日-->
+      WHEN BIDM.出荷年月日 = '      ' THEN NULL
+      ELSE '20' || BIDM.出荷年月日
+      END SHIPPED_YMD,
+      BIDM.出荷伝票ＮＯ                       SHIPPING_VOUCHER_NUM, <!--出荷伝票NO-->
+      NULL                                    SALES_MODEL_CD,     <!--販売型式コード-->
+      NULL                                    SALES_COUNTRY_CD,   <!--販売国コード-->
+      NULL                                    SALES_MODEL_NM,     <!--販売型式名-->
+      NULL                                    CUSTOMER_NM,             <!--得意先名-->
+      NULL                                    DELIVERY_DESTINATION_NM, <!--納所名-->
+      DECODE( LENGTH(TRIM(BIDM.順序表発行年月度)),0, NULL, '20' || BIDM.順序表発行年月度 || '-' || BIDM.順序表発行連番)  PRODUCT_ORDER_NUM1, <!--投入順序連番-->
+      DECODE( LENGTH(TRIM(BIDM.確定発行年月度)), 0, NULL, '20' || BIDM.確定発行年月度 || '-' || BIDM.確定発行連番)       PRODUCT_ORDER_NUM2  <!--確定順序連番-->
+      FROM
+      TBL_MIG_BIDM物流製品番号 BIDM
+      LEFT OUTER JOIN
+      VM_CC_PRODUCT_MODEL PROD ON BIDM.生産型式コード = PROD.PRODUCT_MODEL_CD
+      LEFT OUTER JOIN
+      VM_CC_PRODUCT_MODEL PROD_E2 ON BIDM.エンジン型式コード = PROD_E2.PRODUCT_MODEL_CD
+      <dynamic prepend="WHERE">
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト)…生産時の紐づけを維持する為、生産型式コードで参照 -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (BIDM.生産型式コード, BIDM.本機機番) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト)…生産時の紐づけを維持する為、エンジン型式コードで参照 -->
+        <isNotEmpty property="paramSerialListForToractor" prepend="AND">
+          (BIDM.エンジン型式コード, BIDM.エンジン機番) IN
+          <iterate property="paramSerialListForToractor" open="(" close=")" conjunction="," >
+            (#paramSerialListForToractor[].productModelCd#, #paramSerialListForToractor[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索(改造後に型式が変わる場合がある為、現行の型式は型式コードを参照する必要がある)] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          BIDM.型式コード like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式名検索] -->
+        <isNotEmpty property="paramProductModelNm" prepend="AND">
+          PROD.PRODUCT_MODEL_NM like #paramProductModelNm# || '%'
+        </isNotEmpty>
+        <!-- [機番検索] -->
+        <isNotEmpty property="paramSerial6" prepend="AND">
+          BIDM.本機機番 = #paramSerial6#
+        </isNotEmpty>
+        <!-- [IDNO検索] -->
+        <isNotEmpty property="paramIdno" prepend="AND">
+          BIDM.ＩＤ_ＮＯ = #paramIdno#
+        </isNotEmpty>
+        <!-- [完成日(FROM)検索] -->
+        <isNotEmpty property="paramProductDtFrom" prepend="AND">
+          BIDM.生産年月日 <![CDATA[>=]]> TO_CHAR(#paramProductDtFrom#,'YYMMDD')
+        </isNotEmpty>
+        <!-- [完成日(TO)検索] -->
+        <isNotEmpty property="paramProductDtTo" prepend="AND">
+          BIDM.生産年月日 <![CDATA[<=]]> TO_CHAR(#paramProductDtTo#,'YYMMDD')
+        </isNotEmpty>
+        <!-- [対象製品(必須条件):本機/エンジン/ロータリー] -->
+        <!-- [組立パターン検索] -->
+        <isNotEmpty property="paramAssemblyPatternCdList" prepend="AND">
+          PROD.ASSEMBLY_PATTERN_CD || PROD.ASSEMBLY_PATTERN_SUB_CD IN
+          <iterate property="paramAssemblyPatternCdList" open="(" close=")" conjunction="," >
+            #paramAssemblyPatternCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <!-- [製品状態(必須条件):未出荷] -->
+        <isEqual property="paramProductStatus" compareValue="0" prepend="AND">
+          BIDM.出荷年月日 = '      ' AND TRIM(BIDM.本機機番) IS NOT NULL AND BIDM.改造サイン != '9'
+        </isEqual>
+        <isEqual property="paramProductStatus" compareValue="1" prepend="AND">
+          BIDM.出荷年月日 = '      ' AND TRIM(BIDM.本機機番) IS NOT NULL AND BIDM.改造サイン != '9'
+        </isEqual>
+      </dynamic>
+    </sql>
+
+    <!-- ************************************************************************************** -->
+    <!-- 製品一覧検索のサブクエリ[TBL_MIG_BIDM物流製品番号]搭載エンジンの検索(内部呼出用)       -->
+    <!--                                                                                        -->
+    <!-- PARAMETER:                                                                             -->
+    <!--  *在庫エンジン          : searchStockEngine           [0=非対象/1=対象]                -->
+    <!--   型式/機番リスト       : paramSerialList                                              -->
+    <!--   生産型式コード        : paramProductModelCd                                          -->
+    <!--   生産型式名            : paramProductModelNm                                          -->
+    <!--   機番                  : paramSerial6                                                 -->
+    <!--   IDNO                  : paramIdno                                                    -->
+    <!--   完成日(FROM)          : paramProductDtFrom                                           -->
+    <!--   完成日(TO)            : paramProductDtTo                                             -->
+    <!--  *出荷有無              : paramProductStatus          [1=未出荷(固定)]                 -->
+    <!--                                                                                        -->
+    <!-- ************************************************************************************** -->
+    <sql id="SubSelectBidmEquippedEngine">
+      SELECT
+      21                                      DATA_SOURCE,        <!--取得元:BIDM-->
+      '10'                                    GENERAL_PATTERN_CD, <!--総称パターン-->
+      PROD_E.ASSEMBLY_PATTERN_CD || PROD_E.ASSEMBLY_PATTERN_SUB_CD ASSEMBLY_PATTERN_CD,<!--組立パターン-->
+      TRIM(BIDM.エンジンＩＤ_ＮＯ)            IDNO,               <!--IDNO-->
+      BIDM.エンジン型式コード                 PRODUCT_MODEL_CD,   <!--生産型式コード-->
+      BIDM.エンジン国コード                   PRODUCT_COUNTRY_CD, <!--生産国コード-->
+      BIDM.エンジン型式コード                 MODEL_CD,           <!--型式コード-->
+      BIDM.エンジン国コード                   COUNTRY_CD,         <!--国コード-->
+      PROD_E.PRODUCT_MODEL_NM                           PRODUCT_MODEL_NM,   <!--生産型式名-->
+      BIDM.エンジン機番                       SERIAL6,            <!--6桁機番-->
+      NULL                                    PLAN_YMD,           <!--完成予定日(BIDMには予定日はない)-->
+      CASE                                                        <!--完成日-->
+      WHEN BIDM.エンジン生産年月日 = '      ' THEN '20' || BIDM.生産年月日
+      ELSE '20' || BIDM.エンジン生産年月日
+      END PRODUCT_YMD,
+      BIDM.生産型式コード                     TRACTOR_MODEL_CD,   <!--本機型式コード-->
+      BIDM.生産国コード                       TRACTOR_COUNTRY_CD, <!--本機国コード-->
+      PROD_T.PRODUCT_MODEL_NM                           TRACTOR_MODEL_NM,   <!--本機型式名-->
+      BIDM.本機機番                           TRACTOR_SERIAL6,    <!--本機機番-->
+      BIDM.エンジン型式コード                 ENGINE_MODEL_CD,    <!--エンジン型式コード-->
+      BIDM.エンジン国コード                   ENGINE_COUNTRY_CD,  <!--エンジン国コード-->
+      PROD_E.PRODUCT_MODEL_NM                          ENGINE_MODEL_NM,    <!--エンジン型式名-->
+      BIDM.エンジン機番                       ENGINE_SERIAL6,     <!--エンジン機番-->
+      NULL                                    SHIPPED_YMD,
+      NULL                                    SHIPPING_VOUCHER_NUM, <!--出荷伝票NO-->
+      NULL                                    SALES_MODEL_CD,     <!--販売型式コード-->
+      NULL                                    SALES_COUNTRY_CD,   <!--販売国コード-->
+      NULL                                    SALES_MODEL_NM,     <!--販売型式名-->
+      NULL                                    CUSTOMER_NM,             <!--得意先名-->
+      NULL                                    DELIVERY_DESTINATION_NM, <!--納所名-->
+      DECODE( LENGTH(TRIM(BIDM.順序表発行年月度)), 0, NULL, '20' || BIDM.順序表発行年月度 || '-' || BIDM.順序表発行連番)  PRODUCT_ORDER_NUM1, <!--投入順序連番-->
+      NULL                                    PRODUCT_ORDER_NUM2  <!--確定順序連番-->
+      FROM
+      TBL_MIG_BIDM物流製品番号 BIDM
+      LEFT OUTER JOIN
+      VM_CC_PRODUCT_MODEL PROD_T ON BIDM.生産型式コード = PROD_T.PRODUCT_MODEL_CD
+      LEFT OUTER JOIN
+      VM_CC_PRODUCT_MODEL PROD_E ON BIDM.エンジン型式コード = PROD_E.PRODUCT_MODEL_CD
+      WHERE
+        NOT EXISTS (  
+          SELECT
+            'X'
+          FROM
+            TM_CC_MODEL_PROD_INFO MPI
+          WHERE
+            MPI.MODEL_PROD_INFO_KIND = '04' AND
+            MPI.MODEL_PROD_INFO_ITEM_CD = '01' AND
+            BIDM.生産型式コード = MPI.PRODUCT_MODEL_CD AND
+            TRIM(BIDM.生産国コード) = TRIM(MPI.COUNTRY_CD)
+        )
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (BIDM.エンジン型式コード, BIDM.エンジン機番) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialListForToractor" prepend="AND">
+          (BIDM.エンジン型式コード, BIDM.エンジン機番) IN
+          <iterate property="paramSerialListForToractor" open="(" close=")" conjunction="," >
+            (#paramSerialListForToractor[].productModelCd#, #paramSerialListForToractor[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          BIDM.エンジン型式コード like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式名検索] -->
+        <isNotEmpty property="paramProductModelNm" prepend="AND">
+          PROD_E.PRODUCT_MODEL_NM like #paramProductModelNm# || '%'
+        </isNotEmpty>
+        <!-- [機番検索] -->
+        <isNotEmpty property="paramSerial6" prepend="AND">
+          BIDM.エンジン機番 = #paramSerial6#
+        </isNotEmpty>
+        <!-- [IDNO検索] -->
+        <isNotEmpty property="paramIdno" prepend="AND">
+          BIDM.エンジンＩＤ_ＮＯ = #paramIdno# || '  '
+        </isNotEmpty>
+        <!-- [完成日(FROM)検索] -->
+        <isNotEmpty property="paramProductDtFrom" prepend="AND">
+          ((BIDM.エンジン生産年月日 != '      ' AND BIDM.エンジン生産年月日 <![CDATA[>=]]> TO_CHAR(#paramProductDtFrom#,'YYMMDD')) OR
+          (BIDM.エンジン生産年月日  = '      ' AND BIDM.生産年月日 <![CDATA[>=]]> TO_CHAR(#paramProductDtFrom#,'YYMMDD')))
+        </isNotEmpty>
+        <!-- [完成日(TO)検索] -->
+        <isNotEmpty property="paramProductDtTo" prepend="AND">
+          ((BIDM.エンジン生産年月日 != '      ' AND BIDM.エンジン生産年月日 <![CDATA[<=]]> TO_CHAR(#paramProductDtTo#,'YYMMDD')) OR
+          (BIDM.エンジン生産年月日  = '      ' AND BIDM.生産年月日 <![CDATA[<=]]> TO_CHAR(#paramProductDtTo#,'YYMMDD')))
+        </isNotEmpty>
+        <!-- [対象製品(必須条件):本機] -->
+        <isNotEmpty property="searchStockEngine" prepend="AND">
+          PROD_T.ASSEMBLY_PATTERN_CD || PROD_T.ASSEMBLY_PATTERN_SUB_CD = '32 '
+        </isNotEmpty>
+        <!-- [製品状態(必須条件):未出荷] -->
+        <isEqual property="paramProductStatus" compareValue="0" prepend="AND">
+          BIDM.出荷年月日 = '      '
+        </isEqual>
+        <isEqual property="paramProductStatus" compareValue="1" prepend="AND">
+          BIDM.出荷年月日 = '      '
+        </isEqual>
+    </sql>
+
+    <!-- ************************************************************************************** -->
+    <!-- 製品一覧検索のサブクエリ[TBL_作業指示保存]生産中本機/エンジンの検索                    -->
+    <!--                                                                                        -->
+    <!-- PARAMETER:                                                                             -->
+    <!--  *仕掛エンジン検索      : searchProductingEngine      [0=非対象/1=対象]                -->
+    <!--   型式/機番リスト       : paramSerialList                                              -->
+    <!--   生産型式コード        : paramProductModelCd                                          -->
+    <!--   生産型式名            : paramProductModelNm                                          -->
+    <!--   機番                  : paramSerial6                                                 -->
+    <!--   IDNO                  : paramIdno                                                    -->
+    <!--   完成予定日(FROM)      : paramPlanDtFrom                                              -->
+    <!--   完成予定日(TO)        : paramPlanDtTo                                                -->
+    <!--  *出荷有無              : paramProductStatus        [0=未出荷(固定)]                   -->
+    <!--                                                                                        -->
+    <!-- ************************************************************************************** -->
+    <sql id="SubSelectSagyoEquippedEngine">
+      SELECT
+      22                                      DATA_SOURCE,        <!--取得元:作業指示保存-->
+      SGO.総称パターン                        GENERAL_PATTERN_CD, <!--総称パターン-->
+      PROD.ASSEMBLY_PATTERN_CD || PROD.ASSEMBLY_PATTERN_SUB_CD ASSEMBLY_PATTERN_CD,<!--組立パターン-->
+      SGO.IDNO                                IDNO,               <!--IDNO-->
+      SGO.型式コード                          PRODUCT_MODEL_CD,   <!--生産型式コード-->
+      SGO.国コード                            PRODUCT_COUNTRY_CD, <!--生産国コード-->
+      SGO.型式コード                          MODEL_CD,           <!--型式コード-->
+      SGO.国コード                            COUNTRY_CD,         <!--国コード-->
+      SGO.型式名                              PRODUCT_MODEL_NM,   <!--生産型式名-->
+      SGO.機番                                SERIAL6,            <!--6桁機番-->
+      TO_CHAR(SGO.完成予定日,'YYYYMMDD')      PLAN_YMD,           <!--完成予定日-->
+      TO_CHAR(SGO.完成日時,'YYYYMMDD')        PRODUCT_YMD,        <!--完成日-->
+      SGO.本機型式コード                      TRACTOR_MODEL_CD,   <!--本機型式コード(生産型式)-->
+      SGO.本機国コード                        TRACTOR_COUNTRY_CD, <!--本機国コード(生産型式)-->
+      SGO.本機型式名                          TRACTOR_MODEL_NM,   <!--本機型式名(生産型式)-->
+      SGO.本機機番                            TRACTOR_SERIAL6,    <!--本機機番-->
+      SGO.エンジン型式コード                  ENGINE_MODEL_CD,    <!--搭載エンジン型式コード-->
+      SGO.エンジン国コード                    ENGINE_COUNTRY_CD,  <!--搭載エンジン国コード-->
+      SGO.エンジン型式名                      ENGINE_MODEL_NM,    <!--搭載エンジン型式名-->
+      SGO.エンジン機番                        ENGINE_SERIAL6,     <!--搭載エンジン機番-->
+      NULL                                    SHIPPED_YMD,          <!--出荷日-->
+      NULL                                    SHIPPING_VOUCHER_NUM, <!--出荷伝票NO-->
+      NULL                                    SALES_MODEL_CD,       <!--販売型式コード-->
+      NULL                                    SALES_COUNTRY_CD,     <!--販売国コード-->
+      NULL                                    SALES_MODEL_NM,       <!--販売型式名-->
+      NULL                                    CUSTOMER_NM,             <!--得意先名-->
+      NULL                                    DELIVERY_DESTINATION_NM, <!--納所名-->
+      DECODE( LENGTH(TRIM(SGO.指示月度)), 0, NULL, SGO.指示月度 || '-' || LPAD(SGO.指示連番,5,'0')) PRODUCT_ORDER_NUM1, <!--投入順序連番-->
+      NULL                                    PRODUCT_ORDER_NUM2  <!--確定順序連番-->
+      FROM
+      TBL_作業指示保存 SGO
+      LEFT OUTER JOIN
+      VM_CC_PRODUCT_MODEL PROD ON SGO.型式コード = PROD.PRODUCT_MODEL_CD
+      <dynamic prepend="WHERE">
+        <!-- [対象製品(必須条件):エンジン] -->
+        <isEqual property="searchStockEngine" compareValue="1" prepend="AND">
+          SGO.指示レベル IN ('3','7') AND
+          SGO.組立パターン IN ('14', '15') AND
+          NOT EXISTS (SELECT 'X' FROM TBL_MIG_BIDM物流製品番号 BIDM
+          WHERE (SGO.型式コード = BIDM.生産型式コード AND SGO.機番 = BIDM.本機機番) OR (SGO.型式コード = BIDM.エンジン型式コード AND SGO.機番 = BIDM.エンジン機番))
+        </isEqual>
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (SGO.型式コード, SGO.機番) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialListForToractor" prepend="AND">
+          (SGO.エンジン型式コード, SGO.エンジン機番) IN
+          <iterate property="paramSerialListForToractor" open="(" close=")" conjunction="," >
+            (#paramSerialListForToractor[].productModelCd#, #paramSerialListForToractor[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          SGO.型式コード like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式名検索] -->
+        <isNotEmpty property="paramProductModelNm" prepend="AND">
+          SGO.型式名 like #paramProductModelNm# || '%'
+        </isNotEmpty>
+        <!-- [機番検索] -->
+        <isNotEmpty property="paramSerial6" prepend="AND">
+          SGO.機番 = #paramSerial6#
+        </isNotEmpty>
+        <!-- [IDNO検索] -->
+        <isNotEmpty property="paramIdno" prepend="AND">
+          SGO.IDNO = #paramIdno#
+        </isNotEmpty>
+        <!-- [完成日(FROM)検索] -->
+        <isNotEmpty property="paramProductDtFrom" prepend="AND">
+          SGO.完成日時 <![CDATA[>=]]> #paramProductDtFrom#
+        </isNotEmpty>
+        <!-- [完成日(TO)検索] -->
+        <isNotEmpty property="paramProductDtTo" prepend="AND">
+          SGO.完成日時 <![CDATA[<=]]> #paramProductDtTo#
+        </isNotEmpty>
+        <!-- [製品状態(必須条件):仕掛] -->
+        <isEqual property="paramProductStatus" compareValue="0" prepend="AND">
+          SGO.完成日時 IS NOT NULL AND SGO.出荷日 IS NULL
+        </isEqual>
+        <!-- [製品状態(必須条件):仕掛] -->
+        <isEqual property="paramProductStatus" compareValue="1" prepend="AND">
+          SGO.完成日時 IS NOT NULL AND SGO.出荷日 IS NULL
+        </isEqual>
+      </dynamic>
+    </sql>
+
+    <!-- ************************************************************************************** -->
+    <!-- 製品一覧検索のサブクエリ[TBL_機番情報ファイル]                                         -->
+    <!-- 出荷済みトラクタ/OEMエンジンの検索(内部呼出用)                                         -->
+    <!--                                                                                        -->
+    <!-- PARAMETER:                                                                             -->
+    <!--   型式/機番リスト       : paramSerialList                                              -->
+    <!--   生産型式コード        : paramProductModelCd                                          -->
+    <!--   生産型式名            : paramProductModelNm                                          -->
+    <!--   機番                  : paramSerial6                                                 -->
+    <!--   IDNO                  : paramIdno                                                    -->
+    <!--   完成日(FROM)          : paramProductDtFrom                                           -->
+    <!--   完成日(TO)            : paramProductDtTo                                             -->
+    <!--   出荷日(FROM)          : paramShippedDtFrom                                           -->
+    <!--   出荷日(TO)            : paramShippedDtTo                                             -->
+    <!--                                                                                        -->
+    <!-- ************************************************************************************** -->
+    <sql id="SubSelectKibanFile">
+      SELECT
+      30                                      DATA_SOURCE,        <!--機番情報F(製品)-->
+      KBN.パターンコード                      GENERAL_PATTERN_CD, <!--総称パターン-->
+      KBN.組立パターン                        ASSEMBLY_PATTERN_CD, <!--組立パターン-->
+      KBN.ＩＤＮＯ                            IDNO,               <!--IDNO-->
+      KBN.生産型式コード                      PRODUCT_MODEL_CD,   <!--生産型式コード-->
+      KBN.生産国コード                        PRODUCT_COUNTRY_CD, <!--生産国コード-->
+      KBN.型式コード                          MODEL_CD,           <!--型式コード-->
+      KBN.国コード                            COUNTRY_CD,         <!--国コード-->
+      KBN.型式名                              PRODUCT_MODEL_NM,   <!--生産型式名-->
+      KBN.本機機番                            SERIAL6,            <!--6桁機番-->
+      NULL                                    PLAN_YMD,           <!--完成予定日(機番情報Fには予定日なし)-->
+      KBN.本機生産年月日                      PRODUCT_YMD,        <!--完成日-->
+      CASE                                                        <!--本機型式コード-->
+      WHEN KBN.組立パターン IN ('14 ','15 ','18 ','19 ') THEN NULL
+      ELSE KBN.型式コード
+      END TRACTOR_MODEL_CD,
+      CASE                                                        <!--本機国コード-->
+      WHEN KBN.組立パターン IN ('14 ','15 ','18 ','19 ') THEN NULL
+      ELSE KBN.国コード
+      END TRACTOR_COUNTRY_CD,
+      CASE                                                        <!--本機型式名-->
+      WHEN KBN.組立パターン IN ('14 ','15 ','18 ','19 ') THEN NULL
+      ELSE KBN.型式名
+      END TRACTOR_MODEL_NM,
+      CASE                                                        <!--本機機番-->
+      WHEN KBN.組立パターン IN ('14 ','15 ','18 ','19 ') THEN NULL
+      ELSE KBN.本機機番
+      END TRACTOR_SERIAL6,
+      CASE                                                        <!--搭載エンジン型式コード-->
+      WHEN KBN.組立パターン IN ('14 ','15 ','18 ','19 ') THEN KBN.型式コード
+      WHEN KBN.組立パターン IN ('32 ') THEN KBN.Ｅ型式コード
+      ELSE NULL
+      END ENGINE_MODEL_CD,
+      CASE                                                        <!--搭載エンジン国コード-->
+      WHEN KBN.組立パターン IN ('14 ','15 ','18 ','19 ') THEN KBN.国コード
+      WHEN KBN.組立パターン IN ('32 ') THEN KBN.Ｅ国コード
+      ELSE NULL
+      END ENGINE_COUNTRY_CD,
+      CASE                                                        <!--搭載エンジン型式名-->
+      WHEN KBN.組立パターン IN ('14 ','15 ','18 ','19 ') THEN KBN.型式名
+      WHEN KBN.組立パターン IN ('32 ') THEN KBN.Ｅ型式名
+      ELSE NULL
+      END ENGINE_MODEL_NM,
+      CASE                                                        <!--搭載エンジン機番-->
+      WHEN KBN.組立パターン IN ('14 ','15 ','18 ','19 ') THEN KBN.本機機番
+      WHEN KBN.組立パターン IN ('32 ') THEN KBN.Ｅ機番
+      ELSE NULL
+      END ENGINE_SERIAL6,
+      KBN.出荷年月日                          SHIPPED_YMD,        <!--出荷日-->
+      KBN.出荷伝票ＮＯ                        SHIPPING_VOUCHER_NUM, <!--出荷伝票NO-->
+      KBN.販売型式コード                      SALES_MODEL_CD,     <!--販売型式コード-->
+      KBN.販売国コード                        SALES_COUNTRY_CD,   <!--販売国コード-->
+      KBN.販売型式名                          SALES_MODEL_NM,     <!--販売型式名-->
+      KBN.得意先名                            CUSTOMER_NM,             <!--得意先名-->
+      KBN.納所名                              DELIVERY_DESTINATION_NM, <!--納所名-->
+      CASE
+      WHEN 順序表発行連番 IS NOT NULL THEN 順序表発行年月 || '-' || 順序表発行連番
+      END                                     PRODUCT_ORDER_NUM1, <!--投入順序連番-->
+      CASE
+      WHEN 確定発行連番 IS NOT NULL THEN 確定発行年月 || '-' || 確定発行連番
+      END                                     PRODUCT_ORDER_NUM2  <!--確定順序連番-->
+      FROM
+      TBL_機番情報ファイル KBN
+      <dynamic prepend="WHERE">
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList">
+          <isEqual property="searchFirstProduct" compareValue="0" prepend ="AND">
+            (KBN.型式コード, KBN.本機機番) IN
+            <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+              (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+            </iterate>
+          </isEqual>
+          <isEqual property="searchFirstProduct" compareValue="1" prepend ="AND">
+            (KBN.生産型式コード, KBN.本機機番) IN
+            <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+              (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+            </iterate>
+          </isEqual>
+        </isNotEmpty>
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialListForToractor" prepend="AND">
+          (KBN.型式コード, KBN.本機機番) IN
+          <iterate property="paramSerialListForToractor" open="(" close=")" conjunction="," >
+            (#paramSerialListForToractor[].productModelCd#, #paramSerialListForToractor[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          KBN.型式コード like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式名検索] -->
+        <isNotEmpty property="paramProductModelNm" prepend="AND">
+          KBN.型式名 like #paramProductModelNm# || '%'
+        </isNotEmpty>
+        <!-- [販売型式コード検索] -->
+        <isNotEmpty property="paramSalesModelCd" prepend="AND">
+          KBN.販売型式コード like #paramSalesModelCd# || '%'
+        </isNotEmpty>
+        <!-- [販売型式名検索] -->
+        <isNotEmpty property="paramSalesModelNm" prepend="AND">
+          KBN.販売型式名 like #paramSalesModelNm# || '%'
+        </isNotEmpty>
+        <!-- [機番検索] -->
+        <isNotEmpty property="paramSerial6" prepend="AND">
+          KBN.本機機番 = #paramSerial6#
+        </isNotEmpty>
+        <!-- [組立パターン検索] -->
+        <isNotEmpty property="paramAssemblyPatternCdList" prepend="AND">
+          KBN.組立パターン IN
+          <iterate property="paramAssemblyPatternCdList" open="(" close=")" conjunction="," >
+            #paramAssemblyPatternCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <!-- [IDNO検索] -->
+        <isNotEmpty property="paramIdno" prepend="AND">
+          KBN.ＩＤＮＯ = #paramIdno#
+        </isNotEmpty>
+        <!-- [完成日(FROM)検索] -->
+        <isNotEmpty property="paramProductDtFrom" prepend="AND">
+          KBN.本機生産年月日 <![CDATA[>=]]> TO_CHAR(#paramProductDtFrom#,'YYYYMMDD')
+        </isNotEmpty>
+        <!-- [完成日(TO)検索] -->
+        <isNotEmpty property="paramProductDtTo" prepend="AND">
+          KBN.本機生産年月日 <![CDATA[<=]]> TO_CHAR(#paramProductDtTo#,'YYYYMMDD')
+        </isNotEmpty>
+        <!-- [出荷日(FROM)検索] -->
+        <isNotEmpty property="paramShippedDtFrom" prepend="AND">
+          KBN.出荷年月日 <![CDATA[>=]]> TO_CHAR(#paramShippedDtFrom#,'YYYYMMDD')
+        </isNotEmpty>
+        <!-- [出荷日(TO)検索] -->
+        <isNotEmpty property="paramShippedDtTo" prepend="AND">
+          KBN.出荷年月日 <![CDATA[<=]]> TO_CHAR(#paramShippedDtTo#,'YYYYMMDD')
+        </isNotEmpty>
+      </dynamic>
+    </sql>
+
+    <!-- ************************************************************************************** -->
+    <!-- 製品一覧検索のサブクエリ[TBL_機番情報ファイル]出荷済本機の搭載エンジン検索(内部呼出用) -->
+    <!--                                                                                        -->
+    <!-- PARAMETER:                                                                             -->
+    <!--   型式/機番リスト       : paramSerialList                                              -->
+    <!--   生産型式コード        : paramProductModelCd                                          -->
+    <!--   生産型式名            : paramProductModelNm                                          -->
+    <!--   機番                  : paramSerial6                                                 -->
+    <!--   IDNO                  : paramIdno                                                    -->
+    <!--   完成日(FROM)          : paramProductDtFrom                                           -->
+    <!--   完成日(TO)            : paramProductDtTo                                             -->
+    <!--   出荷日(FROM)          : paramShippedDtFrom                                           -->
+    <!--   出荷日(TO)            : paramShippedDtTo                                             -->
+    <!--                                                                                        -->
+    <!-- ************************************************************************************** -->
+    <sql id="SubSelectKibanFileEquippedEngine">
+      SELECT
+      31                                      DATA_SOURCE,        <!--機番情報F(搭載エンジン)-->
+      '10'                                    GENERAL_PATTERN_CD, <!--総称パターン(旧データは搭載ＥのパターンがNULL)-->
+      PROD.ASSEMBLY_PATTERN_CD || PROD.ASSEMBLY_PATTERN_SUB_CD ASSEMBLY_PATTERN_CD,<!--組立パターン-->
+      KBN.Ｅ＿ＩＤＮＯ                        IDNO,               <!--IDNO-->
+      KBN.Ｅ型式コード                        PRODUCT_MODEL_CD,   <!--生産型式コード-->
+      KBN.Ｅ国コード                          PRODUCT_COUNTRY_CD, <!--生産国コード-->
+      KBN.Ｅ型式コード                        MODEL_CD,           <!--型式コード-->
+      KBN.Ｅ国コード                          COUNTRY_CD,         <!--国コード-->
+      KBN.Ｅ型式名                            PRODUCT_MODEL_NM,   <!--生産型式名-->
+      KBN.Ｅ機番                              SERIAL6,            <!--6桁機番-->
+      NULL                                    PLAN_YMD,           <!--完成予定日(機番情報Fには予定日なし)-->
+      CASE                                                        <!--完成日-->
+      WHEN Ｅ生産年月日 = '        ' THEN KBN.本機生産年月日
+      ELSE Ｅ生産年月日
+      END PRODUCT_YMD,
+      KBN.型式コード                          TRACTOR_MODEL_CD,   <!--本機型式コード(生産型式)-->
+      KBN.国コード                            TRACTOR_COUNTRY_CD, <!--本機国コード(生産型式)-->
+      KBN.型式名                              TRACTOR_MODEL_NM,   <!--本機型式名(生産型式)-->
+      KBN.本機機番                            TRACTOR_SERIAL6,    <!--本機機番-->
+      KBN.Ｅ型式コード                        ENGINE_MODEL_CD,    <!--エンジン型式コード-->
+      KBN.Ｅ国コード                          ENGINE_COUNTRY_CD,  <!--エンジン国コード-->
+      KBN.Ｅ型式名                            ENGINE_MODEL_NM,    <!--エンジン型式名-->
+      KBN.Ｅ機番                              ENGINE_SERIAL6,     <!--エンジン機番-->
+      KBN.出荷年月日                          SHIPPED_YMD,        <!--出荷日-->
+      KBN.出荷伝票ＮＯ                        SHIPPING_VOUCHER_NUM, <!--出荷伝票NO-->
+      KBN.販売型式コード                      SALES_MODEL_CD,     <!--販売型式コード-->
+      KBN.販売国コード                        SALES_COUNTRY_CD,   <!--販売国コード-->
+      KBN.販売型式名                          SALES_MODEL_NM,     <!--販売型式名-->
+      KBN.得意先名                            CUSTOMER_NM,             <!--得意先名-->
+      KBN.納所名                              DELIVERY_DESTINATION_NM, <!--納所名-->
+      NULL                                    PRODUCT_ORDER_NUM1, <!--投入順序連番-->
+      NULL                                    PRODUCT_ORDER_NUM2  <!--確定順序連番-->
+      FROM
+      TBL_機番情報ファイル KBN
+      LEFT OUTER JOIN
+      VM_CC_PRODUCT_MODEL PROD ON KBN.Ｅ型式コード = PROD.PRODUCT_MODEL_CD
+      WHERE
+        NOT EXISTS (  
+          SELECT
+            'X'
+          FROM
+            TM_CC_MODEL_PROD_INFO MPI
+          WHERE
+            MPI.MODEL_PROD_INFO_KIND = '04' AND
+            MPI.MODEL_PROD_INFO_ITEM_CD = '01' AND
+            KBN.型式コード = MPI.PRODUCT_MODEL_CD AND
+            TRIM(KBN.国コード) = TRIM(MPI.COUNTRY_CD)
+        )
+      <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (KBN.Ｅ型式コード, KBN.Ｅ機番) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialListForToractor" prepend="AND">
+          (KBN.Ｅ型式コード, KBN.Ｅ機番) IN
+          <iterate property="paramSerialListForToractor" open="(" close=")" conjunction="," >
+            (#paramSerialListForToractor[].productModelCd#, #paramSerialListForToractor[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          KBN.Ｅ型式コード like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式名検索] -->
+        <isNotEmpty property="paramProductModelNm" prepend="AND">
+          KBN.Ｅ型式名 like #paramProductModelNm# || '%'
+        </isNotEmpty>
+        <!-- [販売型式コード検索] -->
+        <isNotEmpty property="paramSalesModelCd" prepend="AND">
+          1 = 0 <!--検索対象除外-->
+        </isNotEmpty>
+        <!-- [販売型式名検索] -->
+        <isNotEmpty property="paramSalesModelNm" prepend="AND">
+          1 = 0 <!--検索対象除外-->
+        </isNotEmpty>
+        <!-- [機番検索] -->
+        <isNotEmpty property="paramSerial6" prepend="AND">
+          KBN.Ｅ機番 = #paramSerial6#
+        </isNotEmpty>
+        <!-- [IDNO検索] -->
+        <isNotEmpty property="paramIdno" prepend="AND">
+          KBN.Ｅ＿ＩＤＮＯ = #paramIdno#
+        </isNotEmpty>
+        <!-- [完成日(FROM)検索] -->
+        <isNotEmpty property="paramProductDtFrom" prepend="AND">
+          ((TRIM(KBN.Ｅ生産年月日) IS NOT NULL AND KBN.Ｅ生産年月日 <![CDATA[>=]]> TO_CHAR(#paramProductDtFrom#,'YYYYMMDD')) OR
+          (TRIM(KBN.Ｅ生産年月日) IS NULL AND KBN.本機生産年月日 <![CDATA[>=]]> TO_CHAR(#paramProductDtFrom#,'YYYYMMDD')))
+        </isNotEmpty>
+        <!-- [完成日(TO)検索] -->
+        <isNotEmpty property="paramProductDtTo" prepend="AND">
+          ((TRIM(KBN.Ｅ生産年月日) IS NOT NULL AND KBN.Ｅ生産年月日 <![CDATA[<=]]> TO_CHAR(#paramProductDtTo#,'YYYYMMDD')) OR
+          (TRIM(KBN.Ｅ生産年月日) IS NULL AND KBN.本機生産年月日 <![CDATA[<=]]> TO_CHAR(#paramProductDtTo#,'YYYYMMDD')))
+        </isNotEmpty>
+        <!-- [出荷日(FROM)検索] -->
+        <isNotEmpty property="paramShippedDtFrom" prepend="AND">
+          KBN.出荷年月日 <![CDATA[>=]]> TO_CHAR(#paramShippedDtFrom#,'YYYYMMDD')
+        </isNotEmpty>
+        <!-- [出荷日(TO)検索] -->
+        <isNotEmpty property="paramShippedDtTo" prepend="AND">
+          KBN.出荷年月日 <![CDATA[<=]]> TO_CHAR(#paramShippedDtTo#,'YYYYMMDD')
+        </isNotEmpty>
+        <!-- [対象製品(必須条件):エンジン] -->
+        <isEqual property="searchShippedEngine" compareValue="1" prepend="AND">
+          KBN.組立パターン = '32 '
+        </isEqual>
+    </sql>
+
+    <!-- ************************************************************************************** -->
+    <!-- 製品一覧検索のサブクエリ[TBL_機番情報ファイル]出荷済ロータリー検索(内部呼出用)         -->
+    <!--                                                                                        -->
+    <!-- PARAMETER:                                                                             -->
+    <!--   型式/機番リスト       : paramSerialList                                              -->
+    <!--   生産型式コード        : paramProductModelCd                                          -->
+    <!--   生産型式名            : paramProductModelNm                                          -->
+    <!--   機番                  : paramSerial6                                                 -->
+    <!--   IDNO                  : paramIdno                                                    -->
+    <!--   完成日(FROM)          : paramProductDtFrom                                           -->
+    <!--   完成日(TO)            : paramProductDtTo                                             -->
+    <!--   出荷日(FROM)          : paramShippedDtFrom                                           -->
+    <!--   出荷日(TO)            : paramShippedDtTo                                             -->
+    <!--                                                                                        -->
+    <!-- ************************************************************************************** -->
+    <sql id="SubSelectKibanFileRotary">
+      SELECT
+      32                                      DATA_SOURCE,        <!--機番情報F(搭載エンジン)-->
+      KBN.パターンコード                      GENERAL_PATTERN_CD, <!--総称パターン-->
+      KBN.組立パターン                        ASSEMBLY_PATTERN_CD, <!--組立パターン-->
+      KBN.ＩＤＮＯ                            IDNO,               <!--IDNO-->
+      KBN.型式コード                          PRODUCT_MODEL_CD,   <!--生産型式コード-->
+      KBN.国コード                            PRODUCT_COUNTRY_CD, <!--生産国コード-->
+      KBN.型式コード                          MODEL_CD,           <!--型式コード-->
+      KBN.国コード                            COUNTRY_CD,         <!--国コード-->
+      KBN.型式名                              PRODUCT_MODEL_NM,   <!--生産型式名-->
+      KBN.本機機番                            SERIAL6,            <!--6桁機番-->
+      NULL                                    PLAN_YMD,           <!--完成予定日(機番情報Fには予定日なし)-->
+      KBN.本機生産年月日                      PRODUCT_YMD,        <!--完成日-->
+      KBN_P.型式コード                        TRACTOR_MODEL_CD,   <!--本機型式コード(生産型式)-->
+      KBN_P.国コード                          TRACTOR_COUNTRY_CD, <!--本機国コード(生産型式)-->
+      KBN_P.型式名                            TRACTOR_MODEL_NM,   <!--本機型式名(生産型式)-->
+      KBN_P.本機機番                          TRACTOR_SERIAL6,    <!--本機機番-->
+      KBN_P.Ｅ型式コード                      ENGINE_MODEL_CD,    <!--エンジン型式コード-->
+      KBN_P.Ｅ国コード                        ENGINE_COUNTRY_CD,  <!--エンジン国コード-->
+      KBN_P.Ｅ型式名                          ENGINE_MODEL_NM,    <!--エンジン型式名-->
+      KBN_P.Ｅ機番                            ENGINE_SERIAL6,     <!--エンジン機番-->
+      KBN.出荷年月日                          SHIPPED_YMD,        <!--出荷日-->
+      KBN.出荷伝票ＮＯ                        SHIPPING_VOUCHER_NUM, <!--出荷伝票NO-->
+      KBN.販売型式コード                      SALES_MODEL_CD,     <!--販売型式コード-->
+      KBN.販売国コード                        SALES_COUNTRY_CD,   <!--販売国コード-->
+      KBN.販売型式名                          SALES_MODEL_NM,     <!--販売型式名-->
+      KBN.得意先名                            CUSTOMER_NM,             <!--得意先名-->
+      KBN.納所名                              DELIVERY_DESTINATION_NM, <!--納所名-->
+      NULL                                    PRODUCT_ORDER_NUM1, <!--投入順序連番-->
+      NULL                                    PRODUCT_ORDER_NUM2  <!--確定順序連番-->
+      FROM
+      TBL_機番情報ファイル KBN
+      LEFT OUTER JOIN
+      TBL_機番情報ファイル KBN_P ON KBN.型式名 = KBN_P.Ｒ型式名 AND KBN.本機機番 = KBN_P.Ｒ機番
+      <dynamic prepend="WHERE">
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (KBN.型式コード, KBN.本機機番) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          KBN.型式コード like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式名検索] -->
+        <isNotEmpty property="paramProductModelNm" prepend="AND">
+          KBN.型式名 like #paramProductModelNm# || '%'
+        </isNotEmpty>
+        <!-- [販売型式コード検索] -->
+        <isNotEmpty property="paramSalesModelCd" prepend="AND">
+          KBN.販売型式コード like #paramSalesModelCd# || '%'
+        </isNotEmpty>
+        <!-- [販売型式名検索] -->
+        <isNotEmpty property="paramSalesModelNm" prepend="AND">
+          KBN.販売型式名 like #paramSalesModelNm# || '%'
+        </isNotEmpty>
+        <!-- [機番検索] -->
+        <isNotEmpty property="paramSerial6" prepend="AND">
+          KBN.本機機番 = #paramSerial6#
+        </isNotEmpty>
+        <!-- [組立パターン検索] -->
+        <isNotEmpty property="paramAssemblyPatternCdList" prepend="AND">
+          KBN.組立パターン IN
+          <iterate property="paramAssemblyPatternCdList" open="(" close=")" conjunction="," >
+            #paramAssemblyPatternCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <!-- [IDNO検索] -->
+        <isNotEmpty property="paramIdno" prepend="AND">
+          KBN.ＩＤＮＯ = #paramIdno#
+        </isNotEmpty>
+        <!-- [完成日(FROM)検索] -->
+        <isNotEmpty property="paramProductDtFrom" prepend="AND">
+          KBN.本機生産年月日 <![CDATA[>=]]> TO_CHAR(#paramProductDtFrom#,'YYYYMMDD')
+        </isNotEmpty>
+        <!-- [完成日(TO)検索] -->
+        <isNotEmpty property="paramProductDtTo" prepend="AND">
+          KBN.本機生産年月日 <![CDATA[<=]]> TO_CHAR(#paramProductDtTo#,'YYYYMMDD')
+        </isNotEmpty>
+        <!-- [出荷日(FROM)検索] -->
+        <isNotEmpty property="paramShippedDtFrom" prepend="AND">
+          KBN.出荷年月日 <![CDATA[>=]]> TO_CHAR(#paramShippedDtFrom#,'YYYYMMDD')
+        </isNotEmpty>
+        <!-- [出荷日(TO)検索] -->
+        <isNotEmpty property="paramShippedDtTo" prepend="AND">
+          KBN.出荷年月日 <![CDATA[<=]]> TO_CHAR(#paramShippedDtTo#,'YYYYMMDD')
+        </isNotEmpty>
+      </dynamic>
+    </sql>
+
+  </statements>
+</sqlMap>

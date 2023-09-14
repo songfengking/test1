@@ -1,0 +1,192 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="PickingSummary"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+
+    <!-- ************************************************************************************** -->
+    <!-- [ピッキング状況情報]                                                                   -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectPickingSummary">
+      SELECT
+        TRIM(KPS.PICKING_LIST_NO)                     PICKING_LIST_NO,
+        KPS.SEND_TIME                                 SEND_TIME,
+        KPS.END_TIME                                  END_TIME,
+        TO_CHAR(KPICR.DELIVERY_INSTRUCTION_DATE,'YYYY/MM/DD') DELIVERY_INSTRUCTION_DATE,
+        TRIM(KPS.AREA_NM)                             AREA_NM,
+        CASE
+          WHEN KPS.STATUS = 0 THEN '未着手'
+          WHEN KPS.STATUS = 1 THEN '未着手'
+          WHEN KPS.STATUS = 2 THEN '着手中'
+          WHEN KPS.STATUS = 8 THEN '完了(未完あり)'
+          WHEN KPS.STATUS = 9 THEN '完了'
+        END                                           STATUS,
+        NVL(CAU.USER_NM, KPS.USER_ID)                 PICKING_USER
+      FROM
+        TT_HR_KANBAN_PICKING_SUMMARY KPS
+      LEFT JOIN
+        TM_CC_AUTH_USER CAU
+      ON
+        KPS.USER_ID     = CAU.USER_ID
+      LEFT JOIN
+        TT_HR_KANBAN_PICKING_IDENTIFICATION_CARD_RECORD　KPICR
+      ON
+        KPS.PICKING_LIST_NO = KPICR.PICKING_LIST_NO
+      AND
+       KPICR.DISP_ORDER IN ( SELECT
+                              DISP_ORDER
+                           FROM
+                              TT_HR_KANBAN_PICKING_DETAIL KPD
+                           WHERE
+                              KPS.PICKING_LIST_NO = KPD.PICKING_LIST_NO
+                           AND
+                              KPICR.DISP_ORDER = KPD.DISP_ORDER
+                           AND
+                              KPD.PARTS_NUMBER LIKE #partsNumber# )
+      AND
+        #partsNumber# IS NOT NULL
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="sendFrom" prepend=" AND ">
+          to_char(KPS.SEND_TIME,'yyyy/mm/dd hh24:mi:ss') <![CDATA[>=]]> #sendFrom#
+        </isNotEmpty>
+        <isNotEmpty property="sendTo" prepend=" AND ">
+          to_char(KPS.SEND_TIME,'yyyy/mm/dd hh24:mi:ss') <![CDATA[<=]]> #sendTo#
+        </isNotEmpty>
+        <isNotEmpty property="endFrom" prepend=" AND ">
+          to_char(KPS.END_TIME,'yyyy/mm/dd hh24:mi:ss') <![CDATA[>=]]> #endFrom#
+        </isNotEmpty>
+        <isNotEmpty property="endTo" prepend=" AND ">
+          to_char(KPS.END_TIME,'yyyy/mm/dd hh24:mi:ss') <![CDATA[<=]]> #endTo#
+        </isNotEmpty>
+        <isNotEmpty property="status" prepend="AND">
+          KPS.STATUS IN
+          <iterate property="status" open="(" close=")" conjunction="," >
+            #status[]#
+          </iterate>
+        </isNotEmpty>
+        <isNotEmpty property="areaName" prepend="AND">
+          KPS.AREA_NM = #areaName#
+        </isNotEmpty>
+        <isNotEmpty property="userId" prepend="AND">
+          KPS.USER_ID = #userId#
+        </isNotEmpty>
+        <isNotEmpty property="pickingNo" prepend="AND">
+          KPS.PICKING_LIST_NO LIKE (#pickingNo# || '%')
+        </isNotEmpty>
+        <isNotEmpty property="partsNumber" prepend="AND">
+          EXISTS (
+          SELECT 1
+          FROM TT_HR_KANBAN_PICKING_DETAIL KPD
+          WHERE
+          KPD.PARTS_NUMBER LIKE #partsNumber# || '%'
+          AND
+          KPS.PICKING_LIST_NO = KPD.PICKING_LIST_NO
+          )
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+      KPS.SEND_TIME DESC,
+      KPICR.DELIVERY_INSTRUCTION_DATE ASC
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [未完了ピッキング検索]                                                                 -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectIncompletePicking">
+      SELECT
+      KPS.PICKING_LIST_NO,
+      KPS.SEND_TIME,
+      KPS.AREA_NM,
+      NVL(CAU.USER_NM, KPS.USER_ID) PICKING_USER,
+      KPD.DISP_ORDER,
+      KPD.PARTS_NUMBER,
+      KPD.MATERIAL_NAME,
+      KPD.ZAIKAN_PRIMARY_LOCATION PRIMARY_LOCATION,
+      KPD.ZAIKAN_SECONDARY_LOCATION || '-' || KPD.ZAIKAN_TERTIARY_LOCATION SECONDARY_TERTIARY_LOCATION,
+      KPD.SNP,
+      KPD.PICKING_BOX_COUNT,
+      ORD.MIN_DELIVERY_INST_DT,
+      ORD.UNPAID_QTY
+      FROM
+      TT_HR_KANBAN_PICKING_SUMMARY KPS
+      LEFT JOIN
+      TM_CC_AUTH_USER CAU
+      ON
+      KPS.USER_ID = CAU.USER_ID
+      LEFT JOIN
+      TT_HR_KANBAN_PICKING_DETAIL KPD
+      ON
+      KPS.PICKING_LIST_NO  = KPD.PICKING_LIST_NO
+      LEFT JOIN
+      (
+      SELECT
+      RRO.DELIVERY_INST_DT MIN_DELIVERY_INST_DT,
+      RRO.UNPAID_QTY,
+      RRO.CUT_PARTS_NUM
+      FROM
+      (
+      SELECT
+      PRO.DELIVERY_INST_DT,
+      SUM(PRO.UNPAID_QTY)OVER(PARTITION BY PRO.CUT_PARTS_NUM,DELIVERY_INST_DT) UNPAID_QTY,
+      PRO.CUT_PARTS_NUM,
+      ROW_NUMBER()OVER(PARTITION BY PRO.CUT_PARTS_NUM ORDER BY PRO.DELIVERY_INST_DT) RANK
+      FROM
+      (
+      SELECT
+      TRUNC(RO.DELIVERY_INST_DT,'DD') DELIVERY_INST_DT,
+      RO.UNPAID_QTY,
+      SUBSTR(RO.PARTS_NUM,0,10) CUT_PARTS_NUM
+      FROM TT_KW_RELEASED_ORDER RO
+      WHERE RO.UNPAID_QTY != 0 AND SUBSTR(RO.DELIVERY_POINT,3,1) IN ('3','4','5','9')
+      ) PRO
+      ) RRO
+      WHERE RRO.RANK = 1
+      ) ORD
+      ON
+      KPD.PARTS_NUMBER = ORD.CUT_PARTS_NUM
+      WHERE
+      KPS.STATUS = '8'
+      AND
+      KPD.STATUS IN ('0','1')
+      <isNotNull property="sendFrom" prepend="AND">
+        <!-- 引数.要求日時From(#sendFrom#)がNullでない場合 -->
+        KPS.SEND_TIME <![CDATA[>=]]> #sendFrom#
+      </isNotNull>
+      <isNotNull property="sendTo" prepend="AND">
+        <!-- 引数.要求日時To(#sendTo#)がNullでない場合 -->
+        KPS.SEND_TIME <![CDATA[<=]]> #sendTo#
+      </isNotNull>
+      <isNotEmpty property="areaName" prepend="AND">
+        <!-- 引数.エリア(#areaName#)が空文字でない場合 -->
+        KPS.AREA_NM = #areaName#
+      </isNotEmpty>
+      <isNotEmpty property="primaryLocation" prepend="AND">
+        <!-- 引数.材管ロケ大番地(#primaryLocation#)が空文字でない場合 -->
+        KPD.ZAIKAN_PRIMARY_LOCATION = #primaryLocation#
+      </isNotEmpty>
+      <isNotEmpty property="secondaryLocation" prepend="AND">
+        <!-- 引数.材管ロケ中番地(#secondaryLocation#)が空文字でない場合 -->
+        KPD.ZAIKAN_SECONDARY_LOCATION = #secondaryLocation#
+      </isNotEmpty>
+      <isNotEmpty property="tertiaryLocation" prepend="AND">
+        <!-- 引数.材管ロケ小番地(#tertiaryLocation#)が空文字でない場合 -->
+        KPD.ZAIKAN_TERTIARY_LOCATION = #tertiaryLocation#
+      </isNotEmpty>
+      <isNotEmpty property="userId" prepend="AND">
+        <!-- 引数.ピッキング者(#userId#)が空文字でない場合 -->
+        KPS.USER_ID = #userId#
+      </isNotEmpty>
+      <isNotEmpty property="partsNumber" prepend="AND">
+        <!-- 引数.品番(#partsNumber#)が空文字でない場合 -->
+        KPD.PARTS_NUMBER LIKE #partsNumber# || '%'
+      </isNotEmpty>
+      <isNotEmpty property="pickingNo" prepend="AND">
+        <!-- 引数.ピッキングNo(#pickingNo#)が空文字でない場合 -->
+        KPS.PICKING_LIST_NO LIKE #pickingNo# || '%'
+      </isNotEmpty>
+      ORDER BY
+      KPS.SEND_TIME DESC,
+      KPD.DISP_ORDER
+    </statement>
+  </statements>
+</sqlMap>

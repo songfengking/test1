@@ -1,0 +1,641 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="TractorParts"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ部品一覧:WiFiECU検索]                                                         -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectTractorWifiEcuList">
+      SELECT
+        WEP.KATA_CD                     productModelCd,   <!--型式コード-->
+        WEP.KIBAN                       serial6,          <!--機番-->
+        WEP.START_YMD                   installDt,        <!--組付日-->
+        TRIM(WEP.ECU_KIBAN)             ecuSerial,        <!--ECU機番-->
+        TRIM(WEP.HARD_HINBAN)           hardNum,          <!--WiFiECU品番-->
+        TRIM(WEP.SOFT_HINBAN)           softNum,          <!--INI-W品番-->
+        TRIM(WEP.HARD_ASSY_HINBAN)		  assyNum,          <!--WiFi ECUアッシ品番-->
+        TRIM(WEP.HARD_SOFT_HINBAN_WIFI) softHardWifiNum,  <!--WiFi ECUソフト品番(WiFi)-->
+        TRIM(WEP.HARD_SOFT_HINBAN_KIND) softHardKindNum,  <!--WiFi ECUソフト品番(KIND)-->
+        TRIM(WEP.IC_SOFT_HINBAN_WIFI)   icSoftWifiNum,    <!--WiFi ICソフト品番(WiFi)-->
+        TRIM(WEP.IC_SOFT_HINBAN_KIND)   icSoftKindNum,    <!--WiFi ICソフト品番(KIND)-->
+        TRIM(WEP.HARD_KIBAN)            hardSerial,       <!--WiFi ECU機番-->
+        TRIM(WEP.HOUR_METER_JUD)        hourMeterJudge    <!--ｱﾜｰﾒｰﾀ 判定-->
+      FROM
+        PAIRRSLT_F WEP
+      INNER JOIN
+      (
+        SELECT
+          KOJO_CD, KATA_CD, KIBAN, MAX(START_YMD) START_YMD
+        FROM
+          PAIRRSLT_F
+        GROUP BY
+          KOJO_CD, KATA_CD, KIBAN
+      ) WEP_G ON WEP.KOJO_CD = WEP_G.KOJO_CD AND WEP.KATA_CD = WEP_G.KATA_CD AND WEP.KIBAN = WEP_G.KIBAN AND WEP.START_YMD = WEP_G.START_YMD
+      WHERE
+	      WEP.KOJO_CD = '28' 
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (WEP.KATA_CD, WEP.KIBAN) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <!-- [生産型式コード検索] -->
+        <isNotEmpty property="paramProductModelCd" prepend="AND">
+          WEP.KATA_CD like #paramProductModelCd# || '%'
+        </isNotEmpty>
+        <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+        <isNotEmpty property="paramProductModelCdList" prepend="AND">
+          WEP.KATA_CD IN
+          <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+            #paramProductModelCdList[]#
+          </iterate>
+        </isNotEmpty>
+        <!-- [部品区分検索] -->
+        <isNotEmpty property="paramPartsCd" prepend="AND">
+          BKJ.BUHIN_KUBUN = #paramPartsCd#
+        </isNotEmpty>
+        <!-- [部品品番検索] -->
+        <isNotEmpty property="paramPartsNum" prepend="AND">
+          TRIM(WEP.HARD_HINBAN) like #paramPartsNum# || '%'
+        </isNotEmpty>
+        <!-- [部品機番検索] -->
+        <isNotEmpty property="paramPartsSerial" prepend="AND">
+          TRIM(WEP.HARD_KIBAN) like #paramPartsSerial# || '%'
+        </isNotEmpty>
+        <!-- [組付日(FROM)検索] -->
+        <isNotEmpty property="paramInstallDtFrom" prepend="AND">
+          WEP.START_YMD <![CDATA[>=]]> #paramInstallDtFrom#
+        </isNotEmpty>
+        <!-- [組付日(TO)検索] -->
+        <isNotEmpty property="paramInstallDtTo" prepend="AND">
+          WEP.START_YMD <![CDATA[<=]]> #paramInstallDtTo#
+        </isNotEmpty>
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ部品詳細:WifiECU]                                                             -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectTractorWifiEcuDetail">
+    SELECT
+        PR.KOJO_CD                 plantCd,                <!--工場コード-->
+        PR.KATA_CD                 productModelCd,         <!--本機型式コード-->
+        PR.KIBAN                   serial6,                <!--本機機番-->
+        PR.START_YMD               inspectionDt,           <!--開始日時-->
+        PR.SKATA_N                 productModelNm,         <!--本機型式名-->
+        PR.IDNO                    idno,                   <!--ID No-->
+        TRIM(PR.ECU_KIBAN)         ecuSerial,              <!--本機ECU機番-->
+        TRIM(PR.HARD_HINBAN)       hardHinban,             <!--WIFi ECU品番-->
+        TRIM(PR.ECU_MAC)           ecuMac,                 <!--WiFi ECU MACアドレス-->
+        TRIM(PR.SOFT_HINBAN)       softHinban,             <!--INI-W品番-->
+        TRIM(PR.HARD_ASSY_HINBAN)      hardAssyHinban,         <!--WiFi ECUアッシ品番-->
+        TRIM(PR.HARD_SOFT_HINBAN_WIFI) hardSoftHinbanWifi,     <!--WiFi ECUソフト品番(WiFi)-->
+        TRIM(PR.HARD_SOFT_HINBAN_KIND) hardSoftHinbanKind,     <!--WiFi ECUソフト品番(KIND)-->
+        TRIM(PR.IC_SOFT_HINBAN_WIFI)   icSoftHinbanWifi,       <!--WiFi ICソフト品番(WiFi)-->
+        TRIM(PR.IC_SOFT_HINBAN_KIND)   icSoftHinbanKind,       <!--WiFi ICソフト品番(KIND)-->
+        TRIM(PR.SSID)              ssid,                   <!--SSID-->
+        <!--PR.PASSPHRASE              passPhrase,             パスフレーズ-->
+        TRIM(PR.HARD_KIBAN)        hardSerial,             <!--WIFi ECU機番-->
+        PR.HOUR_METER_WRITE        hourMeterWrite,         <!--書込アワーメータ値-->
+        TRIM(PR.HOUR_METER_JUD)    hourMeterJud,           <!--アワーメータ 判定-->
+        PR.HOUR_METER_START        hourMeterStart,         <!--開始アワーメータ値-->
+        PR.HOUR_METER_END          hourMeterEnd,           <!--終了アワーメータ値-->
+        PR.HOUR_METER_CHECK        hourMeterCheck,         <!--アワーメータ 誤差範囲-->
+        PR.ECU_PAIRING             ecuPairing,             <!--本機ECUペアリング-->
+        CASE                                               <!--本機ECUペアリング-->
+          WHEN PR.ECU_PAIRING = '0' THEN 'ペアリング正常'
+          WHEN PR.ECU_PAIRING = '1' THEN 'ペアリング不一致'
+          WHEN PR.ECU_PAIRING = '2' THEN 'ペアリング確認中'
+          WHEN PR.ECU_PAIRING = '3' THEN 'ペアリング無効'
+          WHEN PR.ECU_PAIRING = '9' THEN ''
+        END ecuPairingStr,
+        PR.COLLECTION              collection,             <!--稼働収集-->
+        CASE                                               <!--稼働収集-->
+          WHEN PR.COLLECTION = '0' THEN '停止中'
+          WHEN PR.COLLECTION = '1' THEN '収集中'
+          WHEN PR.COLLECTION = '9' THEN ''
+        END collectionStr,
+        PR.CHK_MODE                chkMode,                <!--検査モード-->
+        CASE                                               <!--検査モード-->
+          WHEN PR.CHK_MODE = '0' THEN '検査モード'
+          WHEN PR.CHK_MODE = '1' THEN '通常モード'
+          WHEN PR.CHK_MODE = '9' THEN ''
+        END chkModeStr,
+        PR.IGN_STATE               ignState,               <!--IGN状態-->
+        CASE                                               <!--IGN状態-->
+          WHEN PR.IGN_STATE = '0' THEN 'OFF'
+          WHEN PR.IGN_STATE = '1' THEN 'ON'
+          WHEN PR.IGN_STATE = '9' THEN ''
+        END ignStateStr,
+        PR.OUTPUT                  output,                 <!--汎用出力-->
+        CASE                                               <!--汎用出力-->
+          WHEN PR.OUTPUT = '0' THEN 'OFF'
+          WHEN PR.OUTPUT = '1' THEN 'ON'
+          WHEN PR.OUTPUT = '9' THEN ''
+        END outputStr,
+        PR.MANUFACTURE_STATE       eepromManufactureState, <!--EEPROM製造工場設定エリア状態-->
+        CASE                                               <!--EEPROM製造工場設定エリア状態-->
+          WHEN PR.MANUFACTURE_STATE = '0' THEN '正常'
+          WHEN PR.MANUFACTURE_STATE = '1' THEN 'CRC異常'
+          WHEN PR.MANUFACTURE_STATE = '9' THEN ''
+        END eepromManufactureStateStr,
+        PR.SYSTEM_STATE            eepromSystemState,      <!--EEPROMシステム設定エリア状態-->
+        CASE                                               <!--EEPROMシステム設定エリア状態-->
+          WHEN PR.SYSTEM_STATE = '0' THEN '正常'
+          WHEN PR.SYSTEM_STATE = '1' THEN 'CRC異常'
+          WHEN PR.SYSTEM_STATE = '9' THEN ''
+        END eepromSystemStateStr,
+        PR.KOJO_STATE              eepromKojoState,        <!--EEPROM工場設定エリア状態-->
+        CASE                                               <!--EEPROM工場設定エリア状態-->
+          WHEN PR.KOJO_STATE = '0' THEN '正常'
+          WHEN PR.KOJO_STATE = '1' THEN 'CRC異常'
+          WHEN PR.KOJO_STATE = '9' THEN ''
+        END eepromKojoStateStr,
+        PR.COLLECTION_STATE        eepromCollectionState,  <!--EEPROM収集条件設定エリア状態-->
+        CASE                                               <!--EEPROM収集条件設定エリア状態-->
+          WHEN PR.COLLECTION_STATE = '0' THEN '正常'
+          WHEN PR.COLLECTION_STATE = '1' THEN 'CRC異常'
+          WHEN PR.COLLECTION_STATE = '9' THEN ''
+        END eepromCollectionStateStr,
+        PR.KARTE_STATE             eepromKarteState,       <!--EEPROMカルテデータエリア状態-->
+        CASE                                               <!--EEPROMカルテデータエリア状態-->
+          WHEN PR.KARTE_STATE = '0' THEN '正常'
+          WHEN PR.KARTE_STATE = '1' THEN 'CRC異常'
+          WHEN PR.KARTE_STATE = '9' THEN ''
+        END eepromKarteStateStr,
+        PR.ETC_STATE               eepromEtcState,         <!--EEPROMその他エリア状態-->
+        CASE                                               <!--EEPROMその他エリア状態-->
+          WHEN PR.ETC_STATE = '0' THEN '正常'
+          WHEN PR.ETC_STATE = '1' THEN 'CRC異常'
+          WHEN PR.ETC_STATE = '9' THEN ''
+        END eepromEtcStateStr,
+        PR.OPTION_STATE            eepromOptionState,      <!--EEPROM動作オプションエリア状態-->
+        CASE                                               <!--EEPROM動作オプションエリア状態-->
+          WHEN PR.OPTION_STATE = '0' THEN '正常'
+          WHEN PR.OPTION_STATE = '1' THEN 'CRC異常'
+          WHEN PR.OPTION_STATE = '9' THEN ''
+        END eepromOptionStateStr,
+        PR.DEFAULTPASS_STATE       eepromDefaultPassState, <!--EEPROMデフォルトパスフレーズ状態-->
+        CASE                                               <!--EEPROMデフォルトパスフレーズ状態-->
+          WHEN PR.DEFAULTPASS_STATE = '0' THEN '設定済'
+          WHEN PR.DEFAULTPASS_STATE = '1' THEN '未設定'
+          WHEN PR.DEFAULTPASS_STATE = '9' THEN ''
+        END eepromDefaultPassStateStr,
+        PR.USERPASS_STATE          eepromUserPassState,    <!--EEPROMユーザパスフレーズ状態-->
+        CASE                                               <!--EEPROMユーザパスフレーズ状態-->
+          WHEN PR.USERPASS_STATE = '0' THEN '設定済'
+          WHEN PR.USERPASS_STATE = '1' THEN '未設定'
+          WHEN PR.USERPASS_STATE = '9' THEN ''
+        END eepromUserPassStateStr,
+        PR.WORKER_NO               employeeCd,             <!--検査員ID-->
+        PR.USER_N                  employeeNm,             <!--検査員名-->
+        PR.STATUS                  statusCd,               <!--ステータス-->
+        CASE                                               <!--ステータス-->
+          WHEN PR.STATUS = 0 THEN '成功'
+          WHEN PR.STATUS = 1 THEN '中断'
+        END statusStr,
+        WD_KBN              WdKbn,
+        HI_COLLECTION_STATE HiCollectionState,
+        SVR0_STATE          Svr0State,
+        SVR1_STATE          Svr1State,
+        SVR2_STATE          Svr2State,
+        SVR3_STATE          Svr3State,
+        SVR4_STATE          Svr4State,
+        SVR5_STATE          Svr5State,
+        SVR6_STATE          Svr6State,
+        SVR7_STATE          Svr7State,
+        SVR8_STATE          Svr8State,
+        SVR9_STATE          Svr9State,
+        SVR10_STATE         Svr10State,
+        SVR11_STATE         Svr11State,
+        THREEG_STATE        ThreeGState,
+        IMEI                Imei,
+        ICCID               Iccid,
+        INI_XML_HINBAN      IniXmlHinban,
+        AUTHENTICATION_ID   AuthenticationId
+    FROM
+        PAIRRSLT_F PR
+    WHERE
+      <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+      (PR.KATA_CD, PR.KIBAN) IN ((#paramSerial.productModelCd#, #paramSerial.serial6#))
+    ORDER BY
+      PR.START_YMD DESC
+    </statement>
+    
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ部品一覧:ミッション検索]                                                      -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectTractorMissionList">
+      SELECT
+        CI.TRCT_MODEL_CD                productModelCd,
+        CI.COUNTRY_CD                   countryCd,
+        CI.TRCT_SERIAL                  serial6,
+        CI.IDNO                         idno,
+        CI.MTL_KIND                     mtlKind,
+        CI.MTL_PROC_MACHINE             mtlProcMachine,
+        CI.MTL_PROC_JIG                 mtlProcJig,
+        CI.DLV_REQ_LOCATION             dlvReqLocation,
+        CI.DLV_REQ_REASON               dlvReqReason,
+    <!--CI.DLV_REQ_DT                   dlvReqDt,-->
+        CI.DLV_REQ_COMP_DT              dlvReqCompDt,
+        CASE
+          WHEN CI.COMP_SEQ IS NULL THEN NULL
+          WHEN SUBSTR(CI.COMP_SEQ,1,6) IS NOT NULL AND SUBSTR(CI.COMP_SEQ,29,3) IS NULL THEN SUBSTR(CI.COMP_SEQ,1,6)
+          ELSE SUBSTR(CI.COMP_SEQ,1,6) || '-' || SUBSTR(CI.COMP_SEQ,29,3)       
+        END compSeq,
+        CI.TRCT_MODEL_NM                trctModelNm,
+        DRR.PRTS_NUM                    partsNum,
+        CASE WHEN TRIM(DRR.PROCESSING_DATE) IS NOT NULL THEN TO_CHAR(TO_DATE(DRR.PROCESSING_DATE,'YYYYMMDD'),'YYYY/MM/DD')
+             ELSE DRR.PROCESSING_DATE
+            END processingYmd,
+        DRR.DLV_REQ_DT                  dlvReqDt,
+        DRR.OUT_RENBAN                  processingSeq
+      FROM
+        TT_KW_COMP_INFO CI
+      LEFT JOIN (
+              SELECT
+                  IDNO,                   <!--IDNO-->
+                  PRTS_NUM,               <!--品番-->
+                  PROCESSING_DATE,        <!--加工日-->
+                  DLV_REQ_DT,             <!--出庫要求日-->
+                  OUT_RENBAN              <!--出庫連番-->
+              FROM
+                  TT_KW_DLV_REQ_RCD
+              WHERE
+                  STATUS = '2'
+              AND MTL_KIND IN (
+                                SELECT DISTINCT
+                                    SUBSTR(MTRL_CD,1,1)
+                                FROM
+                                    TM_KW_MTRL_TYP
+                                WHERE
+                                    TRCT_PROD_TYP='TM'
+                                AND LINE_CD IN ('001110','001120')
+                              )
+          )  DRR
+          ON  CI.IDNO = DRR.IDNO
+      WHERE
+        CI.MTL_KIND IN ('3', '6')
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (CI.TRCT_MODEL_CD, CI.TRCT_SERIAL) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <isNotEmpty property="paramPartsNum" prepend="AND">
+          SUBSTR(CI.COMP_SEQ,20,9) = #paramPartsNum#
+        </isNotEmpty>
+    </statement>
+    
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ部品詳細:ミッション検索]                                                      -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectTractorMissionDetail">
+      SELECT
+        CI.PLANT_CD                     plantCd,
+        CI.STATION_CD                   stationCd,
+        CI.TRCT_MODEL_CD                trctModelCd,
+        CI.COUNTRY_CD                   countryCd,
+        CI.TRCT_SERIAL                  trctSerial,
+        CI.IDNO                         idno,
+        CI.MTL_KIND                     mtlKind,
+        CI.MTL_PROC_MACHINE             mtlProcMachine,
+        CI.MTL_PROC_JIG                 mtlProcJig,
+        CI.DLV_REQ_LOCATION             dlvReqLocation,
+        CI.DLV_REQ_REASON               dlvReqReason,
+    <!--CI.DLV_REQ_DT                   dlvReqDt,-->
+        CI.DLV_REQ_COMP_DT              dlvReqCompDt,
+        CASE
+          WHEN CI.COMP_SEQ IS NULL THEN NULL
+          WHEN SUBSTR(CI.COMP_SEQ,1,6) IS NOT NULL AND SUBSTR(CI.COMP_SEQ,29,3) IS NULL THEN SUBSTR(CI.COMP_SEQ,1,6)
+          ELSE SUBSTR(CI.COMP_SEQ,1,6) || '-' || SUBSTR(CI.COMP_SEQ,29,3)       
+        END compSeq,
+        CI.TRCT_MODEL_NM                trctModelNm,
+        DRR.PRTS_NUM                    partsNum,
+        CASE WHEN TRIM(DRR.PROCESSING_DATE) IS NOT NULL THEN TO_CHAR(TO_DATE(DRR.PROCESSING_DATE,'YYYYMMDD'),'YYYY/MM/DD')
+             ELSE DRR.PROCESSING_DATE
+            END processingYmd,
+        DRR.DLV_REQ_DT                  dlvReqDt,
+        DRR.OUT_RENBAN                  processingSeq
+      FROM
+        TT_KW_COMP_INFO CI
+      LEFT JOIN (
+              SELECT
+                  IDNO,                   <!--IDNO-->
+                  PRTS_NUM,               <!--品番-->
+                  PROCESSING_DATE,        <!--加工日-->
+                  DLV_REQ_DT,             <!--出庫要求日-->
+                  OUT_RENBAN              <!--出庫連番-->
+              FROM
+                  TT_KW_DLV_REQ_RCD
+              WHERE
+                  STATUS = '2'
+              AND MTL_KIND IN (
+                                SELECT DISTINCT
+                                    SUBSTR(MTRL_CD,1,1)
+                                FROM
+                                    TM_KW_MTRL_TYP
+                                WHERE
+                                    TRCT_PROD_TYP='TM'
+                                AND LINE_CD IN ('001110','001120')
+                              )
+          )  DRR
+          ON  CI.IDNO = DRR.IDNO
+      WHERE
+        CI.MTL_KIND IN ('3', '6') AND
+        CI.TRCT_MODEL_CD = #productModelCd# AND
+        CI.TRCT_SERIAL = #serial#
+    </statement>
+    
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ部品一覧:ハウジング検索]                                                      -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectTractorHousingList">
+      SELECT
+        CI.TRCT_MODEL_CD                productModelCd,
+        CI.COUNTRY_CD                   countryCd,
+        CI.TRCT_SERIAL                  serial6,
+        CI.IDNO                         idno,
+        CI.MTL_KIND                     mtlKind,
+        CI.MTL_PROC_MACHINE             mtlProcMachine,
+        CI.MTL_PROC_JIG                 mtlProcJig,
+        CI.DLV_REQ_LOCATION             dlvReqLocation,
+        CI.DLV_REQ_REASON               dlvReqReason,
+    <!--CI.DLV_REQ_DT                   dlvReqDt,-->
+        CI.DLV_REQ_COMP_DT              dlvReqCompDt,
+        CASE
+          WHEN CI.COMP_SEQ IS NULL THEN NULL
+          WHEN SUBSTR(CI.COMP_SEQ,1,6) IS NOT NULL AND SUBSTR(CI.COMP_SEQ,29,3) IS NULL THEN SUBSTR(CI.COMP_SEQ,1,6)
+          ELSE SUBSTR(CI.COMP_SEQ,1,6) || '-' || SUBSTR(CI.COMP_SEQ,29,3)       
+        END compSeq,
+        CI.TRCT_MODEL_NM                trctModelNm,
+        DRR.PRTS_NUM                    partsNum,
+        CASE WHEN TRIM(DRR.PROCESSING_DATE) IS NOT NULL THEN TO_CHAR(TO_DATE(DRR.PROCESSING_DATE,'YYYYMMDD'),'YYYY/MM/DD')
+             ELSE DRR.PROCESSING_DATE
+            END processingYmd,
+        DRR.DLV_REQ_DT                  dlvReqDt,
+        DRR.OUT_RENBAN                  processingSeq
+      FROM
+        TT_KW_COMP_INFO CI
+      LEFT JOIN (
+              SELECT
+                  IDNO,                   <!--IDNO-->
+                  PRTS_NUM,               <!--品番-->
+                  PROCESSING_DATE,        <!--加工日-->
+                  DLV_REQ_DT,             <!--出庫要求日-->
+                  OUT_RENBAN              <!--出庫連番-->
+              FROM
+                  TT_KW_DLV_REQ_RCD
+              WHERE
+                  STATUS = '2'
+              AND MTL_KIND IN (
+                                SELECT DISTINCT
+                                    SUBSTR(MTRL_CD,1,1)
+                                FROM
+                                    TM_KW_MTRL_TYP
+                                WHERE
+                                    TRCT_PROD_TYP='CH'
+                                AND LINE_CD IN ('001110','001120')
+                              )
+          )  DRR
+          ON  CI.IDNO = DRR.IDNO
+      WHERE
+        CI.MTL_KIND IN ('1', '4', '8')
+        <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (CI.TRCT_MODEL_CD, CI.TRCT_SERIAL) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+          </iterate>
+        </isNotEmpty>
+        <isNotEmpty property="paramPartsNum" prepend="AND">
+          SUBSTR(CI.COMP_SEQ,20,9) = #paramPartsNum#
+        </isNotEmpty>
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ部品詳細:ハウジング検索]                                                      -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectTractorHousingDetail">
+      SELECT
+        CI.PLANT_CD                     plantCd,
+        CI.STATION_CD                   stationCd,
+        CI.TRCT_MODEL_CD                trctModelCd,
+        CI.COUNTRY_CD                   countryCd,
+        CI.TRCT_SERIAL                  trctSerial,
+        CI.IDNO                         idno,
+        CI.MTL_KIND                     mtlKind,
+        CI.MTL_PROC_MACHINE             mtlProcMachine,
+        CI.MTL_PROC_JIG                 mtlProcJig,
+        CI.DLV_REQ_LOCATION             dlvReqLocation,
+        CI.DLV_REQ_REASON               dlvReqReason,
+    <!--CI.DLV_REQ_DT                   dlvReqDt,-->
+        CI.DLV_REQ_COMP_DT              dlvReqCompDt,
+        CASE
+          WHEN CI.COMP_SEQ IS NULL THEN NULL
+          WHEN SUBSTR(CI.COMP_SEQ,1,6) IS NOT NULL AND SUBSTR(CI.COMP_SEQ,29,3) IS NULL THEN SUBSTR(CI.COMP_SEQ,1,6)
+          ELSE SUBSTR(CI.COMP_SEQ,1,6) || '-' || SUBSTR(CI.COMP_SEQ,29,3)       
+        END compSeq,
+        CI.TRCT_MODEL_NM                trctModelNm,
+        DRR.PRTS_NUM                    partsNum,
+        CASE WHEN TRIM(DRR.PROCESSING_DATE) IS NOT NULL THEN TO_CHAR(TO_DATE(DRR.PROCESSING_DATE,'YYYYMMDD'),'YYYY/MM/DD')
+             ELSE DRR.PROCESSING_DATE
+            END processingYmd,
+        DRR.DLV_REQ_DT                  dlvReqDt,
+        DRR.OUT_RENBAN                  processingSeq
+      FROM
+        TT_KW_COMP_INFO CI
+      LEFT JOIN (
+              SELECT
+                  IDNO,                   <!--IDNO-->
+                  PRTS_NUM,               <!--品番-->
+                  PROCESSING_DATE,        <!--加工日-->
+                  DLV_REQ_DT,             <!--出庫要求日-->
+                  OUT_RENBAN              <!--出庫連番-->
+              FROM
+                  TT_KW_DLV_REQ_RCD
+              WHERE
+                  STATUS = '2'
+              AND MTL_KIND IN (
+                                SELECT DISTINCT
+                                    SUBSTR(MTRL_CD,1,1)
+                                FROM
+                                    TM_KW_MTRL_TYP
+                                WHERE
+                                    TRCT_PROD_TYP='CH'
+                                AND LINE_CD IN ('001110','001120')
+                              )
+          )  DRR
+          ON  CI.IDNO = DRR.IDNO
+      WHERE
+        CI.MTL_KIND IN ('1', '4', '8') AND
+        CI.TRCT_MODEL_CD = #productModelCd# AND
+        CI.TRCT_SERIAL = #serial#
+    </statement>
+    
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ部品一覧:銘板ラベル検索]                                                      -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectTractorNameplateList">
+      SELECT
+          MODEL_CD "productModelCd",
+          SERIAL_NO "serial6",
+          IDNO "idno",
+          PRINT_DT "installDt",
+          PRINT_CONTENTS_4 "namePlateCd",
+          PRINT_CONTENTS_5 "namePlateNm",
+          PRINT_CONTENTS_7 "subProductCd",
+          NAME_PLATE_KIND_NM "plateType"
+      FROM
+          (
+              SELECT
+                  PR.MODEL_CD,
+                  PR.SERIAL_NO,
+                  PR.IDNO,
+                  PR.PRINT_DT,
+                  MAX(PR.PRINT_DT) OVER (PARTITION BY PR.MODEL_CD, PR.SERIAL_NO, PRINT_TYPE) "MAX_PRINT_DT",
+                  PR.PRINT_CONTENTS_4,
+                  PR.PRINT_CONTENTS_5,
+                  PR.PRINT_CONTENTS_7,
+                  NPK.NAME_PLATE_KIND_NM
+              FROM
+                  TT_SQ_PRINTOUT_RECORD PR
+              LEFT JOIN
+                  TM_SQ_NAME_PLATE_KIND NPK
+                      ON (PR.PRINT_CONTENTS_3 = NPK.NAME_PLATE_KIND_CD)
+              WHERE
+                  PR.PRINT_TYPE IN ('11','12','13')
+                  <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+                  <isNotEmpty property="paramSerialList" prepend="AND">
+                    (PR.MODEL_CD, PR.SERIAL_NO) IN
+                    <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+                      (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+                    </iterate>
+                  </isNotEmpty>
+                  <!-- [生産型式コード検索] -->
+                  <isNotEmpty property="paramProductModelCd" prepend="AND">
+                    PR.MODEL_CD like #paramProductModelCd# || '%'
+                  </isNotEmpty>
+                  <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+                  <isNotEmpty property="paramProductModelCdList" prepend="AND">
+                    PR.MODEL_CD IN
+                    <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+                      #paramProductModelCdList[]#
+                    </iterate>
+                  </isNotEmpty>
+                  <!-- [発行日(FROM)検索] -->
+                  <isNotEmpty property="paramInstallDtFrom" prepend="AND">
+                    PRINT_DT <![CDATA[>=]]> #paramInstallDtFrom#
+                  </isNotEmpty>
+                  <!-- [発行日(TO)検索] -->
+                  <isNotEmpty property="paramInstallDtTo" prepend="AND">
+                    PRINT_DT <![CDATA[<=]]> #paramInstallDtTo#
+                  </isNotEmpty>
+                  <!-- [機番検索] -->
+                  <isNotEmpty property="paramSerial" prepend="AND">
+                    PR.SERIAL_NO = #paramSerial#
+                  </isNotEmpty>
+          )
+      WHERE
+          PRINT_DT = MAX_PRINT_DT
+    </statement>
+    
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ部品一覧:基幹部品検索]                                                      -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectTractorCorePartsList">
+      SELECT
+        MP.MOUNT_DATE installDt, 
+        MP.MS_STATION stationCd, 
+        NULL stationNm, 
+        MP.PARTS_TYPE partsType, 
+        TI.PARTS_TYPE_NM partsTypeNm, 
+        MP.MS_B_KATA_C productModelCd, 
+        MP.MS_KIBAN serial6, 
+        MP.RECORD_NO historyIndex, 
+        MP.PARTS_NUM partsNum, 
+        MP.PARTS_SERIAL partsSerial 
+      FROM
+        TM_SQ_CPT_TRACEABLE_ITEM TI 
+      INNER JOIN TT_SQ_CPT_MOUNT_PARTS MP 
+        ON TI.MS_STATION = MP.MS_STATION 
+        AND TI.PARTS_TYPE = MP.PARTS_TYPE 
+      WHERE
+        TI.PRODUCT_KIND_CD = '30'
+      <!-- [クラスコード検索] -->
+      <isNotEmpty property="paramPartsCd" prepend="AND">
+        TI.CLASS_CD = #paramPartsCd#
+      </isNotEmpty>        
+      <!-- [機番検索](modelCd/serial6メンバを含むリスト) -->
+      <isNotEmpty property="paramSerialList" prepend="AND">
+        (MP.MS_B_KATA_C, MP.MS_KIBAN) IN
+        <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+          (#paramSerialList[].productModelCd#, #paramSerialList[].serial6#)
+        </iterate>
+      </isNotEmpty>
+      <!-- [生産型式コード検索] -->
+      <isNotEmpty property="paramProductModelCd" prepend="AND">
+        MP.MS_B_KATA_C like #paramProductModelCd# || '%'
+      </isNotEmpty>
+      <!-- [生産型式コードリスト検索(型式名からの逆引き用)] -->
+      <isNotEmpty property="paramProductModelCdList" prepend="AND">
+        MP.MS_B_KATA_C IN
+        <iterate property="paramProductModelCdList" open="(" close=")" conjunction="," >
+          #paramProductModelCdList[]#
+        </iterate>
+      </isNotEmpty>
+      <!-- [部品品番検索] -->
+      <isNotEmpty property="paramPartsNum" prepend="AND">
+        TRIM(MP.PARTS_NUM) like #paramPartsNum# || '%'
+      </isNotEmpty>
+      <!-- [部品機番検索] -->
+      <isNotEmpty property="paramPartsSerial" prepend="AND">
+        TRIM(MP.PARTS_SERIAL) like #paramPartsSerial# || '%'
+      </isNotEmpty>      
+      <!-- [発行日(FROM)検索] -->
+      <isNotEmpty property="paramInstallDtFrom" prepend="AND">
+        MP.MOUNT_DATE <![CDATA[>=]]> #paramInstallDtFrom#
+      </isNotEmpty>
+      <!-- [発行日(TO)検索] -->
+      <isNotEmpty property="paramInstallDtTo" prepend="AND">
+        MP.MOUNT_DATE <![CDATA[<=]]> #paramInstallDtTo#
+      </isNotEmpty>
+    </statement>
+    
+    <!-- ************************************************************************************** -->
+    <!-- [トラクタ部品詳細:基幹部品検索]                                                      -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectTractorCorePartsDetail">
+      SELECT
+        MP.MOUNT_DATE installDt, 
+        MP.MS_STATION stationCd, 
+        NULL stationNm, 
+        MP.PARTS_TYPE partsType, 
+        TI.PARTS_TYPE_NM partsTypeNm, 
+        MP.MS_B_KATA_C productModelCd, 
+        MP.MS_KIBAN serial6, 
+        MP.RECORD_NO historyIndex, 
+        MP.PARTS_NUM partsNum, 
+        MP.PARTS_SERIAL partsSerial 
+      FROM
+        TM_SQ_CPT_TRACEABLE_ITEM TI 
+        INNER JOIN TT_SQ_CPT_MOUNT_PARTS MP 
+          ON TI.MS_STATION = MP.MS_STATION 
+          AND TI.PARTS_TYPE = MP.PARTS_TYPE 
+      WHERE
+        TI.PRODUCT_KIND_CD = '30' AND
+        TI.CLASS_CD = #partsCd# AND 
+        MP.MS_B_KATA_C = #productModelCd# AND 
+        MP.MS_KIBAN = #serial#
+      ORDER BY
+        MP.PARTS_TYPE, 
+        MP.MS_STATION, 
+        MP.MS_B_KATA_C, 
+        MP.MS_KIBAN, 
+        MP.RECORD_NO DESC
+    </statement>
+    
+  </statements>
+</sqlMap>

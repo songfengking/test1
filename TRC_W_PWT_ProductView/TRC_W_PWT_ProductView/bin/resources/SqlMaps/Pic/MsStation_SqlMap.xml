@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="MsStation"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <!-- ************************************************************************************** -->
+    <!-- ステーション一覧検索(検索画面からの呼び出し)                                           -->
+    <!--                                                                                        -->
+    <!-- PARAMETER:                                                                             -->
+    <!--   なし                                                                                 -->
+    <!--                                                                                        -->
+    <!-- ************************************************************************************** -->
+    <statement id="Select">
+      SELECT
+        MS_STATION							stationCd, 	/*ステーションコード*/
+        MS_LINE								  lineCd,			/*ラインコード*/
+        MS_ST_NAME							stationNm		/*ステーション名*/
+      FROM
+        MS_STATION
+      ORDER BY
+        MS_STATION
+    </statement>
+  </statements>
+</sqlMap>

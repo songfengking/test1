@@ -1,0 +1,73 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="MasterSub.master.cs" Inherits="TRC_W_PWT_ProductView.UI.MasterForm.MasterSub" %>
+<%@ Import Namespace="TRC_W_PWT_ProductView.Common" %>
+<%@ Register src="~/UI/Pages/UserControl/InputModal.ascx" tagname="InputModal" tagprefix="UC" %>
+
+<!DOCTYPE html>
+<html lang="ja">
+<head runat="server">
+    <meta http-equiv="X-UA-Compatible" content="IE=EDGE"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta charset="utf-8" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title><%: Page.Title %> - <%: WebAppInstance.GetInstance().ProjectCode %></title>
+    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+
+    <meta name="viewport" content="width=device-width" />
+    <%-- マスター画面CSS/スクリプト定義領域 --%>
+    <link href="~/CSS/cobalt/jquery-wijmo.css" rel="stylesheet" />
+    <link href="~/CSS/Base.css" rel="stylesheet" runat="server" />
+    <link href="~/CSS/TRC.css" rel="stylesheet" runat="server" />
+
+    <asp:PlaceHolder ID="BaseScripts" runat="server">
+        <script src="<%: ResolveUrl( "~/Scripts/LibScript/jquery-1.11.1.min.js") %>" ></script>
+        <script src="<%: PageUtils.ResolveUrl( this.Page, "~/Scripts/MasterSub.js") %>" ></script>
+        <script src="<%: PageUtils.ResolveUrl( this.Page, "~/Scripts/KeyControl.js") %>" ></script>
+        <script src="<%: PageUtils.ResolveUrl( this.Page, "~/Scripts/Common.js") %>" ></script>
+    </asp:PlaceHolder>
+    <%-- 画面別スクリプト定義領域 --%>
+    <asp:ContentPlaceHolder runat="server" ID="MasterScript" />
+</head>
+<body onload="MasterSub.Resize();" onresize="MasterSub.Resize();">
+    <form id="frmSub" runat="server">
+       <ASP:ScriptManager ID="spnMaster" runat="server" ScriptMode="Inherit" EnableScriptLocalization="true" />
+        <!-- コンテナ -->
+        <div id="main-container">
+            <%-- コンテンツ領域(上) --%>
+            <div id="containts-area-top">
+                <%--  画面別コンテンツ領域 --%>
+                <asp:ContentPlaceHolder runat="server" ID="MasterBodyTop" />
+            </div>
+            <%-- コンテンツ領域(中央 可変) --%>
+            <div id="containts-area">
+                <%--  画面別コンテンツ領域 --%>
+                <asp:ContentPlaceHolder runat="server" ID="MasterBody" />
+            </div>
+            <%-- コンテンツ領域(下) --%>
+            <div id="containts-area-bottom">
+                <%--  画面別コンテンツ領域 --%>
+                <asp:ContentPlaceHolder runat="server" ID="MasterBodyBottom" />
+            </div>
+        </div>
+        <%-- フッタ領域 --%>
+        <footer id="footer-area">
+            <div id="footer-group">
+                <div id="footer-message-area">
+                    <asp:UpdatePanel ID="upnApplicationMessage" runat="server">
+                        <ContentTemplate>
+                            <asp:TextBox ID="txtApplicationMessage" runat="server" CssClass="footer-message-box" ReadOnly="True" Rows="2" TextMode="MultiLine" />
+                        </ContentTemplate>
+                    </asp:UpdatePanel>
+                </div>
+            </div>
+        </footer>
+        <div class="invisible">
+            <%-- 画面トークン退避 --%>
+            <asp:HiddenField ID="hdnToken" runat="server" />
+            <%-- フォーカスコントロール --%>
+            <asp:HiddenField ID="hdnFocus" runat="server" />
+        </div>
+    </form>
+</body>
+</html>

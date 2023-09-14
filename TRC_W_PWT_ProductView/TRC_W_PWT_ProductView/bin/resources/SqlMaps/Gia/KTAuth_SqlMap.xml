@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="KTAuth"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <statement id="SelectAPMaster">
+      SELECT
+        アプリケーションID AS ApplicationID
+      , アプリケーション名 AS ApplicationNm
+      , アプリケーション表示名
+      , リリースバージョン
+      , リリース日
+      , URL
+      , テストURL
+      , WEBサービス利用サイン
+      , WEBサービスURL AS ServiceUrl
+      , 概要
+      , 備考
+      FROM TBL_KTAUTHAPマスタ
+      WHERE
+        アプリケーションID = #ApplicationID#
+    </statement>
+  </statements>
+  <statements>
+    <statement id="SelectLogonInfo">
+      SELECT
+        ログオンID            AS LogonID
+      , IPアドレス            AS IPAddress
+      , ユーザID              AS UserID
+      , ログオン日時          AS LogonTm
+      , 認証サーバ名          AS ServerNm
+      , アプリケーションID    AS ApplicationID
+      , URL番号               AS UrlNo
+      FROM TBL_KTAUTHログオン認証情報
+      WHERE
+      ログオンID = #LogonID#
+    </statement>
+  </statements>
+</sqlMap>

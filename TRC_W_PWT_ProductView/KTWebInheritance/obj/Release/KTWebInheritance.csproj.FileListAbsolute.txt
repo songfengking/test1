@@ -1,0 +1,11 @@
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebInheritance\bin\Release\KTWebInheritance.dll
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebInheritance\bin\Release\KTWebInheritance.pdb
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebInheritance\bin\Release\KTCommon.dll
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebInheritance\bin\Release\log4net.dll
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebInheritance\bin\Release\KTCommon.pdb
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebInheritance\bin\Release\KTCommon.xml
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebInheritance\obj\Release\KTWebInheritance.csproj.AssemblyReference.cache
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebInheritance\obj\Release\KTWebInheritance.csproj.CoreCompileInputs.cache
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebInheritance\obj\Release\KTWebInheritance.csproj.CopyComplete
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebInheritance\obj\Release\KTWebInheritance.dll
+C:\Users\ho.so\Desktop\workzone\source\source\TRC_W_PWT_ProductView\KTWebInheritance\obj\Release\KTWebInheritance.pdb

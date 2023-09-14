@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="AccessCounter"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <statement id="Update">
+      UPDATE TBL_KTAUTHAPアクセスカウンタ
+      SET カウンタ = カウンタ +1
+         ,更新日時 = SYSDATE
+         ,更新者 = #userId#
+         ,更新プログラム = #applicationId#
+      WHERE アプリケーションID = #applicationId#
+        AND ページID = #pageId#
+        AND 集計日 = #sumDate#
+    </statement>
+    <statement id="Insert">
+      INSERT INTO TBL_KTAUTHAPアクセスカウンタ
+      (アプリケーションID, ページID, 集計日, カウンタ, 作成日時, 作成者, 作成プログラム, 更新日時, 更新者, 更新プログラム)
+      VALUES 
+      (
+        #applicationId#
+       ,#pageId#
+       ,#sumDate#
+       ,1
+       ,SYSDATE
+       ,#userId#
+       ,#applicationId#
+       ,SYSDATE
+       ,#userId#
+       ,#applicationId#
+      )
+    </statement>
+  </statements>
+</sqlMap>

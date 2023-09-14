@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="KatashikiMaster"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <statement id="SelectData">
+      SELECT
+         PLANT_CD  工場,
+         PRODUCT_MODEL_CD  型式コード,
+         ASSEMBLY_PATTERN_CD || ASSEMBLY_PATTERN_SUB_CD  パターンコード
+      FROM
+         VM_CC_PRODUCT_MODEL
+      WHERE
+         PLANT_CD = #plantCode# AND
+         PRODUCT_MODEL_CD = #katashikiCode#
+    </statement>
+  </statements>
+</sqlMap>

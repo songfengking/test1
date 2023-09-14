@@ -1,0 +1,449 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="Atu"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <!-- ************************************************************************************** -->
+    <!-- [ATU一覧:ATU投入順序検索]                                                              -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectAtuThrowOrderList">
+      WITH ATUMAIN AS
+          (SELECT
+          CASE
+              WHEN ATU.COMPLETION_STATUS = '0' THEN '未処理'
+              WHEN ATU.COMPLETION_STATUS = '1' THEN '保留'
+              WHEN ATU.COMPLETION_STATUS = '2' THEN '完了'
+              WHEN ATU.COMPLETION_STATUS = '5' THEN '処理中'
+              WHEN ATU.COMPLETION_STATUS = '6' THEN '外観NG'
+          END                                                                                             productStatus,
+          CASE
+              WHEN ATU.MODEL_TYPE = '1' THEN '1'
+              WHEN ATU.MODEL_TYPE = '3' THEN '3'
+              WHEN ATU.MODEL_TYPE = 'A' THEN '1'
+              WHEN ATU.MODEL_TYPE = 'B' THEN
+		          (CASE
+		              WHEN SAM.MODEL_TYPE = '1' THEN '1'
+		              WHEN SAM.MODEL_TYPE = '3' THEN '3'
+		          END)
+              WHEN ATU.MODEL_TYPE = 'C' THEN
+		          (CASE
+		              WHEN KBN.部品区分 IS NOT NULL AND KBN.部品区分 = '05' THEN '1'
+		              WHEN KBN.部品区分 IS NOT NULL AND KBN.部品区分 = '11' THEN '3'
+		              WHEN KBN.部品区分 IS NULL AND KNS.部位コード = '0101' THEN '1'
+		              WHEN KBN.部品区分 IS NULL AND KNS.部位コード = '0201' THEN '3'
+		          END)
+          END                                                                                              modelTypeCd,
+          CASE
+              WHEN ATU.MODEL_TYPE = '1' THEN 'DPF'
+              WHEN ATU.MODEL_TYPE = '3' THEN 'DOC'
+              WHEN ATU.MODEL_TYPE = 'A' THEN 'DPF'
+              WHEN ATU.MODEL_TYPE = 'B' THEN
+		          (CASE
+		              WHEN SAM.MODEL_TYPE = '1' THEN 'DPF'
+		              WHEN SAM.MODEL_TYPE = '3' THEN 'DOC'
+		          END)
+              WHEN ATU.MODEL_TYPE = 'C' THEN
+		          (CASE
+		              WHEN KBN.部品区分 IS NOT NULL AND KBN.部品区分 = '05' THEN 'DPF'
+		              WHEN KBN.部品区分 IS NOT NULL AND KBN.部品区分 = '11' THEN 'DOC'
+		              WHEN KBN.部品区分 IS NULL AND KNS.部位コード = '0101' THEN 'DPF'
+		              WHEN KBN.部品区分 IS NULL AND KNS.部位コード = '0201' THEN 'DOC'
+		          END)
+          END                                                                                              modelType,
+          CASE
+              WHEN ATU.MODEL_TYPE = '1' THEN '定常品'
+              WHEN ATU.MODEL_TYPE = '3' THEN '定常品'
+              WHEN ATU.MODEL_TYPE = 'A' THEN '堺DPF'
+              WHEN ATU.MODEL_TYPE = 'B' THEN '検査戻り'
+              WHEN ATU.MODEL_TYPE = 'C' THEN 'E環戻り'
+          END                                                                                              status,
+          ATU.MODEL_CD                                                                                     modelCd,
+          NULL                                                                                             modelCdStr,
+          ATU.MODEL_NM                                                                                     modelNm,
+          ATU.FULL_ASSY_PARTS_NUM                                                                          fullAssyPartsNum,
+          NULL                                                                                             fullAssyPartsNumStr,
+          ATU.SERIAL                                                                                       serial,
+          ENGINE_MODEL_CD                                                                                  engineModelCd,
+          NULL                                                                                             engineModelCdStr,
+          ENGINE_MODEL_NM                                                                                  engineModelNm,
+          ENGINE_SERIAL                                                                                    engineSerial,
+          ENGINE_IDNO                                                                                      engineIdno,
+          TRACTOR_MODEL_CD                                                                                 tractorModelCd,
+          NULL                                                                                             tractorModelCdStr,
+          TRACTOR_MODEL_NM                                                                                 tractorModelNm,
+          TRACTOR_SERIAL                                                                                   tractorSerial,
+          TRACTOR_IDNO                                                                                     tractorIdno,
+          TO_CHAR(ATU.CREATE_DT,'yyyy/mm/dd hh24:mi:ss')                                                   createDt,
+          TO_CHAR(ATU.THROW_DT,'yyyy/mm/dd hh24:mi:ss')                                                    throwDt,
+          TO_CHAR(ATU.COMPLETION_DT,'yyyy/mm/dd hh24:mi:ss')                                               completionDt,
+          ATU.THROW_YM || '-' || LPAD(ATU.THROW_SEQUENCE_NUM,5,'0')|| '-' || LPAD(ATU.THROW_SUB_NUM,3,'0') throwMonthlySequenceNum,
+          CASE
+            WHEN ATU.THROW_DESTINATION = '01' THEN 'HS'
+            WHEN ATU.THROW_DESTINATION = '02' THEN 'OEM'
+            WHEN ATU.THROW_DESTINATION = '03' THEN 'KIE'
+            WHEN ATU.THROW_DESTINATION = '04' THEN '検査'
+            WHEN ATU.THROW_DESTINATION = '05' THEN 'E環'
+            WHEN ATU.THROW_DESTINATION = '06' THEN 'サービス(筑波)'
+            WHEN ATU.THROW_DESTINATION = '07' THEN 'サービス(他工場・OEM先)'
+          END                                                                                              throwDestination,
+          CASE
+            WHEN ATU.COMPLETION_DESTINATION = '01' THEN 'HS'
+            WHEN ATU.COMPLETION_DESTINATION = '02' THEN 'OEM'
+            WHEN ATU.COMPLETION_DESTINATION = '03' THEN '久和(KIE)'
+            WHEN ATU.COMPLETION_DESTINATION = '04' THEN '検査'
+            WHEN ATU.COMPLETION_DESTINATION = '05' THEN 'E環'
+            WHEN ATU.COMPLETION_DESTINATION = '06' THEN 'サービス(筑波)'
+            WHEN ATU.COMPLETION_DESTINATION = '07' THEN 'サービス(他工場・OEM先)'
+            WHEN ATU.COMPLETION_DESTINATION = '08' THEN '久和(単体)'
+          END                                                                                               completionDestination
+          FROM
+              TT_SI_ATU_THROW_ORDER ATU
+          LEFT JOIN
+              TT_SI_ATU_SAMPLING_INSPECTION SAM ON ATU.MODEL_CD = SAM.MODEL_CD AND ATU.SERIAL = SAM.SERIAL
+          LEFT JOIN
+              TBL_DPF機番情報 KBN ON ATU.MODEL_CD = KBN.DPFフルアッシ型式コード AND ATU.SERIAL = KBN.DPFフルアッシ機番
+          LEFT JOIN
+              TBL_DPF検査情報 KNS ON ATU.MODEL_CD = KBN.DPFフルアッシ型式コード AND ATU.SERIAL = KNS.DPFフルアッシ機番
+          <dynamic prepend="WHERE">
+            <!-- [ATU型式コード検索] -->
+            <isNotEmpty property="paramModelCd" prepend="AND">
+              ATU.MODEL_CD like #paramModelCd# || '%'
+            </isNotEmpty>
+            <!-- [ATU型式名検索] -->
+            <isNotEmpty property="paramModelNm" prepend="AND">
+              ATU.MODEL_Nm like #paramModelNm# || '%'
+            </isNotEmpty>
+            <!-- [機番検索] -->
+            <isNotEmpty property="paramSerial" prepend="AND">
+              ATU.SERIAL like #paramSerial# || '%'
+            </isNotEmpty>
+            <!-- [IDNO検索] -->
+            <!--<isNotEmpty property="paramIdno" prepend="AND">
+              ATU.ENGINE_IDNO like #paramIdno# || '%'
+            </isNotEmpty>-->
+            <!-- [フルアッシ品番検索] -->
+            <isNotEmpty property="paramPartsNum" prepend="AND">
+              ATU.FULL_ASSY_PARTS_NUM like #paramPartsNum# || '%'
+            </isNotEmpty>
+            <!-- [生産指示日(FROM)検索] -->
+            <isNotEmpty property="paramProductInstDtFrom" prepend="AND">
+              ATU.CREATE_DT <![CDATA[>=]]> #paramProductInstDtFrom#
+            </isNotEmpty>
+            <!-- [生産指示日(TO)検索] -->
+            <isNotEmpty property="paramProductInstDtTo" prepend="AND">
+              ATU.CREATE_DT <![CDATA[<=]]> #paramProductInstDtTo#
+            </isNotEmpty>
+            <!-- [投入日(FROM)検索] -->
+            <isNotEmpty property="paramThrowDtFrom" prepend="AND">
+              ATU.THROW_DT <![CDATA[>=]]> #paramThrowDtFrom#
+            </isNotEmpty>
+            <!-- [投入日(TO)検索] -->
+            <isNotEmpty property="paramThrowDtTo" prepend="AND">
+              ATU.THROW_DT <![CDATA[<=]]> #paramThrowDtTo#
+            </isNotEmpty>
+            <!-- [完成日(FROM)検索] -->
+            <isNotEmpty property="paramCompletionDtFrom" prepend="AND">
+              ATU.COMPLETION_DT <![CDATA[>=]]> #paramCompletionDtFrom#
+            </isNotEmpty>
+            <!-- [完成日(TO)検索] -->
+            <isNotEmpty property="paramCompletionDtTo" prepend="AND">
+              ATU.COMPLETION_DT <![CDATA[<=]]> #paramCompletionDtTo#
+            </isNotEmpty>
+          </dynamic>
+          )
+      SELECT ATUMAIN.*
+      FROM
+        ATUMAIN
+          <dynamic prepend="WHERE">
+          <!-- 機種区分検索] -->
+            <isNotEmpty property="paramModelType" prepend="AND">
+              ATUMAIN.modelTypeCd <![CDATA[=]]> #paramModelType#
+            </isNotEmpty>
+          </dynamic>
+      ORDER BY
+        ATUMAIN.throwMonthlySequenceNum
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [ATU一覧:ATU機番管理検索]                                                              -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectAtuPartsSerialList">
+      SELECT
+          TO_CHAR(PS.READ_DT,'yyyy/mm/dd hh24:mi:ss')                                  readDt,
+          PS.STATION_CD                                                                stationCd,
+          NULL                                                                         stationNm,
+          PS.ASSY_PARTS_NUM                                                            assyPartsNum,
+          PS.ASSY_SERIAL                                                               assySerial,
+          PS.COMPONENT_PARTS_NUM1                                                      componentPartsNum1,
+          PS.COMPONENT_SERIAL1                                                         componentSerial1,
+          PS.COMPONENT_PARTS_NUM2                                                      componentPartsNum2,
+          PS.COMPONENT_SERIAL2                                                         componentSerial2,
+          PS.MODEL_CD                                                                  modelCd,
+          PS.SERIAL                                                                    serial
+      FROM
+          TT_SI_ATU_PARTS_SERIAL PS
+      INNER JOIN
+      (
+        SELECT
+          MODEL_CD,SERIAL, MAX(READ_DT) READ_DT
+        FROM
+          TT_SI_ATU_PARTS_SERIAL
+        GROUP BY
+          MODEL_CD,SERIAL
+      )PS_G ON PS.MODEL_CD = PS_G.MODEL_CD AND PS.SERIAL = PS_G.SERIAL AND PS.READ_DT = PS_G.READ_DT
+        <dynamic prepend="WHERE">
+          <isNotEmpty property="paramSerialList" prepend="AND">
+            (PS.MODEL_CD, PS.SERIAL) IN
+            <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+              (#paramSerialList[].productModelCd#, #paramSerialList[].serial#)
+            </iterate>
+          </isNotEmpty>
+        </dynamic>
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [ATU詳細:ATU機番管理検索]                                                              -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectAtuPartsSerial">
+      SELECT
+        TO_CHAR(READ_DT,'yyyy/mm/dd hh24:mi:ss')                                  readDt,
+        STATION_CD                                                                stationCd,
+        NULL                                                                      stationNm,
+        ASSY_PARTS_NUM                                                            assyPartsNum,
+        ASSY_SERIAL                                                               assySerial,
+        COMPONENT_PARTS_NUM1                                                      componentPartsNum1,
+        COMPONENT_SERIAL1                                                         componentSerial1,
+        COMPONENT_PARTS_NUM2                                                      componentPartsNum2,
+        COMPONENT_SERIAL2                                                         componentSerial2,
+        MODEL_CD                                                                  modelCd,
+        SERIAL                                                                    serial
+      FROM
+        TT_SI_ATU_PARTS_SERIAL
+      <dynamic prepend="WHERE">
+        <!-- [ATU型式コード検索] -->
+        <isNotEmpty property="paramModelCd" prepend="AND">
+          MODEL_CD like #paramModelCd# || '%'
+        </isNotEmpty>
+          <!-- [機番検索] -->
+        <isNotEmpty property="paramSerial" prepend="AND">
+          SERIAL like #paramSerial# || '%'
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+        READ_DT DESC
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [ATU一覧:トルク締付履歴検索]                                                           -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectTorqueTightenRecordList">
+      SELECT
+        TQ.部品名称                          partsNm,
+        TO_CHAR(TQ.作成日時,'yyyy/mm/dd hh24:mi:ss') tqCreateDt,
+        TQ.ステーションNO                    stationCd,
+        NULL                                 stationNm,
+        TQ.端末名                            terminalNm,
+        CASE
+          WHEN TQ.結果 = '0' THEN '未実施'
+          WHEN TQ.結果 = '1' THEN '完了'
+          WHEN TQ.結果 = '2' THEN 'NG'
+          WHEN TQ.結果 = '8' THEN 'パス'
+          WHEN TQ.結果 = '9' THEN '中断'
+        END                                  result,
+        TQ.型式コード                        modelCd,
+        TQ.機番                              serial
+      FROM
+        TBL_トルク締付履歴 TQ
+      INNER JOIN
+      (
+      SELECT
+        型式コード,機番, 部品名称, MAX(計測通番) 計測通番
+        <!--型式コード,機番, MAX(計測通番) 計測通番-->
+      FROM
+        TBL_トルク締付履歴
+      GROUP BY
+        型式コード,機番, 部品名称
+        <!--型式コード,機番-->
+      )TQ_G ON TQ.型式コード = TQ_G.型式コード AND TQ.機番 = TQ_G.機番 AND TQ.部品名称 = TQ_G.部品名称 AND TQ.計測通番 = TQ_G.計測通番
+      <!--)TQ_G ON TQ.型式コード = TQ_G.型式コード AND TQ.機番 = TQ_G.機番 AND TQ.計測通番 = TQ_G.計測通番-->
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (TQ.型式コード, TQ.機番) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial#)
+          </iterate>
+        </isNotEmpty>
+      </dynamic>
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [ATU詳細:トルク締付履歴検索]                                                           -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectTorqueTightenRecord">
+      SELECT
+        部品名称                    partsNm,
+        作成日時                    inspectionDt,
+        ステーションNO              stationCd,
+        NULL                        stationNm,
+        端末名                      terminalNm,
+        計測通番                    historyIndex,
+        CASE
+          WHEN 結果 = '0' THEN '未実施'
+          WHEN 結果 = '1' THEN '完了'
+          WHEN 結果 = '2' THEN 'NG'
+          WHEN 結果 = '8' THEN 'パス'
+          WHEN 結果 = '9' THEN '中断'
+        END                         result,
+        DECODE(上限値 ,null,null,TO_CHAR(上限値  / 100 ,'990.00')) upperLimit,
+        DECODE(下限値 ,null,null,TO_CHAR(下限値  / 100 ,'990.00')) lowerLimit,
+        DECODE(計測値1,null,null,TO_CHAR(計測値1 / 100 ,'990.00')) measureVal1,
+        DECODE(計測値2,null,null,TO_CHAR(計測値2 / 100 ,'990.00')) measureVal2,
+        DECODE(計測値3,null,null,TO_CHAR(計測値3 / 100 ,'990.00')) measureVal3,
+        DECODE(計測値4,null,null,TO_CHAR(計測値4 / 100 ,'990.00')) measureVal4,
+        DECODE(計測値5,null,null,TO_CHAR(計測値5 / 100 ,'990.00')) measureVal5,
+        DECODE(計測値6,null,null,TO_CHAR(計測値6 / 100 ,'990.00')) measureVal6,
+        DECODE(計測値7,null,null,TO_CHAR(計測値7 / 100 ,'990.00')) measureVal7,
+        DECODE(計測値8,null,null,TO_CHAR(計測値8 / 100 ,'990.00')) measureVal8,
+        型式コード                  modelCd,
+        機番                        serial
+      FROM
+        TBL_トルク締付履歴
+      <dynamic prepend="WHERE">
+        <!-- [ATU型式コード検索] -->
+        <isNotEmpty property="paramModelCd" prepend="AND">
+          型式コード like #paramModelCd# || '%'
+        </isNotEmpty>
+        <!-- [機番検索] -->
+        <isNotEmpty property="paramSerial" prepend="AND">
+          機番 like #paramSerial# || '%'
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+        計測通番 DESC,
+        作成日時 DESC
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [ATU一覧:リーク測定結果検索]                                                           -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectLeakMeasureResultList">
+      SELECT
+        TO_CHAR(LM.MEASURE_DT ,'yyyy/mm/dd hh24:mi:ss')  measureDt,
+        LM.STATION_CD                          stationCd,
+        NULL                                   stationNm,
+        LM.RECORD_NUM                          recordNm,
+      CASE
+        WHEN LM.TOTAL_JUDGE = '0' THEN 'NG'
+        WHEN LM.TOTAL_JUDGE = '1' THEN 'OK'
+      END                                      totalJudge,
+        LM.MODEL_CD                            modelCd,
+        LM.SERIAL                              serial,
+      CASE 
+          WHEN LM.UPDATE_PG = 'DPF_N_SI_LeakTest_1' OR LM.UPDATE_PG = 'DPF_N_SI_LeakTest'  THEN '1号機' 
+          WHEN LM.UPDATE_PG = 'DPF_N_SI_LeakTest_2' THEN '2号機'
+          WHEN LM.UPDATE_PG = 'DPF_N_SI_LeakTest_3' THEN '3号機'
+          ELSE LM.UPDATE_PG 
+      END                                      measureTester
+      FROM
+        TT_SI_ATU_LEAK_MEASURE_RESULT LM
+      INNER JOIN
+      (
+      SELECT
+        MODEL_CD,SERIAL, MAX(RECORD_NUM) RECORD_NUM
+      FROM
+        TT_SI_ATU_LEAK_MEASURE_RESULT
+      GROUP BY
+        MODEL_CD,SERIAL
+      )LM_G ON LM.MODEL_CD = LM_G.MODEL_CD AND LM.SERIAL = LM_G.SERIAL AND LM.RECORD_NUM = LM_G.RECORD_NUM
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="paramSerialList" prepend="AND">
+          (LM.MODEL_CD, LM.SERIAL) IN
+          <iterate property="paramSerialList" open="(" close=")" conjunction="," >
+            (#paramSerialList[].productModelCd#, #paramSerialList[].serial#)
+          </iterate>
+        </isNotEmpty>
+      </dynamic>
+    </statement>
+
+    <!-- ************************************************************************************** -->
+    <!-- [ATU詳細:リーク測定結果検索]                                                           -->
+    <!-- ************************************************************************************** -->
+    <statement id="SelectLeakMeasureResult">
+      SELECT
+        MEASURE_DT                                         measureDt,
+        STATION_CD                                         stationCd,
+        NULL                                               stationNm,
+        CASE
+          WHEN TOTAL_JUDGE = '0' THEN 'NG'
+          WHEN TOTAL_JUDGE = '1' THEN 'OK'
+        END                                                totalJudge,
+        RECORD_NUM                                         recordNum,
+        LEAK_PRESSURE                                      leakPressure,
+        CASE
+          WHEN LEAK_PRESSURE_JUDGE = '0' THEN 'NONE'
+          WHEN LEAK_PRESSURE_JUDGE = '1' THEN 'OK'
+          WHEN LEAK_PRESSURE_JUDGE = '2' THEN 'NG'
+        END                                                leakPressureJudge,
+        LEAK_FLOW_RATE                                     leakFlowRate,
+        CASE
+          WHEN LEAK_FLOW_JUDGE = '0' THEN 'NONE'
+          WHEN LEAK_FLOW_JUDGE = '1' THEN 'OK'
+          WHEN LEAK_FLOW_JUDGE = '2' THEN 'NG'
+        END                                                leakFlowJudge,
+        DP_PRESSURE                                        dpPressure,
+        DP_SENSOR_NOTHING                                  dpSensorNothing,
+        CASE
+          WHEN DP_SENSOR_NOTHING_JUDGE = '0' THEN 'NONE'
+          WHEN DP_SENSOR_NOTHING_JUDGE = '1' THEN 'OK'
+          WHEN DP_SENSOR_NOTHING_JUDGE = '2' THEN 'NG'
+        END                                                dpSensorNothingJudge,
+        DP_SENSOR_EXISTS                                   dpSensorExists,
+        CASE
+          WHEN DP_SENSOR_EXISTS_JUDGE = '0' THEN 'NONE'
+          WHEN DP_SENSOR_EXISTS_JUDGE = '1' THEN 'OK'
+          WHEN DP_SENSOR_EXISTS_JUDGE = '2' THEN 'NG'
+        END                                                dpSensorExistsJudge,
+        TEMP_ROOM                                          tempRoom,
+        TEMP_SENSOR_DOC_IN                                 tempSensorDocIn,
+        CASE
+          WHEN TEMP_SENSOR_DOC_IN_JUDGE = '0' THEN 'NONE'
+          WHEN TEMP_SENSOR_DOC_IN_JUDGE = '1' THEN 'OK'
+          WHEN TEMP_SENSOR_DOC_IN_JUDGE = '2' THEN 'NG'
+        END                                                tempSensorDocInJudge,
+        TEMP_SENSOR_DPF_IN                                 tempSensorDpfIn,
+        CASE
+          WHEN TEMP_SENSOR_DPF_IN_JUDGE = '0' THEN 'NONE'
+          WHEN TEMP_SENSOR_DPF_IN_JUDGE = '1' THEN 'OK'
+          WHEN TEMP_SENSOR_DPF_IN_JUDGE = '2' THEN 'NG'
+        END                                                tempSensorDpfInJudge,
+        TEMP_SENSOR_DPF_OUT                                tempSensorDpfOut,
+        CASE
+          WHEN TEMP_SENSOR_DPF_OUT_JUDGE = '0' THEN 'NONE'
+          WHEN TEMP_SENSOR_DPF_OUT_JUDGE = '1' THEN 'OK'
+          WHEN TEMP_SENSOR_DPF_OUT_JUDGE = '2' THEN 'NG'
+        END                                                tempSensorDpfOutJudge,
+        MODEL_CD,
+        SERIAL, 
+        CASE 
+          WHEN UPDATE_PG = 'DPF_N_SI_LeakTest_1' OR UPDATE_PG = 'DPF_N_SI_LeakTest'  THEN '1号機' 
+          WHEN UPDATE_PG = 'DPF_N_SI_LeakTest_2' THEN '2号機'
+          WHEN UPDATE_PG = 'DPF_N_SI_LeakTest_3' THEN '3号機'
+          ELSE UPDATE_PG 
+        END                                                measureTester
+      FROM
+        TT_SI_ATU_LEAK_MEASURE_RESULT
+      <dynamic prepend="WHERE">
+        <!-- [ATU型式コード検索] -->
+        <isNotEmpty property="paramModelCd" prepend="AND">
+          MODEL_CD like #paramModelCd# || '%'
+        </isNotEmpty>
+          <!-- [機番検索] -->
+        <isNotEmpty property="paramSerial" prepend="AND">
+          SERIAL like #paramSerial# || '%'
+        </isNotEmpty>
+      </dynamic>
+      ORDER BY
+        RECORD_NUM DESC
+    </statement>
+  </statements>
+</sqlMap>

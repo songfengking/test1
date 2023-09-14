@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="Imadoko"
+        xmlns="http://ibatis.apache.org/mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <statements>
+    <statement id="SelectList">
+      SELECT
+      ステーション,
+      工程順序,
+      IDNO,
+      型式コード,
+      国コード,
+      型式名,
+      LTRIM(機番7) 機番,
+      指示月度連番,
+      確定月度連番,
+      RTRIM(組立パターン) 組立パターン,
+      エンジン型式コード,
+      エンジンIDNO,
+      LTRIM(エンジン機番7) エンジン機番,
+      実績連番,
+      実績日時,
+      出荷年月日
+      FROM
+      VIW_型式別通過実績データ
+      WHERE
+      実績日時 <![CDATA[>]]> '2001/01/01'
+      <!-- トラクタ -->
+      <isEqual property="searchSyubetu" compareValue="1" prepend="AND">
+        指示レベル = '1' AND 組立パターン = '32 '
+      </isEqual>
+      <!-- 03エンジン + 全て -->
+      <isEqual property="searchSyubetu" compareValue="2" prepend="AND">
+        指示レベル = '3' AND 組立パターン IN ('15 ','19 ')
+      </isEqual>
+      <!-- 03エンジン + 搭載 -->
+      <isEqual property="searchSyubetu" compareValue="3" prepend="AND">
+        指示レベル = '3' AND 組立パターン = '15 '
+      </isEqual>
+      <!-- 03エンジン + OEM -->
+      <isEqual property="searchSyubetu" compareValue="4" prepend="AND">
+        指示レベル = '3' AND 組立パターン = '19 '
+      </isEqual>
+      <!-- 07エンジン + 全て -->
+      <isEqual property="searchSyubetu" compareValue="5" prepend="AND">
+        指示レベル = '7' AND 組立パターン IN ('14 ','18 ')
+      </isEqual>
+      <!-- 07エンジン + 搭載 -->
+      <isEqual property="searchSyubetu" compareValue="6" prepend="AND">
+        指示レベル = '7' AND 組立パターン = '14 '
+      </isEqual>
+      <!-- 07エンジン + OEM -->
+      <isEqual property="searchSyubetu" compareValue="7" prepend="AND">
+        指示レベル = '7' AND 組立パターン = '18 '
+      </isEqual>
+      <isNotEmpty property="idno" prepend="AND">
+        IDNO = '$idno$'
+      </isNotEmpty>
+      <isNotEmpty property="katashikiCode" prepend="AND">
+        型式コード LIKE '$katashikiCode$%'
+      </isNotEmpty>
+      <isNotEmpty property="kuniCode" prepend="AND">
+        国コード LIKE '$kuniCode$%'
+      </isNotEmpty>
+      <isNotEmpty property="katashikiName" prepend="AND">
+        型式名 LIKE '%$katashikiName$%'
+      </isNotEmpty>
+      <isNotEmpty property="kiban" prepend="AND">
+        機番7 LIKE '%$kiban$%'
+      </isNotEmpty>
+      <isNotEmpty property="tonyuYMNum" prepend="AND">
+        指示月度連番 LIKE '$tonyuYMNum$%'
+      </isNotEmpty>
+      <isNotEmpty property="kakuteiYMNum" prepend="AND">
+        確定月度連番 LIKE '$kakuteiYMNum$%'
+      </isNotEmpty>
+      ORDER BY
+      指示月度連番,
+      工程順序
+    </statement>
+  </statements>
+</sqlMap>
